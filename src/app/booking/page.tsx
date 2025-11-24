@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // ⚠️ À SUPPRIMER APRÈS PAIEMENT
 import servicesData from "@/app/data/services.json";
 import { Header, Footer, InfoModal } from "@/components";
 import Whatsapp from "@/components/whatsapp/Whatsapp";
@@ -39,6 +40,54 @@ const getCalUrl = (duree: number) => {
 };
 
 export default function BookingPage() {
+  // ⚠️ BLOCAGE AVANT PAIEMENT - DÉBUT DU BLOC À SUPPRIMER ⚠️
+  const router = useRouter();
+  const isDemoMode = process.env.NEXT_PUBLIC_SHOW_PAYMENT_BANNER === "true";
+  
+  if (isDemoMode) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-[#0F0F0F] to-gray-900 text-white">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-12 flex items-center justify-center">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="bg-orange-900/20 border-2 border-orange-500/50 rounded-2xl p-8 shadow-2xl">
+              <div className="w-20 h-20 mx-auto mb-6 bg-orange-500/20 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h1 className="text-3xl font-bold text-orange-400 mb-4">
+                🚧 Réservation temporairement désactivée
+              </h1>
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
+                Le système de réservation en ligne sera disponible très prochainement.
+              </p>
+              <p className="text-gray-400 mb-8">
+                En attendant, vous pouvez consulter mes tarifs et me contacter directement.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => router.push("/tarifs")}
+                  className="cursor-pointer bg-amber-600 hover:bg-amber-500 transition px-6 py-3 rounded-lg font-semibold text-white shadow-lg"
+                >
+                  📋 Voir les tarifs
+                </button>
+                <button
+                  onClick={() => router.push("/contact")}
+                  className="cursor-pointer bg-gray-700 hover:bg-gray-600 transition px-6 py-3 rounded-lg font-semibold text-white shadow-lg"
+                >
+                  📞 Me contacter
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  // ⚠️ BLOCAGE AVANT PAIEMENT - FIN DU BLOC À SUPPRIMER ⚠️
+
   const [categorie, setCategorie] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [dureeTotale, setDureeTotale] = useState<number | null>(null);
@@ -52,10 +101,18 @@ export default function BookingPage() {
   ];
 
   //! Prestations filtrées (exclure celles qui sont uniquement pour la page tarifs)
+  //! ET exclure celles sans durée définie (sur devis) ou avec durée/prix non numériques
   const prestations = servicesData.filter(
     (s) =>
       s.categorie === categorie &&
-      (!s.afficherDans || s.afficherDans.includes("booking"))
+      // Exclure si explicitement réservé aux tarifs uniquement
+      (!s.afficherDans || s.afficherDans.includes("booking")) &&
+      // Exclure si durée est null, non numérique, ou "Variable"
+      s.duree !== null &&
+      typeof s.duree === "number" &&
+      // Exclure si prix est null ou non numérique (sur devis)
+      s.prix !== null &&
+      typeof s.prix === "number"
   );
 
   //! Sélection / déselection

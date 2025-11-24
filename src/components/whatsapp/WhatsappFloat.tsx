@@ -30,6 +30,13 @@ import React from "react";
 import { siteConfig } from "@/config/site";
 
 export default function WhatsappFloat() {
+  // ⚠️ BLOCAGE AVANT PAIEMENT - DÉBUT DU BLOC À SUPPRIMER ⚠️
+  const isDemoMode = process.env.NEXT_PUBLIC_SHOW_PAYMENT_BANNER === "true";
+  if (isDemoMode) {
+    return null;
+  }
+  // ⚠️ BLOCAGE AVANT PAIEMENT - FIN DU BLOC À SUPPRIMER ⚠️
+
   const phoneNumber = siteConfig.whatsapp.number;
   
   // Vérification et nettoyage du numéro
