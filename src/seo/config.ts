@@ -22,7 +22,7 @@ import { siteConfig } from "@/config/site";
 export const seoConfig = {
   // 📱 Informations de base
   name: siteConfig.name,
-  slogan: "Mécanicien automobile à domicile à Salon-de-Provence",
+  slogan: "Mécanicien automobile à domicile à Salon-de-Provence et alentours",
   description: siteConfig.description,
   serviceType: "Mécanicien automobile à domicile",
   baseUrl: siteConfig.url,

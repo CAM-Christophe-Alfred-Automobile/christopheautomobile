@@ -58,12 +58,21 @@ export default function IOSInstallPrompt() {
         return true;
       }
       
+      // 🚫 Exclure explicitement les PC (Windows, Mac, Linux)
+      if (userAgent.includes('windows') || userAgent.includes('linux') || userAgent.includes('x11')) {
+        return false;
+      }
+      
       // Méthode 2 : Détection avancée pour iOS 17+ (User-Agent masqué par Apple)
       // iOS 17+ renvoie un User-Agent générique, on doit donc détecter via d'autres moyens
       // Note : Sur iOS, Chrome/Firefox/Edge utilisent tous WebKit (moteur Safari imposé par Apple)
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       const isNotAndroid = !userAgent.includes('android');
-      const isLikelyIOS = isTouchDevice && isNotAndroid;
+      const isMacOS = userAgent.includes('mac os x');
+      
+      // iOS 17+ se présente comme "Mac OS X" avec support tactile
+      // Mais un vrai Mac n'a pas de support tactile (sauf iPad en mode desktop)
+      const isLikelyIOS = isTouchDevice && isNotAndroid && isMacOS;
       
       return isLikelyIOS;
     };

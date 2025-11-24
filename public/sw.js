@@ -22,7 +22,6 @@ const CACHE_NAME = "cam-v1";
 const STATIC_ASSETS = [
   "/",
   "/tarifs",
-  "/services",
   "/booking",
   "/contact",
   "/favicon.ico",

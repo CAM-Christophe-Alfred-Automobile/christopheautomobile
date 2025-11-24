@@ -41,21 +41,6 @@ export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Détection mobile (ANDROID uniquement, pas iOS)
-  useEffect(() => {
-    const checkMobile = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      // Exclure iOS car il a sa propre bannière (IOSInstallPrompt)
-      const isIOS = /iphone|ipad|ipod/.test(userAgent);
-      const isAndroid = /android/.test(userAgent);
-      const isMobileOther = /mobile/.test(userAgent) && !isIOS;
-      
-      return (isAndroid || isMobileOther) && !isIOS;
-    };
-    setIsMobile(checkMobile());
-  }, []);
 
   useEffect(() => {
     // ---------------------------------------------------------------------------
@@ -82,14 +67,13 @@ export default function InstallPWA() {
       e.preventDefault();
       console.log("🎁 beforeinstallprompt capturé");
       
-      // ⚠️ Vérification mobile AVANT d'afficher le bouton
+      // 📱 Vérification MOBILE UNIQUEMENT (pas sur PC)
       const userAgent = navigator.userAgent.toLowerCase();
       const isIOS = /iphone|ipad|ipod/.test(userAgent);
       const isAndroid = /android/.test(userAgent);
       const isMobileOther = /mobile/.test(userAgent) && !isIOS;
       const isMobileDevice = (isAndroid || isMobileOther) && !isIOS;
       
-      // N'affiche le bouton QUE sur mobile (pas sur PC)
       if (!isMobileDevice) {
         console.log("🖥️ Desktop détecté - bouton PWA masqué");
         return;
@@ -156,9 +140,9 @@ export default function InstallPWA() {
   };
 
   // ---------------------------------------------------------------------------
-  // 🎨 Affichage du bouton si l'événement est disponible ET sur mobile
+  // 🎨 Affichage du bouton si l'événement est disponible
   // ---------------------------------------------------------------------------
-  if (!showInstallButton || !isMobile) return null;
+  if (!showInstallButton) return null;
 
   return (
     <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:bottom-4 z-40 animate-slideUp">
