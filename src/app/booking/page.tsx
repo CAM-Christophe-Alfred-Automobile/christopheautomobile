@@ -40,6 +40,13 @@ const getCalUrl = (duree: number) => {
 };
 
 export default function BookingPage() {
+  // 🔹 HOOKS - Toujours en premier (règle React)
+  const [categorie, setCategorie] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [dureeTotale, setDureeTotale] = useState<number | null>(null);
+  const [dureePersonnalisee, setDureePersonnalisee] = useState<number>(60);
+  const [showReservationWarning, setShowReservationWarning] = useState(false);
+
   // ⚠️ BLOCAGE AVANT PAIEMENT - DÉBUT DU BLOC À SUPPRIMER ⚠️
   const router = useRouter();
   const isDemoMode = process.env.NEXT_PUBLIC_SHOW_PAYMENT_BANNER === "true";
@@ -87,12 +94,6 @@ export default function BookingPage() {
     );
   }
   // ⚠️ BLOCAGE AVANT PAIEMENT - FIN DU BLOC À SUPPRIMER ⚠️
-
-  const [categorie, setCategorie] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
-  const [dureeTotale, setDureeTotale] = useState<number | null>(null);
-  const [dureePersonnalisee, setDureePersonnalisee] = useState<number>(60);
-  const [showReservationWarning, setShowReservationWarning] = useState(false);
 
   //! Catégories uniques + option "Autre"
   const categories = [

@@ -42,7 +42,7 @@ import { siteConfig } from "@/config/site";
 export default function AutodocModal() {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { referralCode, referralUrl } = siteConfig.autodoc;
+  const { referralCode } = siteConfig.autodoc;
 
   const handleCopy = async () => {
     if (!referralCode) return;
