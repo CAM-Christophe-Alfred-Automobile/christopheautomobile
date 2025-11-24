@@ -54,7 +54,8 @@ config.autoAddCss = false;
 // -----------------------------------------------------------------------------
 export { metadata } from "@/seo/metadata";
 
-import { WhatsappFloat, InstallPWA, IOSInstallPrompt } from "@/components";
+// ⚠️ À SUPPRIMER APRÈS PAIEMENT : import PaymentBanner
+import { WhatsappFloat, InstallPWA, IOSInstallPrompt, PaymentBanner } from "@/components";
 
 // -----------------------------------------------------------------------------
 // 🔹 Initialisation des polices
@@ -96,6 +97,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        {/* ⚠️ À SUPPRIMER APRÈS PAIEMENT : Bannière de test */}
+        <PaymentBanner />
+        
         {/* 
           {children} = contenu de chaque page :
           - Sur "/"         → app/page.tsx

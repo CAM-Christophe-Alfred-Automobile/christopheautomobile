@@ -179,35 +179,35 @@ export default function IOSInstallPrompt() {
               Pour réserver en quelques secondes, directement depuis votre iPhone.
             </p>
 
-            {/* ⚠️ Avertissement si Chrome/Firefox */}
-            {isChrome && (
+            {/* ⚠️ Message différent selon le navigateur */}
+            {isChrome ? (
+              // Chrome/Firefox : juste dire d'ouvrir dans Safari
               <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 mb-3">
                 <p className="text-sm text-neutral-950 font-semibold">
                   ⚠️ Vous utilisez Chrome/Firefox. Pour installer l&apos;app, ouvrez ce site dans <strong>Safari</strong>.
                 </p>
               </div>
+            ) : (
+              // Safari : afficher les étapes d'installation
+              <div className="bg-neutral-950/20 rounded-lg p-3 mb-3 space-y-2">
+                {/* Étape 1 : Appuyer sur le bouton Partager */}
+                <div className="flex items-center gap-2 text-sm text-neutral-900">
+                  <span className="font-bold">1.</span>
+                  <span>
+                    Appuyez sur le bouton{" "}
+                    <Share className="w-4 h-4 inline mx-0.5" /> partager
+                  </span>
+                </div>
+                
+                {/* Étape 2 : Sélectionner "Ajouter à l'écran d'accueil" */}
+                <div className="flex items-center gap-2 text-sm text-neutral-900">
+                  <span className="font-bold">2.</span>
+                  <span>
+                    Choisissez <strong>Ajouter à l&rsquo;écran d&rsquo;accueil</strong>
+                  </span>
+                </div>
+              </div>
             )}
-
-            {/* 📋 Instructions étape par étape */}
-            <div className="bg-neutral-950/20 rounded-lg p-3 mb-3 space-y-2">
-              {/* Étape 1 : Appuyer sur le bouton Partager */}
-              <div className="flex items-center gap-2 text-sm text-neutral-900">
-                <span className="font-bold">1.</span>
-                <span>
-                  Appuyez sur le bouton{" "}
-                  <Share className="w-4 h-4 inline mx-0.5" /> partager {isChrome && "(dans Safari)"}
-                </span>
-              </div>
-              
-              {/* Étape 2 : Sélectionner "Ajouter à l'écran d'accueil" */}
-              <div className="flex items-center gap-2 text-sm text-neutral-900">
-                <span className="font-bold">2.</span>
-                <span>
-                  Choisissez <strong>Ajouter à l&rsquo;écran d&rsquo;accueil</strong>
-                </span>
-              </div>
-              
-            </div>
 
             {/* ✅ Bouton de confirmation (ferme la bannière) */}
             <button
