@@ -1,0 +1,811 @@
+[
+  {
+    "categorie": "Entretien",
+    "service": "Vidange moteur seule",
+    "description": "huile moteur uniquement",
+    "duree": 35,
+    "prix": 30
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Vidange + filtre à huile",
+    "description": "",
+    "duree": 40,
+    "prix": 30
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Entretien complet",
+    "description": "Huile + filtres à air, habitacle, gazoil",
+    "duree": 120,
+    "prix": 70
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Filtre à air",
+    "description": "",
+    "duree": 30,
+    "prix": 15
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Filtre habitacle",
+    "description": "",
+    "duree": 30,
+    "prix": 15
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Filtre gasoil",
+    "description": "",
+    "duree": 45,
+    "prix": 25
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Vidange liquide de frein",
+    "description": "purge + remplissage",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Vidange liquide refroidissement",
+    "description": "purge + remplissage",
+    "duree": 75,
+    "prix": 40
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Vidange boîte manuelle",
+    "description": "",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Vidange boîte auto",
+    "description": "Huile + crépine sans rinçage",
+    "duree": 150,
+    "prix": 70
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Nettoyage moteur",
+    "description": "Extérieur + Vérification fuites",
+    "duree": 45,
+    "prix": 30
+  },
+
+
+
+
+  {
+    "categorie": "Freinage",
+    "service": "Plaquettes (essieu)",
+    "description": "Remplacement avant ou arrière",
+    "duree": 60,
+    "prix": 35
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Disques + plaquettes",
+    "description": "Remplacement avant ou arrière",
+    "duree": 120,
+    "prix": 50
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Kit tambours",
+    "description": "Dépose, nettoyage, réglages",
+    "duree": 180,
+    "prix": 80
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Étrier de frein",
+    "description": "Remplacement",
+    "duree": 90,
+    "prix": 50
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Capteur ABS",
+    "description": "Remplacement unitaire",
+    "duree": 60,
+    "prix": 30
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Purge de frein",
+    "description": "Vidange + purge du circuit",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Flexible de frein",
+    "description": "Remplacement d'un côté",
+    "duree": 45,
+    "prix": 25
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Maître-cylindre",
+    "description": "Remplacement + purge",
+    "duree": 120,
+    "prix": 60
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Boîtier ABS complet",
+    "description": "Remplacement + purge",
+    "duree": 180,
+    "prix": 120
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Nettoyage tambours AR",
+    "description": "Dégrippage + réglage + graissage",
+    "duree": 160,
+    "prix": 70
+  },
+  {
+    "categorie": "Freinage",
+    "service": "Câble de frein à main",
+    "description": "Réglage ou remplacement",
+    "duree": 160,
+    "prix": 70
+  },
+
+
+
+
+  {
+    "categorie": "Moteur",
+    "service": "Courroie distribution + pompe à eau",
+    "description": "Kit complet",
+    "duree": 480,
+    "prix": 170
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Courroie accessoire",
+    "description": "Remplacement simple",
+    "duree": 120,
+    "prix": 60
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Pompe à eau",
+    "description": "Remplacement + purge",
+    "duree": 120,
+    "prix": 60
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Chaîne de distribution",
+    "description": "Remplacement complet",
+    "duree": 720,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Culasse complète",
+    "description": "Dépose, rectif, repose",
+    "duree": 1200,
+    "prix": 900
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Joint de culasse",
+    "description": "Dépose + remplacement",
+    "duree": 1080,
+    "prix": 700
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Moteur complet",
+    "description": "Échange standard, repose",
+    "duree": 1440,
+    "prix": 600
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Injecteur (1)",
+    "description": "Dépose / repose (non grippé)",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Injecteurs (4)",
+    "description": "Dépose / repose ensemble",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Pompe à injection",
+    "description": "Remplacement + purge (si dans distribution → kit obligatoire)",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Capteur PMH / vilebrequin",
+    "description": "Remplacement",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Capteur AAC / arbre à cames",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 35
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Capteur pression rail",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 25
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Capteur MAP / MAF",
+    "description": "Nettoyage, remplacement",
+    "duree": 45,
+    "prix": 20
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Bougies d'allumage",
+    "description": "x3 ou x4 (essence)",
+    "duree": 60,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Bougies de préchauffage",
+    "description": "x4 (diesel)",
+    "duree": 120,
+    "prix": 40
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Boîtier de préchauffage",
+    "description": "Contrôle, remplacement",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Boîtier papillon",
+    "description": "Nettoyage ou remplacement",
+    "duree": 90,
+    "prix": 45
+  },
+  {
+    "categorie": "Moteur",
+    "service": "EGR / FAP",
+    "description": "Nettoyage ou remplacement",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Turbo",
+    "description": "Remplacement simple",
+    "duree": 360,
+    "prix": 180
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Ligne échappement",
+    "description": "Remplacement partielle",
+    "duree": 160,
+    "prix": 70
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Catalyseur",
+    "description": "Remplacement",
+    "duree": 160,
+    "prix": 70
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Sonde",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Rampe commune (unité)",
+    "description": "Remplacement du rail",
+    "duree": 160,
+    "prix": 60
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Intercooler",
+    "description": "Remplacement",
+    "duree": 160,
+    "prix": 70
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Carter huile moteur",
+    "description": "Remplacement",
+    "duree": 300,
+    "prix": 100
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Couvre culasse",
+    "description": "Remplacement / étanchéité",
+    "duree": 140,
+    "prix": 70
+  },
+
+
+
+
+    {
+        "categorie": "Refroidissement",
+        "service": "Boîtier d’eau / thermostat",
+        "description": "remplacement complet",
+        "duree": 90,
+        "prix": 40
+    },
+    {
+        "categorie": "Refroidissement",
+        "service": "Radiateur moteur",
+        "description": "remplacement + purge",
+        "duree": 180,
+        "prix": 80
+    },
+    {
+        "categorie": "Refroidissement",
+        "service": "Ventilateur moteur",
+        "description": "remplacement",
+        "duree": 90,
+        "prix": 50
+    },
+    {
+        "categorie": "Refroidissement",
+        "service": "Sonde température / LDR",
+        "description": "Remplacement",
+        "duree": 60,
+        "prix": 30
+    },
+    {
+        "categorie": "Refroidissement",
+        "service": "Durite / raccord / fuite",
+        "description": "Remplacement simple",
+        "duree": 45,
+        "prix": 25
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Embrayage complet",
+        "description": "Kit disque mécanisme, butée",
+        "duree": 540,
+        "prix": 280
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Volant bi-masse + embrayage",
+        "description": "Kit complet",
+        "duree": 600,
+        "prix": 320
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Cardan (1 côté)",
+        "description": "Remplacement",
+        "duree": 60,
+        "prix": 40
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Boîte de vitesses",
+        "description": "Dépose, repose",
+        "duree": 720,
+        "prix": 300
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Joint spi boîte",
+        "description": "Remplacement",
+        "duree": 120,
+        "prix": 50
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Joint spi vilebrequin",
+        "description": "Remplacement",
+        "duree": 480,
+        "prix": 200
+    },
+    {
+        "categorie": "Transmission",
+        "service": "Roulement de transmission",
+        "description": "Remplacement",
+        "duree": 120,
+        "prix": 50
+    },
+
+
+
+    
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Amortisseurs (paire)",
+    "description": "Avant ou arrière",
+    "duree": 150,
+    "prix": 100
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Coupelles d'amortisseur (paire)",
+    "description": "Remplacement",
+    "duree": 150,
+    "prix": 100
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Triangles de suspension (paire)",
+    "description": "Remplacement",
+    "duree": 90,
+    "prix": 80
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Biellettes de barre stabilisatrice (paire)",
+    "description": "Remplacement",
+    "duree": 45,
+    "prix": 30
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Rotules de direction (paire)",
+    "description": "Remplacement",
+    "duree": 45,
+    "prix": 40
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Roulement de roue",
+    "description": "Remplacement",
+    "duree": 180,
+    "prix": 50
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Crémaillère de direction",
+    "description": "Remplacement",
+    "duree": 360,
+    "prix": 150
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Soufflet de direction",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 30
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Ressorts avant",
+    "description": "Remplacement",
+    "duree": 150,
+    "prix": 100
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Ressorts arrière",
+    "description": "Remplacement",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Colonne de direction",
+    "description": "Remplacement",
+    "duree": 300,
+    "prix": 130
+  },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Silentblocs train AV / AR",
+    "description": "Remplacement",
+    "duree": 200,
+    "prix": 100
+  },
+
+
+
+
+  
+  {
+    "categorie": "Électricité",
+    "service": "Batterie",
+    "description": "Remplacement & tests",
+    "duree": 30,
+    "prix": 15
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Alternateur",
+    "description": "Remplacement",
+    "duree": 120,
+    "prix": 90
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Démarreur",
+    "description": "Remplacement",
+    "duree": null,
+    "prix": null
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Moteur lève-vitre",
+    "description": "Remplacement",
+    "duree": 120,
+    "prix": 60
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Moteur essuie-glace",
+    "description": "Remplacement",
+    "duree": 90,
+    "prix": 50
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Relais / fusible / faisceau",
+    "description": "Recherche / remplacement",
+    "duree": 90,
+    "prix": null
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Voyant diagnostic",
+    "description": "Scan & lecture des défauts",
+    "duree": 45,
+    "prix": 30
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Réinitialisation voyant service",
+    "description": "Après entretien",
+    "duree": 15,
+    "prix": 10
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Adaptation / effacement",
+    "description": "Reprogrammation via valise",
+    "duree": 30,
+    "prix": 25
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Ampoule",
+    "description": "Remplacement",
+    "duree": 30,
+    "prix": 10
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Phare (unité)",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Feu arrière (unité)",
+    "description": "Remplacement",
+    "duree": 40,
+    "prix": 30
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Rétroviseur (unité)",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Serrure / poignée de porte",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 40
+  },
+
+
+
+
+
+
+    {
+        "categorie": "Climatisation",
+        "service": "Recharge gaz + test étanchéité",
+        "description": "climatisation complète",
+        "duree": 60,
+        "prix": 40
+    },
+    {
+        "categorie": "Climatisation",
+        "service": "Compresseur de clim",
+        "description": "Remplacement",
+        "duree": 240,
+        "prix": 100
+    },
+    {
+        "categorie": "Climatisation",
+        "service": "Condenseur de clim",
+        "description": "Remplacement",
+        "duree": 120,
+        "prix": 70
+    },
+    {
+        "categorie": "Climatisation",
+        "service": "Détendeur / évaporateur",
+        "description": "Remplacement",
+        "duree": 120,
+        "prix": 60
+    },
+    {
+        "categorie": "Climatisation",
+        "service": "Désinfection habitacle",
+        "description": "Nettoyage antibacterien",
+        "duree": 30,
+        "prix": 20
+    },
+
+
+
+
+
+   
+  {
+    "categorie": "Diagnostic",
+    "service": "Diagnostic valise complet",
+    "description": "Lecture code + effacement",
+    "duree": 45,
+    "prix": 30
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Inspection / contrôle panne",
+    "description": "Contrôle visuel général",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Contrôle compression moteur",
+    "description": "Test sur 3 ou 4 cylindres",
+    "duree": 90,
+    "prix": 50
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Contrôle étanchéité cylindre (leak test)",
+    "description": "Recherche perte de compression",
+    "duree": 120,
+    "prix": 60
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Test retour injecteurs",
+    "description": "Vérification injecteurs diesel",
+    "duree": 90,
+    "prix": 50
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Test CO2 / joint de culasse",
+    "description": "Test chimique LDR",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Contrôle pré-achat",
+    "description": "Contrôle complet avant achat",
+    "duree": 90,
+    "prix": 40
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Pré-contrôle technique",
+    "description": "Vérification complète CT",
+    "duree": 75,
+    "prix": 50
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Contrôle avant long trajet",
+    "description": "Check complet avant départ",
+    "duree": 90,
+    "prix": 40
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Test échappement",
+    "description": "Recherche fuite / odeur",
+    "duree": 60,
+    "prix": 30
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Diagnostic  Déplacement Zone 1",
+    "description": "10 km autour de Salon-de-Provence",
+    "duree": null,
+    "prix": "Gratuit"
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Diagnostic Déplacement Zone 2",
+    "description": "11 km à 30 km autour de Salon-de-Provence",
+    "duree": null,
+    "prix": 15
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Diagnostic Déplacement Zone 3",
+    "description": "31 km et + selon zone d'intervention",
+    "duree": null,
+    "prix": 20
+  },
+  {
+    "categorie": "Diagnostic",
+    "service": "Contrôle avant achat ",
+    "description": "Vérification selon type de véhicule",
+    "duree": null,
+    "prix": null
+  },
+
+
+
+
+
+    {
+        "categorie": "Autre interventions",
+        "service": "Diagnostic à distance",
+        "description": "Photo, vidéo, Whatsapp",
+        "duree": 30,
+        "prix": 15
+    },
+    {
+        "categorie": "Autre interventions",
+        "service": "Assistance démarrage",
+        "description": "Booster / batterie",
+        "duree": 30,
+        "prix": 20
+    },
+    {
+        "categorie": "Autre interventions",
+        "service": "Montage accessoires",
+        "description": "Petit matériel",
+        "duree": 45,
+        "prix": 20
+    },
+    {
+        "categorie": "Autre interventions",
+        "service": "Intervention urgente",
+        "description": "Dépannage sur zone",
+        "duree": "Variable",
+        "prix": "40-80",
+        "afficherDans": ["tarifs"]
+    }
+]

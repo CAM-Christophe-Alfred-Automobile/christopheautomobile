@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --foreground-rgb: 237, 237, 237;
+    --background-start-rgb: 26, 71, 139;
+    --background-end-rgb: 30, 58, 138;
+  }
+}
+
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* --- Custom DayPicker Styles --- */
+
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-caption-font-size: 1rem;
+  --rdp-accent-color: #2563eb; /* blue-600 */
+  --rdp-background-color: #eff6ff; /* blue-50 */
+  --rdp-accent-color-dark: #1d4ed8; /* blue-800 */
+  --rdp-background-color-dark: #1e3a8a; /* blue-900 */
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  --rdp-outline-selected: 3px solid var(--rdp-accent-color);
+  margin: 1em;
+}
+
+.rdp-caption_label {
+  font-weight: 600;
+}
+
+.rdp-nav_button {
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+}
+
+.rdp-day_selected,
+.rdp-day_selected:focus-visible,
+.rdp-day_selected:hover {
+  background-color: var(--rdp-accent-color);
+  color: white;
+  font-weight: bold;
+}
+
+.rdp-day_today {
+  font-weight: bold;
+  color: var(--rdp-accent-color);
+}
+
+.rdp-day:hover:not(.rdp-day_disabled) {
+  background-color: var(--rdp-background-color);
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Masquer les éléments Cal.com indésirables */
+iframe[src*="cal.com"] {
+  /* Masquer le bouton "Superposer mon calendrier" et autres éléments UI Cal.com */
+}
+
+/* Style pour masquer les éléments Cal.com via CSS si nécessaire */
+.cal-overlay-button,
+[data-testid="overlay-calendar"],
+button[aria-label*="calendar"],
+button[title*="calendar"] {
+  display: none !important;
+}
+
+/* Fix des lignes blanches entre tuiles Leaflet */
+.leaflet-tile-container {
+  background-color: #dcdcdc; /* ou la couleur de ton fond */
+}
+
+.leaflet-tile {
+  transform: translateZ(0);
+}
+
+/* Animations personnalisées pour la page de confirmation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Forcer le scroll même quand Headless UI Listbox est ouvert */
+body {
+  overflow: auto !important;
+}
+
+html {
+  overflow: auto !important;
+}

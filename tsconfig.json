@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".", // ⬅️ nécessaire pour que "paths" fonctionne
+    "paths": {
+      "@/*": [
+        "src/*"
+      ] // ⬅️ alias "@/..." → "src/..."
+    },
+    "types": [
+      "node"
+    ] // ⬅️ utile pour éviter des manques de types Node
+    ,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    // Force reload
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
