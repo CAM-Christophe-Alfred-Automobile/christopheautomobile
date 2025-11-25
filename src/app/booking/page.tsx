@@ -235,9 +235,7 @@ export default function BookingPage() {
         </div>
 
         {/* Choix du mode : Recherche OU Catégorie */}
-        <div className={`relative z-0 mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0 ${
-          searchMode === "category" && !categorie ? "min-h-[600px]" : ""
-        }`}>
+        <div className="relative z-0 mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0">
           <label className="relative z-0 block mb-6 font-semibold text-lg sm:text-xl text-amber-400 text-center">
             1. Comment souhaitez-vous trouver votre intervention ?
           </label>
@@ -295,7 +293,7 @@ export default function BookingPage() {
 
           {/* Mode catégorie */}
           {searchMode === "category" && (
-            <div className="px-6 sm:px-0">
+            <div className={`px-6 sm:px-0 ${!categorie ? "pb-[60vh] sm:pb-0" : ""}`}>
               <p className="text-center text-gray-400 mb-4 text-sm">
                 💡 Sélectionnez d&#39;abord une catégorie, puis choisissez vos interventions
               </p>

@@ -154,7 +154,7 @@ export default function ContactForm() {
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-base focus:border-orange-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm sm:text-base focus:border-orange-500 focus:outline-none"
               placeholder=""
             />
           </div>
@@ -164,7 +164,7 @@ export default function ContactForm() {
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-base focus:border-orange-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm sm:text-base focus:border-orange-500 focus:outline-none"
               placeholder=""
             />
           </div>
@@ -176,7 +176,7 @@ export default function ContactForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-base focus:border-amber-500 focus:outline-none"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm sm:text-base focus:border-amber-500 focus:outline-none"
             placeholder="votre.email@exemple.com"
           />
         </div>
@@ -187,7 +187,7 @@ export default function ContactForm() {
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-base focus:border-orange-500 focus:outline-none"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm sm:text-base focus:border-orange-500 focus:outline-none "
             placeholder="Commençant par 06 ou 07"
           />
         </div>
@@ -198,7 +198,7 @@ export default function ContactForm() {
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-base focus:border-orange-500 focus:outline-none"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm sm:text-base focus:border-orange-500 focus:outline-none "
             placeholder="Devis, réparation, ou simple question"
           />
         </div>
@@ -209,7 +209,7 @@ export default function ContactForm() {
             rows={3}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-base focus:border-orange-500 focus:outline-none resize-none"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm sm:text-base focus:border-orange-500 focus:outline-none resize-none"
             placeholder="Question, demande d’informations ou précisions sur une intervention."
           />
         </div>

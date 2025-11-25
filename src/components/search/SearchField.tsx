@@ -83,7 +83,7 @@ export default function SearchField({
           onChange={(e) => onChange(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg 
                      text-xs md:text-sm
-                     placeholder:text-[15px] md:placeholder:text-sm
+                     placeholder:text-[13px] md:placeholder:text-sm
                      placeholder-gray-500 focus:outline-none focus:border-amber-500
                      focus:ring-1 focus:ring-amber-500 transition-colors"
         />

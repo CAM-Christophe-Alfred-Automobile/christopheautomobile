@@ -45,9 +45,9 @@ export default function SelectCategorie({
     <div className="w-full">
       <Listbox value={categorie} onChange={setCategorie}>
         <div className="relative">
-          <Listbox.Button className="relative z-0 cursor-pointer w-full rounded-xl border-2 border-amber-500 bg-gray-900 py-3 px-4 text-white text-base flex justify-between items-center focus:ring-2 focus:ring-amber-500/40 focus:border-amber-400 outline-none transition-all">
+          <Listbox.Button className="relative z-0 cursor-pointer w-full rounded-xl border-2 border-amber-500 bg-gray-900 py-3 px-4 text-white text-sm md:text-base flex justify-between items-center focus:ring-2 focus:ring-amber-500/40 focus:border-amber-400 outline-none transition-all ">
             <span className={categorie ? "text-white" : "text-gray-400"}>
-              {categorie || "-- Sélectionnez une catégorie --"}
+              {categorie || "- Sélectionnez une catégorie -"}
             </span>
             <ChevronUpDownIcon className="h-5 w-5 text-amber-400" />
           </Listbox.Button>

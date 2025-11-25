@@ -179,8 +179,8 @@ export default function InfoModal({
                     Tarifs = Main d&apos;œuvre uniquement
                   </h3>
                 </div>
-                <p className="text-base text-gray-300 leading-relaxed font-normal text-left">
-                  <p className="text-gray-400 leading-relaxed">
+                <div   className="text-base text-gray-300 leading-relaxed font-normal text-left">
+                  <span  className="text-gray-400 leading-relaxed">
                     Les{" "}
                     <strong className="text-white font-bold">
                       pièces nécessaires aux réparations
@@ -193,8 +193,8 @@ export default function InfoModal({
                       acompte de 40 %
                     </strong>{" "}
                     du montant total, à régler avant toute commande.
-                  </p>
-                </p>
+                  </span>
+                </div>
               </div>
 
               {/* À savoir */}
