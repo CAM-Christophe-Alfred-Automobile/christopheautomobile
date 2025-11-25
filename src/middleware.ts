@@ -70,14 +70,15 @@ export function middleware(request: NextRequest) {
   }
 
   //! Accès refusé
-  return new Response("🔒 Accès réservé - Site en cours de développement", {
-    //! Si aucune condition précédente n’est valide → accès refusé
+  return new Response("Acces reserve - Site en cours de developpement", {
+    //! Si aucune condition précédente n'est valide → accès refusé
     status: 401,
     //! Code HTTP 401 = Authentification requise
 
     headers: {
-      "WWW-Authenticate": 'Basic realm="Site CAM - Démo Client"',
+      "WWW-Authenticate": 'Basic realm="Site CAM - Demo Client"',
       //! Demande au navigateur d'afficher une popup de login
+      //! IMPORTANT: Pas d'accents dans les headers HTTP (Edge Runtime)
     },
   });
 }
