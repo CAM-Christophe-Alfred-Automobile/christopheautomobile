@@ -86,7 +86,6 @@ export default function MentionsLegalesPage() {
             <div className="text-sm sm:text-base text-gray-300 space-y-2">
               <p><strong>Développeur :</strong> MJM Coding - Jessica MOSCATO</p>
               <p><strong>Site web :</strong> <a href="https://www.mjm-coding.fr" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">www.mjm-coding.fr</a></p>
-              <p><strong>GitHub :</strong> <a href="https://github.com/MJM-Coding" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">@MJM-Coding</a></p>
             </div>
           </section>
 

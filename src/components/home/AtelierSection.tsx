@@ -83,7 +83,7 @@ export default function AtelierSection() {
                 Équipement pro
               </h3>
               <p className="text-gray-400 text-xs leading-relaxed">
-                Outillage complet, valise OBD, pont mobile
+                Outillage complet, valise de diagnostic
               </p>
             </div>
 
