@@ -27,48 +27,56 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // Déclaration de la fonction middleware exécutée sur chaque requête
-  const basicAuth = request.headers.get("authorization"); // Récupère l'entête Authorization envoyé par le navigateur (Basic Auth)
+  //! Déclaration de la fonction middleware exécutée sur chaque requête
+  const basicAuth = request.headers.get("authorization"); 
+  //! Récupère l'entête Authorization envoyé par le navigateur (Basic Auth)
+
   const authUser = process.env.DEMO_USER;
-  const authPass = process.env.DEMO_PASSWORD; // Identifiant et mot de passe définis dans les variables d’environnement
+  const authPass = process.env.DEMO_PASSWORD;
+  //! Identifiant et mot de passe définis dans les variables d’environnement
 
   // Si pas configuré => accès normal (production)
   if (!authUser || !authPass) {
-    return NextResponse.next(); // Si les variables ne sont pas définies => pas de protection
-    // NextResponse.next() = laisse passer la requête normalement
+    //! Si les variables ne sont pas définies => pas de protection
+    return NextResponse.next();
+    //! NextResponse.next() = laisse passer la requête normalement
   }
 
   // Vérification des credentials
   if (basicAuth) {
-    // Si le header Authorization existe => on vérifie
+    //! Si le header Authorization existe => on vérifie
     try {
       const authValue = basicAuth.split(" ")[1];
-      // basicAuth a la forme : "Basic base64EncodedString"
-      // On récupère la partie encodée en base64
-      const [user, pass] = atob(authValue).split(":");
-      // Décodage base64 → "user:password"
-      // On sépare en user / password
+      //! basicAuth a la forme : "Basic base64EncodedString"
+      //! On récupère la partie encodée en base64
+
+      const decoded = Buffer.from(authValue, "base64").toString();
+      //! Remplace atob() → Compatible Edge Runtime (Vercel)
+
+      const [user, pass] = decoded.split(":");
+      //! On sépare en user / password
 
       if (user === authUser && pass === authPass) {
-        // Si identifiant ET mot de passe sont corrects
+        //! Si identifiant ET mot de passe sont corrects
         return NextResponse.next();
-        // On autorise l’accès
+        //! On autorise l’accès
       }
     } catch (error) {
-      // En cas d'erreur de décodage, on refuse l'accès
+      //! Si une erreur se produit lors du décodage
       console.error("Erreur d'authentification:", error);
+      //! Log optionnel en console (serveur)
     }
   }
 
-   // Accès refusé
+  //! Accès refusé
   return new Response("🔒 Accès réservé - Site en cours de développement", {
-    // Si aucune condition précédente n’est valide → accès refusé
+    //! Si aucune condition précédente n’est valide → accès refusé
     status: 401,
-    // Code HTTP 401 = Authentification requise
+    //! Code HTTP 401 = Authentification requise
 
     headers: {
       "WWW-Authenticate": 'Basic realm="Site CAM - Démo Client"',
-      // Demande au navigateur d'afficher une popup de login
+      //! Demande au navigateur d'afficher une popup de login
     },
   });
 }
@@ -76,7 +84,7 @@ export function middleware(request: NextRequest) {
 // Configuration : protège toutes les routes sauf les assets
 export const config = {
   matcher: [
-    // Le middleware s’applique aux routes correspondantes au pattern suivant
+    //! Le middleware s’applique aux routes correspondantes au pattern suivant
     
     /*
      * Match toutes les routes sauf :
