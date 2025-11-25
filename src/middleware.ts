@@ -50,8 +50,9 @@ export function middleware(request: NextRequest) {
       //! basicAuth a la forme : "Basic base64EncodedString"
       //! On récupère la partie encodée en base64
 
-      const decoded = Buffer.from(authValue, "base64").toString();
-      //! Remplace atob() → Compatible Edge Runtime (Vercel)
+      // Décodage base64 compatible Edge Runtime (Vercel)
+      const decoded = atob(authValue);
+      //! atob() est une fonction Web API standard, compatible Edge Runtime
 
       const [user, pass] = decoded.split(":");
       //! On sépare en user / password
