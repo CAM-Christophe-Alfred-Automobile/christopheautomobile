@@ -153,7 +153,7 @@ export default function ServiceCard({
 
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
         {prix && (
-          <span className="text-amber-400 font-bold text-lg whitespace-nowrap">
+          <span className="text-amber-400 font-bold text-lg whitespace-nowrap text-sm sm:text-base">
             {prix}
           </span>
         )}
