@@ -14,6 +14,13 @@
  * qui ne sont plus disponibles. Avec force-dynamic, les données sont toujours fraîches.
  */
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Réservation en ligne",
+  description: "Réservez votre intervention mécanique à domicile en ligne. Choisissez vos prestations et prenez rendez-vous directement sur notre calendrier. Service rapide et professionnel à Salon-de-Provence.",
+};
+
 //! Force le rendu dynamique (pas de cache)
 export const dynamic = 'force-dynamic';
 
