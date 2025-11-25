@@ -77,9 +77,6 @@
     "prix": 30
   },
 
-
-
-
   {
     "categorie": "Freinage",
     "service": "Plaquettes (essieu)",
@@ -138,7 +135,7 @@
   },
   {
     "categorie": "Freinage",
-    "service": "Boîtier ABS complet",
+    "service": "Boitier ABS complet",
     "description": "Remplacement + purge",
     "duree": 180,
     "prix": 120
@@ -157,9 +154,6 @@
     "duree": 160,
     "prix": 70
   },
-
-
-
 
   {
     "categorie": "Moteur",
@@ -187,7 +181,7 @@
     "service": "Chaîne de distribution",
     "description": "Remplacement complet",
     "duree": 720,
-    "prix": null
+    "prix": "à partir de 250€"
   },
   {
     "categorie": "Moteur",
@@ -222,21 +216,21 @@
     "service": "Injecteurs (4)",
     "description": "Dépose / repose ensemble",
     "duree": null,
-    "prix": null
+    "prix": "à partir de 60€"
   },
   {
     "categorie": "Moteur",
     "service": "Pompe à injection",
     "description": "Remplacement + purge (si dans distribution → kit obligatoire)",
-    "duree": null,
-    "prix": null
+    "duree": 240,
+    "prix": "à partir de 100€ (sur devis)"
   },
   {
     "categorie": "Moteur",
     "service": "Capteur PMH / vilebrequin",
     "description": "Remplacement",
     "duree": null,
-    "prix": null
+    "prix": "à partir de 35€"
   },
   {
     "categorie": "Moteur",
@@ -264,7 +258,7 @@
     "service": "Bougies d'allumage",
     "description": "x3 ou x4 (essence)",
     "duree": 60,
-    "prix": null
+    "prix": "à partir de 30€"
   },
   {
     "categorie": "Moteur",
@@ -275,14 +269,14 @@
   },
   {
     "categorie": "Moteur",
-    "service": "Boîtier de préchauffage",
+    "service": "Boitier de préchauffage",
     "description": "Contrôle, remplacement",
-    "duree": null,
-    "prix": null
+    "duree": 60,
+    "prix": "à partir de 35€"
   },
   {
     "categorie": "Moteur",
-    "service": "Boîtier papillon",
+    "service": "Boitier papillon",
     "description": "Nettoyage ou remplacement",
     "duree": 90,
     "prix": 45
@@ -292,7 +286,7 @@
     "service": "EGR / FAP",
     "description": "Nettoyage ou remplacement",
     "duree": null,
-    "prix": null
+    "prix": "à partir de 60€"
   },
   {
     "categorie": "Moteur",
@@ -354,94 +348,100 @@
 
 
 
-    {
-        "categorie": "Refroidissement",
-        "service": "Boîtier d’eau / thermostat",
-        "description": "remplacement complet",
-        "duree": 90,
-        "prix": 40
-    },
-    {
-        "categorie": "Refroidissement",
-        "service": "Radiateur moteur",
-        "description": "remplacement + purge",
-        "duree": 180,
-        "prix": 80
-    },
-    {
-        "categorie": "Refroidissement",
-        "service": "Ventilateur moteur",
-        "description": "remplacement",
-        "duree": 90,
-        "prix": 50
-    },
-    {
-        "categorie": "Refroidissement",
-        "service": "Sonde température / LDR",
-        "description": "Remplacement",
-        "duree": 60,
-        "prix": 30
-    },
-    {
-        "categorie": "Refroidissement",
-        "service": "Durite / raccord / fuite",
-        "description": "Remplacement simple",
-        "duree": 45,
-        "prix": 25
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Embrayage complet",
-        "description": "Kit disque mécanisme, butée",
-        "duree": 540,
-        "prix": 280
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Volant bi-masse + embrayage",
-        "description": "Kit complet",
-        "duree": 600,
-        "prix": 320
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Cardan (1 côté)",
-        "description": "Remplacement",
-        "duree": 60,
-        "prix": 40
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Boîte de vitesses",
-        "description": "Dépose, repose",
-        "duree": 720,
-        "prix": 300
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Joint spi boîte",
-        "description": "Remplacement",
-        "duree": 120,
-        "prix": 50
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Joint spi vilebrequin",
-        "description": "Remplacement",
-        "duree": 480,
-        "prix": 200
-    },
-    {
-        "categorie": "Transmission",
-        "service": "Roulement de transmission",
-        "description": "Remplacement",
-        "duree": 120,
-        "prix": 50
-    },
+  {
+    "categorie": "Refroidissement",
+    "service": "Boitier d’eau / thermostat",
+    "description": "remplacement complet",
+    "duree": 90,
+    "prix": 40
+  },
+  {
+    "categorie": "Refroidissement",
+    "service": "Radiateur moteur",
+    "description": "remplacement + purge",
+    "duree": 180,
+    "prix": 80
+  },
+  {
+    "categorie": "Refroidissement",
+    "service": "Ventilateur moteur",
+    "description": "remplacement",
+    "duree": 90,
+    "prix": 50
+  },
+  {
+    "categorie": "Refroidissement",
+    "service": "Sonde température / LDR",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 30
+  },
+  {
+    "categorie": "Refroidissement",
+    "service": "Durite / raccord / fuite",
+    "description": "Remplacement simple",
+    "duree": 45,
+    "prix": 25
+  },
 
 
 
-    
+
+
+
+  {
+    "categorie": "Transmission",
+    "service": "Embrayage complet",
+    "description": "Kit disque mécanisme, butée",
+    "duree": 540,
+    "prix": 280
+  },
+  {
+    "categorie": "Transmission",
+    "service": "Volant bi-masse + embrayage",
+    "description": "Kit complet",
+    "duree": 600,
+    "prix": 280
+  },
+  {
+    "categorie": "Transmission",
+    "service": "Cardan (1 côté)",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 40
+  },
+  {
+    "categorie": "Transmission",
+    "service": "Boîte de vitesses",
+    "description": "Dépose, repose",
+    "duree": 520,
+    "prix": 240
+  },
+  {
+    "categorie": "Transmission",
+    "service": "Joint spi boîte",
+    "description": "Remplacement",
+    "duree": 120,
+    "prix": 50
+  },
+  {
+    "categorie": "Transmission",
+    "service": "Joint spi vilebrequin",
+    "description": "Remplacement",
+    "duree": 620,
+    "prix": 290
+  },
+  {
+    "categorie": "Transmission",
+    "service": "Support moteur/boite/pont",
+    "description": "Remplacement",
+    "duree": 160,
+    "prix": 40
+  },
+
+
+
+
   {
     "categorie": "Suspension / Direction",
     "service": "Amortisseurs (paire)",
@@ -510,7 +510,7 @@
     "service": "Ressorts arrière",
     "description": "Remplacement",
     "duree": null,
-    "prix": null
+    "prix": "à partir de 60€"
   },
   {
     "categorie": "Suspension / Direction",
@@ -530,7 +530,6 @@
 
 
 
-  
   {
     "categorie": "Électricité",
     "service": "Batterie",
@@ -550,7 +549,7 @@
     "service": "Démarreur",
     "description": "Remplacement",
     "duree": null,
-    "prix": null
+    "prix": " à partir de 60€"
   },
   {
     "categorie": "Électricité",
@@ -571,7 +570,7 @@
     "service": "Relais / fusible / faisceau",
     "description": "Recherche / remplacement",
     "duree": 90,
-    "prix": null
+    "prix": "à partir de 30€"
   },
   {
     "categorie": "Électricité",
@@ -635,47 +634,37 @@
 
 
 
-    {
-        "categorie": "Climatisation",
-        "service": "Recharge gaz + test étanchéité",
-        "description": "climatisation complète",
-        "duree": 60,
-        "prix": 40
-    },
-    {
-        "categorie": "Climatisation",
-        "service": "Compresseur de clim",
-        "description": "Remplacement",
-        "duree": 240,
-        "prix": 100
-    },
-    {
-        "categorie": "Climatisation",
-        "service": "Condenseur de clim",
-        "description": "Remplacement",
-        "duree": 120,
-        "prix": 70
-    },
-    {
-        "categorie": "Climatisation",
-        "service": "Détendeur / évaporateur",
-        "description": "Remplacement",
-        "duree": 120,
-        "prix": 60
-    },
-    {
-        "categorie": "Climatisation",
-        "service": "Désinfection habitacle",
-        "description": "Nettoyage antibacterien",
-        "duree": 30,
-        "prix": 20
-    },
+  {
+    "categorie": "Climatisation",
+    "service": "Compresseur de clim",
+    "description": "Remplacement",
+    "duree": 240,
+    "prix": 80
+  },
+  {
+    "categorie": "Climatisation",
+    "service": "Condenseur de clim",
+    "description": "Remplacement",
+    "duree": 120,
+    "prix": 70
+  },
+  {
+    "categorie": "Climatisation",
+    "service": "Détendeur / évaporateur",
+    "description": "Remplacement",
+    "duree": 120,
+    "prix": 60
+  },
+  {
+    "categorie": "Climatisation",
+    "service": "Désinfection habitacle",
+    "description": "Nettoyage antibacterien",
+    "duree": 30,
+    "prix": 20
+  },
 
 
 
-
-
-   
   {
     "categorie": "Diagnostic",
     "service": "Diagnostic valise complet",
@@ -720,8 +709,8 @@
   },
   {
     "categorie": "Diagnostic",
-    "service": "Contrôle pré-achat",
-    "description": "Contrôle complet avant achat",
+    "service": "Contrôle pré-achat ou départ avant long trajet",
+    "description": "Contrôle complet ",
     "duree": 90,
     "prix": 40
   },
@@ -732,13 +721,7 @@
     "duree": 75,
     "prix": 50
   },
-  {
-    "categorie": "Diagnostic",
-    "service": "Contrôle avant long trajet",
-    "description": "Check complet avant départ",
-    "duree": 90,
-    "prix": 40
-  },
+
   {
     "categorie": "Diagnostic",
     "service": "Test échappement",
@@ -750,62 +733,53 @@
     "categorie": "Diagnostic",
     "service": "Diagnostic  Déplacement Zone 1",
     "description": "10 km autour de Salon-de-Provence",
-    "duree": null,
+    "duree": "Durée variable",
     "prix": "Gratuit"
   },
   {
     "categorie": "Diagnostic",
     "service": "Diagnostic Déplacement Zone 2",
     "description": "11 km à 30 km autour de Salon-de-Provence",
-    "duree": null,
+    "duree": "Durée variable",
     "prix": 15
   },
   {
     "categorie": "Diagnostic",
     "service": "Diagnostic Déplacement Zone 3",
     "description": "31 km et + selon zone d'intervention",
-    "duree": null,
+    "duree": "Durée variable",
+    "prix": 20
+  },
+
+
+
+
+  {
+    "categorie": "Autre interventions",
+    "service": "Diagnostic à distance",
+    "description": "Photo, vidéo, Whatsapp",
+    "duree": 30,
+    "prix": 15
+  },
+  {
+    "categorie": "Autre interventions",
+    "service": "Assistance démarrage",
+    "description": "Booster / batterie",
+    "duree": 30,
     "prix": 20
   },
   {
-    "categorie": "Diagnostic",
-    "service": "Contrôle avant achat ",
-    "description": "Vérification selon type de véhicule",
-    "duree": null,
-    "prix": null
+    "categorie": "Autre interventions",
+    "service": "Montage accessoires",
+    "description": "Petit matériel",
+    "duree": 45,
+    "prix": 20
   },
-
-
-
-
-
-    {
-        "categorie": "Autre interventions",
-        "service": "Diagnostic à distance",
-        "description": "Photo, vidéo, Whatsapp",
-        "duree": 30,
-        "prix": 15
-    },
-    {
-        "categorie": "Autre interventions",
-        "service": "Assistance démarrage",
-        "description": "Booster / batterie",
-        "duree": 30,
-        "prix": 20
-    },
-    {
-        "categorie": "Autre interventions",
-        "service": "Montage accessoires",
-        "description": "Petit matériel",
-        "duree": 45,
-        "prix": 20
-    },
-    {
-        "categorie": "Autre interventions",
-        "service": "Intervention urgente",
-        "description": "Dépannage sur zone",
-        "duree": "Variable",
-        "prix": "40-80",
-        "afficherDans": ["tarifs"]
-    }
+  {
+    "categorie": "Autre interventions",
+    "service": "Intervention urgente",
+    "description": "Dépannage sur zone",
+    "duree": "Variable",
+    "prix": "à partir de 40€"
+  }
 ]

@@ -26,6 +26,7 @@
  * - VERT : Interventions rapides (≤ 2h30)
  * - ORANGE : Interventions moyennes (2h30 - 3h30)
  * - ROUGE : Interventions longues (> 3h30)
+ * - GRIS : Sur devis / Variable (durée ou prix non défini)
  *
  * 💡 AVANTAGES :
  * - Un seul composant pour deux pages différentes
@@ -36,8 +37,26 @@
 
 "use client";
 
-//! Code couleur selon la durée (vert/orange/rouge)
+//! Code couleur selon la durée (vert/orange/rouge/gris)
 export const getColorClasses = (duree: number | string | null) => {
+  // Si durée est null, "Sur devis", "Variable" ou "Durée variable" → GRIS
+  const isOnQuote = 
+    duree === null || 
+    duree === "Sur devis" || 
+    duree === "Variable" || 
+    duree === "Durée variable";
+
+  if (isOnQuote) {
+    // Sur devis / Variable : GRIS
+    return {
+      border: "border-gray-500",
+      bg: "bg-gray-500/10",
+      shadow: "shadow-gray-500/20",
+      hover: "hover:border-gray-400",
+      badge: "bg-gray-600/20 border-gray-600/50 text-gray-400",
+    };
+  }
+
   const minutes = typeof duree === "number" ? duree : 0;
 
   if (minutes <= 150) {
@@ -163,6 +182,10 @@ export function ColorLegend() {
       <div className="flex items-center gap-1.5">
         <div className="w-3 h-3 rounded border-2 border-red-500 bg-red-500/20"></div>
         <span className="text-gray-400">&gt; 3h30</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <div className="w-3 h-3 rounded border-2 border-gray-500 bg-gray-500/10"></div>
+        <span className="text-gray-400">Sur devis</span>
       </div>
     </div>
   );

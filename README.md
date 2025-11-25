@@ -30,18 +30,21 @@ Site web professionnel pour **Christophe**, mécanicien à domicile. Conçu pour
 **CAM** est un site moderne et responsive destiné à Christophe, mécanicien à domicile. Il présente :
 
 - 📅 **Réservation en ligne intelligente** : Sélection d'interventions avec calcul automatique de durée et redirection vers Cal.com
-- 🎯 **Système de services JSON** : Base de données des interventions avec durées et prix
+- 🎯 **Système de services JSON** : Base de données des interventions avec durées et prix, tri automatique et filtrage intelligent
 - 💬 **Formulaire de contact** : Communication directe avec envoi d'email automatique via Nodemailer
 - 🗺️ **Carte interactive** : Visualisation de la zone d'intervention (30km autour de Salon-de-Provence)
-- 💰 **Grille tarifaire dynamique** : Tarifs générés automatiquement depuis le JSON avec code couleur
+- 💰 **Grille tarifaire dynamique** : Tarifs générés automatiquement depuis le JSON avec code couleur et recherche en temps réel
 - ⚖️ **Mentions légales** : Page d'informations légales obligatoires
+- 📱 **PWA Ready** : Installation possible sur mobile et desktop, fonctionne hors ligne
 
 Le site est conçu avec un focus sur :
 
-- ⚡ **Performance** : Optimisé pour le SEO et la vitesse de chargement (Lighthouse 90+)
+- ⚡ **Performance** : Optimisé pour le SEO et la vitesse de chargement (Lighthouse 95+)
+- 🔍 **SEO avancé** : Sitemap XML, métadonnées optimisées, structured data Schema.org
 - 📱 **Responsive Design** : Adaptation parfaite sur mobile, tablette et desktop
 - ♿ **Accessibilité** : Conforme aux standards WCAG 2.1 niveau AA
 - 🎨 **Design moderne** : Interface sombre avec accents ambre/orange
+- 🔒 **Sécurisé** : HTTPS, variables d'environnement protégées, validation des formulaires
 
 Ce projet est conçu comme un **template réutilisable** pour tout professionnel souhaitant une présence en ligne rapide et efficace.
 
@@ -63,16 +66,17 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 
 ### Fonctionnalités techniques
 
-✅ **SEO optimisé** : Sitemap XML, balises meta, structure sémantique HTML5  
-✅ **Images optimisées** : Next.js Image avec lazy loading, domaine Cloudinary autorisé  
-✅ **Système de réservation intelligent** : Sélection multi-interventions, calcul automatique, redirection Cal.com  
-✅ **Base de données JSON** : Services avec catégories, durées, prix et descriptions  
-✅ **Tarifs dynamiques** : Génération automatique avec code couleur selon prix  
+✅ **SEO optimisé** : Sitemap XML, balises meta, structured data Schema.org, Open Graph  
+✅ **PWA** : Manifest, service worker, installation native, mode hors ligne  
+✅ **Images optimisées** : Next.js Image avec lazy loading, formats WebP/AVIF  
+✅ **Système de réservation intelligent** : Filtrage automatique, sélection multi-interventions, calcul dynamique  
+✅ **Base de données JSON** : Services avec tri automatique par durée, code couleur intelligent  
+✅ **Tarifs dynamiques** : Génération automatique avec recherche en temps réel, accordéons, code couleur  
 ✅ **Formulaire intelligent** : Validation côté client + API Nodemailer côté serveur  
 ✅ **Carte interactive** : Leaflet avec cercle de 30km, chargement dynamique (SSR désactivé)  
 ✅ **Accessibilité** : Skip link, ARIA labels, navigation au clavier, lecteurs d'écran  
 ✅ **Responsive** : Menu burger mobile, grilles adaptatives, breakpoints Tailwind  
-✅ **Performance** : Force-dynamic sur pages critiques, optimisation des assets
+✅ **Performance** : Optimisation des assets, code splitting, lazy loading
 
 ---
 
@@ -94,8 +98,7 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 | **Cal.com** | 1.5.3 | Système de réservation (iframe intégré) |
 | **Leaflet** | 1.9.4 | Cartes interactives OpenStreetMap |
 | **React Leaflet** | 5.0.0 | Composants React pour Leaflet |
-| **Nodemailer** | 7.0.6 | Envoi d'emails via Gmail SMTP |
-| **Cloudinary** | - | Hébergement d'images (tarifs) |
+| **Nodemailer** | 7.0.6 | Envoi d'emails via SMTP |
 
 ### Outils de développement
 
@@ -115,7 +118,6 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 - Node.js 18.x ou 20.x
 - pnpm (recommandé) ou npm
 - Compte Gmail (pour Nodemailer)
-- Compte Cloudinary (pour les images)
 - Compte Cal.com (pour les réservations)
 
 ### Étapes d'installation
@@ -158,19 +160,12 @@ SMTP_FROM="Garage <contact@votre-domaine.fr>"  # adresse qui ENVOIE
 # Adresse qui reçoit les mails des clients
 CONTACT_RECEIVER="votre-email@exemple.fr"
 
-# -----------------------------------------------------------------------------
-# ! CLOUDINARY - Image des tarifs
-# -----------------------------------------------------------------------------
-# URL de l'image des tarifs hébergée sur Cloudinary
-NEXT_PUBLIC_TARIFS_IMAGE=https://res.cloudinary.com/votre-cloud/image/upload/v123/tarifs.png
-
-# Date de mise à jour des tarifs (affichée sur la page)
-NEXT_PUBLIC_TARIFS_LAST_UPDATE=octobre 2025
 ```
 
 ⚠️ **Important** : 
 - Pour SMTP avec **Hostinger**, utilisez votre mot de passe email normal
 - Pour SMTP avec **Gmail**, vous devez créer un **App Password** (voir section ci-dessous)
+- Les tarifs sont générés dynamiquement depuis le fichier JSON, pas d'image externe
 
 4. **Lancer le serveur de développement**
 
@@ -262,7 +257,7 @@ cam/
 |----------|-------------|---------|
 | `NEXT_PUBLIC_SITE_NAME` | Nom du site/entreprise | `CAM` |
 | `NEXT_PUBLIC_SITE_EMAIL` | Email public du site | `contact@cam.fr` |
-| `NEXT_PUBLIC_SITE_PHONE` | Téléphone | `+33 6 12 34 56 78` |
+| `NEXT_PUBLIC_SITE_PHONE` | Téléphone | `+33 6 00 00 00 00` |
 | `NEXT_PUBLIC_SITE_ADDRESS` | Adresse complète | `123 Rue Example, 13000 Ville` |
 | `NEXT_PUBLIC_CITY` | Ville d'intervention | `Salon-de-Provence` |
 | `NEXT_PUBLIC_RAYON_INTERVENTION` | Rayon en km | `30` |
@@ -276,17 +271,12 @@ cam/
 | `SMTP_PASS` | Mot de passe SMTP | `votre-mot-de-passe` |
 | `SMTP_FROM` | Adresse d'envoi avec nom | `Garage <contact@votre-domaine.fr>` |
 | `CONTACT_RECEIVER` | Destinataire des messages clients | `votre-email@exemple.fr` |
-| `NEXT_PUBLIC_TARIFS_IMAGE` | URL Cloudinary de l'image des tarifs | `https://res.cloudinary.com/...` |
-| `NEXT_PUBLIC_TARIFS_LAST_UPDATE` | Date de mise à jour des tarifs | `octobre 2025` |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp | `33612345678` |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp | `33600000000` |
 
 ### Configuration Next.js (next.config.ts)
 
 ```typescript
 const nextConfig: NextConfig = {
-  images: {
-    domains: ["res.cloudinary.com"], // Autorise Cloudinary
-  },
   reactStrictMode: true,
 };
 ```
@@ -365,24 +355,86 @@ Vercel détecte Next.js automatiquement :
 
 ### Performance
 
-- ✅ **Next.js Image** : Optimisation automatique des images (WebP, lazy loading)
-- ✅ **Force-dynamic** : Pages booking/contact/confirmation toujours fraîches
-- ✅ **SSR désactivé** : Leaflet chargé uniquement côté client
+- ✅ **Next.js Image** : Optimisation automatique (WebP/AVIF, lazy loading, responsive)
+- ✅ **Code splitting** : Chargement progressif des composants
+- ✅ **SSR désactivé** : Leaflet et modales chargés côté client uniquement
 - ✅ **Tailwind CSS** : CSS optimisé et purgé en production
+- ✅ **Fonts locales** : Pas de requêtes externes Google Fonts
+- ✅ **useMemo/useCallback** : Optimisation des re-renders React
 
-### SEO
+### SEO Avancé
 
-- ✅ **Métadonnées** : Title, description, Open Graph
-- ✅ **Structure sémantique** : HTML5 (`<header>`, `<nav>`, `<main>`, `<footer>`)
-- ✅ **Sitemap** : Génération automatique par Next.js
-- ✅ **Attribut lang** : `lang="fr"` sur la balise `<html>`
+#### Métadonnées complètes
+- ✅ **Title & Description** : Optimisés pour chaque page
+- ✅ **Open Graph** : Partage sur réseaux sociaux (Facebook, Twitter)
+- ✅ **Canonical URLs** : Évite le duplicate content
+- ✅ **Attribut lang** : `lang="fr"` sur `<html>`
+
+#### Structure et indexation
+- ✅ **Sitemap XML** : `/sitemap.xml` généré automatiquement
+- ✅ **Robots.txt** : `/robots.txt` pour les crawlers
+- ✅ **Structure sémantique** : HTML5 (`<header>`, `<nav>`, `<main>`, `<footer>`, `<article>`)
+- ✅ **Headings hiérarchiques** : H1 → H2 → H3 respectés
+
+#### Schema.org (Structured Data)
+- ✅ **LocalBusiness** : Informations du garage (nom, adresse, téléphone)
+- ✅ **Service** : Liste des prestations avec prix
+- ✅ **Organization** : Identité de l'entreprise
+- ✅ **BreadcrumbList** : Fil d'Ariane
+
+#### Performance SEO
+- ✅ **Core Web Vitals** : LCP, FID, CLS optimisés
+- ✅ **Lighthouse Score** : 95+ sur toutes les pages
+- ✅ **Mobile-First** : Indexation mobile prioritaire
+
+### PWA (Progressive Web App)
+
+#### Manifest Web App
+```json
+{
+  "name": "CAM - Mécanicien à Domicile",
+  "short_name": "CAM",
+  "theme_color": "#F59E0B",
+  "background_color": "#111827",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+#### Fonctionnalités PWA
+- ✅ **Installation native** : Bouton "Ajouter à l'écran d'accueil"
+- ✅ **Mode standalone** : Fonctionne comme une app native
+- ✅ **Icônes adaptatives** : 192x192 et 512x512
+- ✅ **Theme color** : Barre d'adresse colorée sur mobile
+- ✅ **Mode hors ligne** : Service worker pour cache basique
+
+#### Avantages pour l'utilisateur
+- 📱 **Installation rapide** : Un clic pour ajouter à l'écran d'accueil
+- 🚀 **Chargement instantané** : Cache des ressources statiques
+- 📶 **Hors ligne** : Accès aux pages visitées même sans connexion
+- 🔔 **Notifications push** : Possibilité d'ajouter des notifications (futur)
 
 ### Accessibilité (WCAG 2.1 AA)
 
 - ✅ **Skip link** : "Aller au contenu principal" (visible au focus)
-- ✅ **ARIA labels** : Navigation, formulaires, carte
-- ✅ **Navigation clavier** : Tous les éléments focusables
+- ✅ **ARIA labels** : Navigation, formulaires, carte, modales
+- ✅ **Navigation clavier** : Tous les éléments interactifs focusables
 - ✅ **Lecteurs d'écran** : SVG décoratifs masqués, labels descriptifs
+- ✅ **Contraste** : Ratios de contraste conformes (4.5:1 minimum)
+- ✅ **Focus visible** : Outline sur tous les éléments interactifs
+- ✅ **Messages dynamiques** : `aria-live="polite"` pour les notifications
 
 ---
 
@@ -404,41 +456,126 @@ Le GUIDE.md contient :
 
 ## 💡 Points techniques clés
 
+### 📋 Système de gestion des interventions (services.json)
+
+#### Structure d'une intervention
+
+```json
+{
+  "categorie": "Moteur",
+  "service": "Vidange moteur",
+  "description": "Huile moteur uniquement",
+  "duree": 35,
+  "prix": 30
+}
+```
+
+#### Logique des durées et réservabilité
+
+| Type de durée | Valeur | Affichage | Réservable ? | Usage |
+|--------------|--------|-----------|--------------|-------|
+| **Durée fixe** | `120` (nombre) | `⏱ 2h` | ✅ Oui | Intervention standardisée |
+| **Sur devis** | `null` | `⏱ Sur devis` | ❌ Non | Dépend du véhicule/diagnostic |
+| **Variable** | `"Variable"` | `⏱ Variable` | ❌ Non | Durée imprévisible |
+
+**Règle importante** : Seules les interventions avec une **durée numérique** sont réservables sur la page booking.
+
+#### Logique des prix
+
+| Type de prix | Valeur | Affichage | Exemple d'usage |
+|-------------|--------|-----------|------------------|
+| **Prix fixe** | `30` (nombre) | `30€` | Prix standard connu |
+| **Prix minimum** | `"À partir de 60€"` | `À partir de 60€` | Prix variable selon véhicule |
+| **Sur devis** | `null` | `Sur devis` | Prix totalement variable |
+
+**Note** : Le prix n'affecte PAS la réservabilité. Une intervention avec `prix: null` mais `duree: 120` reste réservable.
+
+#### Code couleur automatique (basé sur la durée)
+
+| Couleur | Durée | Badge | Usage |
+|---------|-------|-------|-------|
+| 🟢 **Vert** | ≤ 2h30 (150 min) | Bordure + badge verts | Interventions rapides |
+| 🟠 **Orange** | 2h30 - 3h30 (150-210 min) | Bordure + badge oranges | Interventions moyennes |
+| 🔴 **Rouge** | > 3h30 (210 min) | Bordure + badge rouges | Interventions longues |
+| ⚪ **Gris** | `null` ou non numérique | Bordure + badge gris | Sur devis / Variable |
+
+#### Tri automatique
+
+Les interventions sont automatiquement triées par **durée croissante** dans chaque catégorie :
+1. Interventions rapides en premier (30 min, 45 min, 60 min...)
+2. Interventions longues ensuite
+3. Interventions "Sur devis" en dernier
+
+#### Exemples pratiques
+
+**Intervention réservable avec prix variable :**
+```json
+{
+  "service": "Pompe à injection",
+  "duree": 240,  // ✅ Réservable (durée connue)
+  "prix": "À partir de 100€"  // Prix varie selon modèle
+}
+```
+
+**Intervention sur devis (non réservable) :**
+```json
+{
+  "service": "Capteur PMH",
+  "duree": null,  // ❌ Non réservable
+  "prix": "À partir de 35€"  // Peut quand même indiquer un prix minimum
+}
+```
+
+**Intervention standard (réservable) :**
+```json
+{
+  "service": "Vidange moteur",
+  "duree": 35,  // ✅ Réservable
+  "prix": 30  // Prix fixe
+}
+```
+
 ### Page Tarifs dynamique
 
 Les tarifs sont générés automatiquement depuis `src/app/data/services.json` :
-- **Code couleur automatique** : Vert (<100€), Jaune (100-300€), Rouge (>300€)
-- **Layout masonry** : Colonnes qui s'adaptent pour éviter les espaces vides
-- **Groupement par catégorie** : Entretien, Freinage, Distribution, etc.
-- **Affichage complet** : Service, description, durée, prix
+- **Recherche en temps réel** : Filtre par nom, catégorie ou description
+- **Code couleur intelligent** : Basé sur la durée (vert/orange/rouge/gris)
+- **Tri automatique** : Par durée croissante dans chaque catégorie
+- **Accordéons** : Catégories repliables avec compteur d'interventions
+- **Layout colonnes** : 2 colonnes sur desktop, 1 sur mobile
+- **Bouton "Tout ouvrir/fermer"** : Contrôle global des accordéons
+- Affichage complet : Service, description, durée, prix
 - Date de mise à jour générée automatiquement
 
 ### Système de réservation intelligent
 
 La page booking permet de :
-1. **Sélectionner une catégorie** : Entretien, Freinage, Distribution, etc.
-2. **Choisir des interventions** : Sélection multiple avec durées
-3. **Option "Autre / Sur mesure"** : Slider pour définir une durée personnalisée (1h à 8h)
-4. **Calcul automatique** : Durée totale calculée
-5. **Redirection Cal.com** : Vers l'événement correspondant (1h, 2h, 3h, etc.)
-6. **Gestion des limites** : Alerte si durée > 8h avec contact direct
+1. **Filtrage automatique** : Seules les interventions avec durée numérique sont affichées
+2. **Sélectionner une catégorie** : Entretien, Freinage, Moteur, etc.
+3. **Choisir des interventions** : Sélection multiple avec code couleur
+4. **Option "Autre / Sur mesure"** : Slider pour définir une durée personnalisée (1h à 8h)
+5. **Calcul automatique** : Durée totale calculée en temps réel
+6. **Redirection Cal.com** : Vers l'événement correspondant (1h, 2h, 3h, etc.)
+7. **Gestion des limites** : Alerte si durée > 8h avec redirection vers contact
+
+**Règle de filtrage** : Les interventions avec `duree: null` ou `duree: "Variable"` n'apparaissent pas dans le booking (client doit contacter directement).
 
 ### Base de données JSON
 
 Le fichier `services.json` contient tous les services :
 ```json
 {
-  "categorie": "Entretien & vidanges",
+  "categorie": "Entretien",
   "service": "Vidange moteur",
   "description": "huile moteur uniquement",
-  "duree": 60,
-  "prix": 50
+  "duree": 35,
+  "prix": 30
 }
 ```
 
 Utilisé par :
-- Page **booking** : Pour la sélection d'interventions
-- Page **tarifs** : Pour l'affichage automatique des prix
+- Page **booking** : Filtrage et sélection des interventions réservables
+- Page **tarifs** : Affichage complet avec recherche, tri et code couleur
 
 ### Carte Leaflet
 
@@ -495,7 +632,6 @@ Projet sous licence **MIT** – libre d'utilisation et de modification, à condi
 ## 🙏 Remerciements
 
 - **Cal.com** pour le système de réservation
-- **Cloudinary** pour l'hébergement d'images
 - **Leaflet** pour les cartes interactives
 - **Vercel** pour l'hébergement
 

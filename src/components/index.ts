@@ -22,16 +22,20 @@
 export { default as AutodocModal } from "./modals/autodocModal";
 export { default as Footer } from "./layout/Footer";
 export { default as Header } from "./layout/Header";
-export { default as CategoryAccordion } from "./CategoryAccordion";
+export { default as CategoryAccordion } from "./categories/CategoryAccordion";
 export { default as ContactForm } from "./forms/ContactForm";
 export { default as InfoModal } from "./modals/InfoModal";
-export { default as NeonCAM } from "./NeonCAM";
+export { default as NeonCAM } from "./ui/NeonCAM";
 export { default as Whatsapp } from "./whatsapp/Whatsapp";
 export { default as WhatsappFloat } from "./whatsapp/WhatsappFloat";
+
 export { default as InstallPWA } from "./PWA/InstallPWA";
 export { default as IOSInstallPrompt } from "./PWA/IOSInstallPrompt";
 
-// ⚠️ À SUPPRIMER APRÈS PAIEMENT (voir instructions dans PaymentBanner.tsx)
-export { default as PaymentBanner } from "./banner/PaymentBanner";
+export { default as ServiceCard } from "./services/ServiceCard";
+export { default as SearchField } from "./search/SearchField";
+
+
+
 
 // 🚫 Ne pas exporter `MapZone` ici (voir explication ci-dessus)

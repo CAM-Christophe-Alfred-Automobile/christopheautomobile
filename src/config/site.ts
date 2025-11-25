@@ -26,10 +26,6 @@ interface SiteConfig {
     username: string;
     iframeUrl: string;
   };
-  tarifs: {
-    imageUrl: string;
-    lastUpdate: string;
-  };
   whatsapp: {
     number: string;
   };
@@ -73,10 +69,7 @@ export const siteConfig: SiteConfig = {
     username: process.env.NEXT_PUBLIC_CAL_COM_USERNAME!,
     iframeUrl: process.env.NEXT_PUBLIC_CAL_COM_URL!,
   },
-  tarifs: {
-    imageUrl: process.env.NEXT_PUBLIC_TARIFS_IMAGE!,
-    lastUpdate: process.env.NEXT_PUBLIC_TARIFS_LAST_UPDATE!,
-  },
+
   whatsapp: {
     number: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER!,
   },

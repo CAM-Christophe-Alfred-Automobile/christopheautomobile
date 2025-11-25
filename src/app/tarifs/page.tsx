@@ -2,46 +2,40 @@
 // FICHIER : src/app/tarifs/page.tsx
 // -----------------------------------------------------------------------------
 //! 🎯 OBJECTIF :
-// Afficher la page des tarifs du garage MécaniPro sous deux formes :
-//   1️⃣ Une image Cloudinary (si définie dans .env)
-//   2️⃣ Une version texte SEO-friendly (si aucune image n’est définie)
+// Afficher la page des tarifs sous forme de liste filtrable,
+// triée par durée, avec un affichage SEO-friendly et une navigation claire.
 //
-//! 💡 LOGIQUE :
-// - Si la variable d’environnement NEXT_PUBLIC_TARIFS_IMAGE est présente,
-//   la page affiche l’image Cloudinary (utile pour un rendu visuel).
-// - Si elle est absente, la page affiche une liste HTML stylisée,
-//   parfaitement lisible par Google et meilleure pour le référencement (SEO).
+//! 💡 FONCTIONNALITÉS PRINCIPALES :
+// - Recherche en temps réel sur les prestations
+// - Tri automatique par durée croissante
+// - Groupement par catégories avec accordéons (ouverture globale possible)
+// - Code couleur par temps d’intervention
+// - Modale Autodoc pour les pièces détachées
+// - Contenu 100% indexable par Google ✨
 //
-//! ⚙️ CONFIGURATION REQUISE (.env) :
-//   NEXT_PUBLIC_TARIFS_IMAGE=https://res.cloudinary.com/.../tarifs.png
-//   NEXT_PUBLIC_TARIFS_LAST_UPDATE=octobre 2025
+//! 📦 DONNÉES :
+// Chargement des prestations depuis le fichier local :
+//   src/app/data/services.json
 //
-//! 📌 AVANTAGES SEO :
-// - Le texte est indexable par les moteurs de recherche.
-// - Chaque prestation contient des mots-clés pertinents (vidange, freinage, etc.).
-// - Le code HTML propre améliore la compréhension sémantique de la page.
+//! 🎨 DESIGN :
+// - Fond sombre cohérent avec l'identité du site
+// - Columns Masonry responsives (1 → 2 colonnes)
+// - Bouton “Tout ouvrir / Tout fermer”
+// - Composants réutilisables (Header, Footer, CategoryAccordion, etc.)
 //
-//! 🧩 DESIGN :
-// - Fond sombre cohérent avec le reste du site
-// - Titres clairs et lisibles
-// - Cartes élégantes avec ombre et effet hover
-// - Mise en page responsive (2 colonnes sur desktop, 1 colonne sur mobile)
-// - Prix séparés par un petit trait vertical “|” pour un visuel plus net
-//
-//! 🛠️ ASTUCE :
-// Pour forcer la version texte, il suffit de commenter la ligne
-// NEXT_PUBLIC_TARIFS_IMAGE dans le fichier .env.
-//
+//! 🔁 MISE À JOUR :
+// La date affichée se base sur la date actuelle du navigateur.
 // -----------------------------------------------------------------------------
+
 
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic"; // ✅ Ajout
-import { Header, Footer, InfoModal } from "@/components";
+import { useState, useMemo } from "react";
+import dynamic from "next/dynamic"; 
+import { Header, Footer, InfoModal, CategoryAccordion } from "@/components";
 import servicesData from "@/app/data/services.json";
-import { ColorLegend } from "@/components/ServiceCard";
-import CategoryAccordion from "@/components/CategoryAccordion";
+import { ColorLegend } from "@/components/services/ServiceCard";
+import SearchField from "@/components/search/SearchField";
 
 // ✅ Import dynamique de ta modale (empêche le SSR)
 const AutodocModal = dynamic(() => import("@/components/modals/autodocModal"), {
@@ -49,14 +43,45 @@ const AutodocModal = dynamic(() => import("@/components/modals/autodocModal"), {
 });
 
 export default function TarifsPage() {
-  //! Grouper les services par catégorie
-  const categories = Array.from(new Set(servicesData.map((s) => s.categorie)));
   const [expandAll, setExpandAll] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const lastUpdate = new Date().toLocaleDateString("fr-FR", {
     month: "long",
     year: "numeric",
   });
+
+  // Fonction pour normaliser la durée (convertir en nombre pour le tri)
+  const normalizeDuree = (duree: number | string | null): number => {
+    if (duree === null || duree === undefined) return Infinity; // Les null à la fin
+    if (typeof duree === "number") return duree;
+    // Si c'est une string ("variable", "Sur devis", etc.), mettre à la fin
+    return Infinity;
+  };
+
+  // Filtrer et trier les services
+  const filteredAndSortedServices = useMemo(() => {
+    // Filtrer selon la recherche
+    const filtered = servicesData.filter((service) => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        service.service.toLowerCase().includes(query) ||
+        service.categorie.toLowerCase().includes(query) ||
+        (service.description && service.description.toLowerCase().includes(query))
+      );
+    });
+
+    // Trier par durée croissante
+    return filtered.sort((a, b) => {
+      return normalizeDuree(a.duree) - normalizeDuree(b.duree);
+    });
+  }, [searchQuery]);
+
+  // Grouper les services filtrés par catégorie
+  const categories = Array.from(
+    new Set(filteredAndSortedServices.map((s) => s.categorie))
+  );
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -93,6 +118,16 @@ export default function TarifsPage() {
               <span className="w-full sm:w-auto">Code couleur par durée :</span>
               <ColorLegend />
             </div>
+          </div>
+
+          {/* Champ de recherche */}
+          <div className="mb-8">
+            <SearchField
+              value={searchQuery}
+              onChange={setSearchQuery}
+              resultCount={filteredAndSortedServices.length}
+              showResultCount={true}
+            />
           </div>
           {/* Bouton Tout ouvrir/fermer */}
           <div className="flex justify-center mb-8">
@@ -139,23 +174,33 @@ export default function TarifsPage() {
           </div>
           {/* Layout en colonnes type masonry avec accordéons */}
           <div className="lg:columns-2 gap-6 space-y-6">
-            {categories.map((categorie) => {
-              // Filtrer les services : afficher tous ceux sans restriction + ceux marqués pour "tarifs"
-              const services = servicesData.filter(
-                (s) =>
-                  s.categorie === categorie &&
-                  (!s.afficherDans || s.afficherDans.includes("tarifs"))
-              );
+            {categories.length === 0 ? (
+              <div className="col-span-2 text-center py-12">
+                <p className="text-gray-400 text-lg">Aucune intervention trouvée pour &quot;{searchQuery}&quot;</p>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                >
+                  Réinitialiser la recherche
+                </button>
+              </div>
+            ) : (
+              categories.map((categorie) => {
+                // Filtrer les services par catégorie
+                const services = filteredAndSortedServices.filter(
+                  (s) => s.categorie === categorie
+                );
 
-              return (
-                <CategoryAccordion
-                  key={`${categorie}-${expandAll}`}
-                  categorie={categorie}
-                  services={services}
-                  defaultOpen={expandAll}
-                />
-              );
-            })}
+                return (
+                  <CategoryAccordion
+                    key={`${categorie}-${expandAll}-${searchQuery}`}
+                    categorie={categorie}
+                    services={services}
+                    defaultOpen={expandAll || searchQuery !== ""}
+                  />
+                );
+              })
+            )}
           </div>
 
           {/* Note et date */}

@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation"; // ⚠️ À SUPPRIMER APRÈS PAIEMENT
+import { useState, useMemo } from "react";
 import servicesData from "@/app/data/services.json";
 import { Header, Footer, InfoModal } from "@/components";
 import Whatsapp from "@/components/whatsapp/Whatsapp";
-import SelectCategorie from "@/components/SelectCategorie";
+import SelectCategorie from "@/components/categories/SelectCategorie";
 import ServiceCard, {
   ColorLegend,
   getColorClasses,
-} from "@/components/ServiceCard";
+} from "@/components/services/ServiceCard";
 import Image from "next/image";
+import SearchField from "@/components/search/SearchField";
+import { siteConfig } from "@/config/site";
 
 //! Convertir minutes → format h:mm
 const formatDuree = (minutes: number | string | null) => {
@@ -23,20 +24,21 @@ const formatDuree = (minutes: number | string | null) => {
 //! Limite d'une journée d'intervention (8h = 480 min)
 const LIMITE_JOURNEE = 480;
 
-//! URL Cal.com selon durée
+//! URL Cal.com selon durée - Utilise le username depuis la config
 const getCalUrl = (duree: number) => {
-  if (duree <= 60) return "https://cal.com/christophe-am/1h";
-  if (duree <= 90) return "https://cal.com/christophe-am/1h30";
-  if (duree <= 120) return "https://cal.com/christophe-am/2h";
-  if (duree <= 150) return "https://cal.com/christophe-am/2h30";
-  if (duree <= 180) return "https://cal.com/christophe-am/3h";
-  if (duree <= 210) return "https://cal.com/christophe-am/3h30";
-  if (duree <= 240) return "https://cal.com/christophe-am/4h";
-  if (duree <= 270) return "https://cal.com/christophe-am/4h30";
-  if (duree <= 300) return "https://cal.com/christophe-am/5h";
-  if (duree <= 330) return "https://cal.com/christophe-am/5h30";
-  if (duree <= 360) return "https://cal.com/christophe-am/6h";
-  return "https://cal.com/christophe-am/journee-complete"; // au-delà de 6h
+  const username = siteConfig.calcom.username;
+  if (duree <= 60) return `https://cal.com/${username}/1h`;
+  if (duree <= 90) return `https://cal.com/${username}/1h30`;
+  if (duree <= 120) return `https://cal.com/${username}/2h`;
+  if (duree <= 150) return `https://cal.com/${username}/2h30`;
+  if (duree <= 180) return `https://cal.com/${username}/3h`;
+  if (duree <= 210) return `https://cal.com/${username}/3h30`;
+  if (duree <= 240) return `https://cal.com/${username}/4h`;
+  if (duree <= 270) return `https://cal.com/${username}/4h30`;
+  if (duree <= 300) return `https://cal.com/${username}/5h`;
+  if (duree <= 330) return `https://cal.com/${username}/5h30`;
+  if (duree <= 360) return `https://cal.com/${username}/6h`;
+  return `https://cal.com/${username}/journee-complete`; // au-delà de 6h
 };
 
 export default function BookingPage() {
@@ -46,54 +48,9 @@ export default function BookingPage() {
   const [dureeTotale, setDureeTotale] = useState<number | null>(null);
   const [dureePersonnalisee, setDureePersonnalisee] = useState<number>(60);
   const [showReservationWarning, setShowReservationWarning] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<"search" | "category">("search"); // Mode par défaut : recherche
 
-  // ⚠️ BLOCAGE AVANT PAIEMENT - DÉBUT DU BLOC À SUPPRIMER ⚠️
-  const router = useRouter();
-  const isDemoMode = process.env.NEXT_PUBLIC_SHOW_PAYMENT_BANNER === "true";
-  
-  if (isDemoMode) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-[#0F0F0F] to-gray-900 text-white">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-12 flex items-center justify-center">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-orange-900/20 border-2 border-orange-500/50 rounded-2xl p-8 shadow-2xl">
-              <div className="w-20 h-20 mx-auto mb-6 bg-orange-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h1 className="text-3xl font-bold text-orange-400 mb-4">
-                🚧 Réservation temporairement désactivée
-              </h1>
-              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
-                Le système de réservation en ligne sera disponible très prochainement.
-              </p>
-              <p className="text-gray-400 mb-8">
-                En attendant, vous pouvez consulter mes tarifs et me contacter directement.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => router.push("/tarifs")}
-                  className="cursor-pointer bg-amber-600 hover:bg-amber-500 transition px-6 py-3 rounded-lg font-semibold text-white shadow-lg"
-                >
-                  📋 Voir les tarifs
-                </button>
-                <button
-                  onClick={() => router.push("/contact")}
-                  className="cursor-pointer bg-gray-700 hover:bg-gray-600 transition px-6 py-3 rounded-lg font-semibold text-white shadow-lg"
-                >
-                  📞 Me contacter
-                </button>
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  // ⚠️ BLOCAGE AVANT PAIEMENT - FIN DU BLOC À SUPPRIMER ⚠️
 
   //! Catégories uniques + option "Autre"
   const categories = [
@@ -101,20 +58,36 @@ export default function BookingPage() {
     "Autre / Sur mesure",
   ];
 
-  //! Prestations filtrées (exclure celles qui sont uniquement pour la page tarifs)
-  //! ET exclure celles sans durée définie (sur devis) ou avec durée/prix non numériques
-  const prestations = servicesData.filter(
-    (s) =>
-      s.categorie === categorie &&
-      // Exclure si explicitement réservé aux tarifs uniquement
-      (!s.afficherDans || s.afficherDans.includes("booking")) &&
-      // Exclure si durée est null, non numérique, ou "Variable"
-      s.duree !== null &&
-      typeof s.duree === "number" &&
-      // Exclure si prix est null ou non numérique (sur devis)
-      s.prix !== null &&
-      typeof s.prix === "number"
-  );
+  // Fonction pour normaliser la durée (convertir en nombre pour le tri)
+  const normalizeDuree = (duree: number | string | null): number => {
+    if (duree === null || duree === undefined) return Infinity; // Les null à la fin
+    if (typeof duree === "number") return duree;
+    // Si c'est une string ("variable", "Sur devis", etc.), mettre à la fin
+    return Infinity;
+  };
+
+  //! Prestations filtrées + recherche + tri par durée croissante
+  const prestations = useMemo(() => {
+    const filtered = servicesData.filter(
+      (s) =>
+        // En mode recherche : pas besoin de catégorie, en mode catégorie : filtrer par catégorie
+        (searchMode === "search" || s.categorie === categorie) &&
+        // Exclure UNIQUEMENT si durée est null ou non numérique
+        // Le prix peut être null (ex: "À partir de X€"), seule la durée compte pour réserver
+        s.duree !== null &&
+        typeof s.duree === "number" &&
+        // Filtrer selon la recherche
+        (searchQuery === "" ||
+          s.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.categorie.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase())))
+    );
+
+    // Trier par durée croissante
+    return filtered.sort((a, b) => {
+      return normalizeDuree(a.duree) - normalizeDuree(b.duree);
+    });
+  }, [categorie, searchQuery, searchMode]);
 
   //! Sélection / déselection
   const handleSelect = (service: string) => {
@@ -243,8 +216,8 @@ export default function BookingPage() {
                     </h4>
 
                     <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                      Si le mécanicien doit s&#39;occuper de commander les pièces,
-                      merci de{" "}
+                      Si le mécanicien doit s&#39;occuper de commander les
+                      pièces, merci de{" "}
                       <strong className="text-amber-300">
                         le contacter avant de réserver
                       </strong>{" "}
@@ -261,26 +234,81 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* //! Catégorie */}
-        <div
-          className={`relative z-0 mb-8 w-full max-w-2xl mx-auto pt-4 sm:pt-0 ${
-            !categorie ? "pb-[50vh]" : ""
-          }`}
-        >
-          <label className="relative z-0 block mb-6 sm:mb-3 font-semibold text-lg text-amber-400 text-center sm:text-left px-2 sm:px-0">
-            1. Choisissez une catégorie
+        {/* Choix du mode : Recherche OU Catégorie */}
+        <div className={`relative z-0 mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0 ${
+          searchMode === "category" && !categorie ? "min-h-[600px]" : ""
+        }`}>
+          <label className="relative z-0 block mb-6 font-semibold text-lg sm:text-xl text-amber-400 text-center">
+            1. Comment souhaitez-vous trouver votre intervention ?
           </label>
 
-          <div className="px-6 sm:px-0">
-            <SelectCategorie
-              categorie={categorie}
-              setCategorie={(value) => {
-                setCategorie(value);
-                setDureeTotale(null);
+          {/* Toggle entre recherche et catégorie */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6">
+            <button
+              onClick={() => {
+                setSearchMode("search");
+                setCategorie("");
               }}
-              categories={categories}
-            />
+              className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
+                searchMode === "search"
+                  ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg sm:scale-105"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className="whitespace-nowrap">Rechercher directement</span>
+            </button>
+            <button
+              onClick={() => {
+                setSearchMode("category");
+                setSearchQuery("");
+              }}
+              className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
+                searchMode === "category"
+                  ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg sm:scale-105"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              <span className="whitespace-nowrap">Parcourir par catégorie</span>
+            </button>
           </div>
+
+          {/* Mode recherche */}
+          {searchMode === "search" && (
+            <div className="px-6 sm:px-0">
+              <p className="text-center text-gray-400 mb-4 text-sm">
+                💡 Tapez directement ce que vous cherchez (ex: "vidange", "plaquettes", "diagnostic")
+              </p>
+              <SearchField
+                value={searchQuery}
+                onChange={setSearchQuery}
+                resultCount={prestations.length}
+                showResultCount={true}
+              />
+            </div>
+          )}
+
+          {/* Mode catégorie */}
+          {searchMode === "category" && (
+            <div className="px-6 sm:px-0">
+              <p className="text-center text-gray-400 mb-4 text-sm">
+                💡 Sélectionnez d'abord une catégorie, puis choisissez vos interventions
+              </p>
+              <SelectCategorie
+                categorie={categorie}
+                setCategorie={(value) => {
+                  setCategorie(value);
+                  setDureeTotale(null);
+                }}
+                categories={categories}
+              />
+            </div>
+          )}
         </div>
 
         {/* Durée personnalisée pour "Autre / Sur mesure" */}
@@ -333,8 +361,9 @@ export default function BookingPage() {
           </div>
         )}
 
-        {/* Prestations */}
-        {categorie && categorie !== "Autre / Sur mesure" && (
+        {/* Prestations - Afficher si : (mode recherche + recherche active) OU (mode catégorie + catégorie sélectionnée) */}
+        {((searchMode === "search" && searchQuery) || 
+          (searchMode === "category" && categorie && categorie !== "Autre / Sur mesure")) && (
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
               <label className="font-semibold text-lg text-amber-400">
@@ -344,19 +373,36 @@ export default function BookingPage() {
               {/* Légende des couleurs */}
               <ColorLegend />
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
-              {prestations.map((p) => (
-                <ServiceCard
-                  key={p.service}
-                  service={p.service}
-                  duree={p.duree}
-                  description={p.description}
-                  isSelected={selected.includes(p.service)}
-                  onSelect={() => handleSelect(p.service)}
-                  showCheckbox={true}
-                />
-              ))}
-            </div>
+
+            {prestations.length === 0 ? (
+              <div className="text-center py-12 bg-gray-800/30 border border-gray-700 rounded-xl">
+                <p className="text-gray-400 text-lg mb-4">
+                  Aucune intervention trouvée{searchQuery && ` pour "${searchQuery}"`}
+                </p>
+                {searchMode === "search" && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                  >
+                    Réinitialiser la recherche
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                {prestations.map((p) => (
+                  <ServiceCard
+                    key={p.service}
+                    service={p.service}
+                    duree={p.duree}
+                    description={p.description}
+                    isSelected={selected.includes(p.service)}
+                    onSelect={() => handleSelect(p.service)}
+                    showCheckbox={true}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 

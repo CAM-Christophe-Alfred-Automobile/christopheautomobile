@@ -34,7 +34,7 @@
 "use client";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import ServiceCard from "./ServiceCard";
+import { ServiceCard } from "@/components";
 
 interface Service {
   service: string;
@@ -97,11 +97,17 @@ export default function CategoryAccordion({
                       : service.prix;
                 }
 
+                // Gérer l'affichage de la durée : "Sur devis" si null
+                let dureeAffichee = service.duree;
+                if (service.duree === null || service.duree === undefined) {
+                  dureeAffichee = "Sur devis";
+                }
+
                 return (
                   <ServiceCard
                     key={service.service}
                     service={service.service}
-                    duree={service.duree}
+                    duree={dureeAffichee}
                     description={service.description}
                     prix={prixAffiche}
                     showCheckbox={false}
