@@ -282,7 +282,7 @@ export default function BookingPage() {
           {searchMode === "search" && (
             <div className="px-6 sm:px-0">
               <p className="text-center text-gray-400 mb-4 text-sm">
-                💡 Tapez directement ce que vous cherchez (ex: "vidange", "plaquettes", "diagnostic")
+                💡 Tapez directement ce que vous cherchez (ex: &quot;vidange&quot;, &quot;plaquettes&quot;, &quot;diagnostic&quot;)
               </p>
               <SearchField
                 value={searchQuery}
@@ -297,7 +297,7 @@ export default function BookingPage() {
           {searchMode === "category" && (
             <div className="px-6 sm:px-0">
               <p className="text-center text-gray-400 mb-4 text-sm">
-                💡 Sélectionnez d'abord une catégorie, puis choisissez vos interventions
+                💡 Sélectionnez d&#39;abord une catégorie, puis choisissez vos interventions
               </p>
               <SelectCategorie
                 categorie={categorie}
