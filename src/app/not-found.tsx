@@ -19,14 +19,19 @@ export default function NotFound() {
               alt="Page 404"
               width={600}
               height={600}
-              className="mx-auto relative z-10 drop-shadow-2xl hover:scale-105 transition-transform duration-300 w-[200px] sm:w-[300px] rounded-2xl"
-              style={{ width: '200px', height: 'auto' }}
+              quality={85}
               priority
+              className="
+    mx-auto relative z-10 drop-shadow-2xl
+    hover:scale-105 transition-transform duration-300
+    w-[200px] sm:w-[300px] md:w-[400px]
+    rounded-2xl
+  "
             />
           </div>
 
           {/* Titre avec gradient */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent mb-3 animate-[fadeIn_0.8s_ease-out]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent mb-3 animate-[fadeIn_0.8s_ease-out]">
             Oups ! Page introuvable
           </h1>
 
@@ -59,8 +64,6 @@ export default function NotFound() {
               </svg>
               Retour à l&#39;accueil
             </Link>
-
-          
           </div>
 
           {/* Suggestions de navigation */}

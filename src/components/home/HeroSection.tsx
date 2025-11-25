@@ -111,8 +111,8 @@ export default function HeroSection() {
             <Image
               src="/images/accueil2.webp"
               alt="Christophe AutoMobile"
-              width={448}
-              height={448}
+              width={600}
+              height={600}
               quality={85}
               priority
               className="w-full max-w-md h-auto rounded-lg object-cover shadow-2xl transition-all duration-300"
