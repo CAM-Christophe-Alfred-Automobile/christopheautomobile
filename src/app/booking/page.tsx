@@ -172,9 +172,9 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm sm:text-base font-bold text-blue-300 mb-1">
+                    <h2  className="text-sm sm:text-base font-bold text-blue-300 mb-1">
                       💳 Acompte requis
-                    </h4>
+                    </h2>
                     <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                       Un acompte vous sera demandé lors de la réservation pour
                       garantir votre créneau. Le montant varie selon la durée de
@@ -211,9 +211,9 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm sm:text-base font-bold text-amber-300 mb-1 tex">
+                    <h2  className="text-sm sm:text-base font-bold text-amber-300 mb-1 tex">
                       🔧 Achat de pièces
-                    </h4>
+                    </h2>
 
                     <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                       Si le mécanicien doit s&#39;occuper de commander les
