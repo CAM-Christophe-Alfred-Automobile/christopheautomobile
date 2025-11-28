@@ -55,6 +55,8 @@ export default function AtelierSection() {
                   height={220}
                   className="rounded-xl shadow-xl w-full h-auto object-cover"
                   priority
+                  sizes="(max-width: 768px) 250px, 350px"
+
                 />
               </div>
             </div>

@@ -3,21 +3,21 @@
  * 📄 COMPOSANT : Footer
  * ============================================================================
  * Pied de page du site
- * 
+ *
  * 🎯 OBJECTIF :
  * - Afficher le logo, les mentions légales et le copyright
  * - Fournir une navigation secondaire en bas de page
  * - Design responsive (empilé sur mobile, horizontal sur desktop)
- * 
+ *
  * 📍 UTILISÉ DANS :
  * - Toutes les pages du site (/, /booking, /tarifs, /contact, etc.)
- * 
+ *
  * 🎨 FONCTIONNALITÉS :
  * - Logo cliquable qui ramène à l'accueil
  * - Lien vers les mentions légales
  * - Copyright avec année dynamique
  * - Layout responsive
- * 
+ *
  * 💡 AVANTAGES :
  * - Footer cohérent sur tout le site
  * - Informations légales accessibles
@@ -27,8 +27,8 @@
 
 "use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
+import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export default function Footer() {
@@ -54,9 +54,10 @@ export default function Footer() {
               alt="CAM - Mécanique à domicile"
               width={120}
               height={80}
+              loading="lazy" //! pas critique au chargement
               className="h-10 w-auto"
-              style={{ width: 'auto', height: '40px' }}
-            /> 
+              style={{ width: "auto", height: "40px" }}
+            />
           </div>
 
           {/* Liens légaux */}

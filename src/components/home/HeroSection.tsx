@@ -93,6 +93,7 @@ export default function HeroSection() {
               .
             </p>
             {/* Image ronde visible uniquement sur mobile */}
+            {/* //! Image ronde visible uniquement sur mobile — optimisée */}
             <div className="flex justify-center lg:hidden">
               <Image
                 src="/images/accueil2.webp"
@@ -102,11 +103,13 @@ export default function HeroSection() {
                 quality={85}
                 priority
                 className="w-38 h-38 rounded-full object-cover shadow-2xl transition-all duration-300"
+                //! Sur mobile : taille d’affichage ≈ 150-200px max
+                sizes="(max-width: 1024px) 180px"
               />
             </div>
           </div>
 
-          {/* Colonne droite : Image visible uniquement sur desktop */}
+          {/* //! Image visible uniquement sur desktop — optimisée */}
           <div className="hidden lg:flex justify-center lg:justify-start">
             <Image
               src="/images/accueil2.webp"
@@ -116,6 +119,8 @@ export default function HeroSection() {
               quality={85}
               priority
               className="w-full max-w-md h-auto rounded-lg object-cover shadow-2xl transition-all duration-300"
+              //! Sur desktop : max-width ≈ 400px / Sur mobile : l’image n’est pas chargée
+              sizes="(min-width: 1024px) 400px"
             />
           </div>
         </div>
@@ -190,7 +195,7 @@ export default function HeroSection() {
           <div className="flex flex-col items-center">
             <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-2" />
             <p className="text-lg sm:text-2xl font-bold text-orange-500">
-             { siteConfig.rayonIntervention} km
+              {siteConfig.rayonIntervention} km
             </p>
             <p className="text-gray-300 text-xs sm:text-sm leading-tight">
               Autour de Salon de Provence

@@ -51,14 +51,25 @@ export default function Header() {
         <div className="flex justify-between items-center py-2">
           {/* LOGO - Cliquable, ramène à l'accueil */}
           <Link href="/" className="flex items-center">
-            {/* Image du logo */}
+            {/* //! Logo Header — optimisé */}
             <Image
               src="/images/CAM-blanc-complet.webp"
               alt="Logo MécaniPro"
-              width={70} //! largeur du logo
-              height={70} //! hauteur du logo
+              width={70}
+              height={70}
               priority
+              className="h-auto w-[70px]"
+              //! Sur mobile : 50px / Sur desktop : 70px
+              sizes="(max-width: 768px) 50px, 70px"
             />
+          </Link>
+
+          {/* BOUTON RÉSERVER MOBILE - Visible uniquement sur mobile */}
+          <Link
+            href="/booking"
+            className="md:hidden bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 px-4 py-2 rounded-lg font-bold text-sm hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg"
+          >
+            Réserver
           </Link>
 
           {/* NAVIGATION DESKTOP */}
@@ -162,15 +173,6 @@ export default function Header() {
                 }`}
               >
                 Tarifs
-              </Link>
-              <Link
-                href="/booking"
-                onClick={() => setIsMenuOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium text-center text-gray-100 hover:text-white hover:bg-gray-700 ${
-                  isActive("/booking") ? "bg-gray-700 text-white" : ""
-                }`}
-              >
-                Réserver
               </Link>
               <Link
                 href="/contact"

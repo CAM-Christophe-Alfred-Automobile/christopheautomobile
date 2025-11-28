@@ -107,12 +107,15 @@ export default function ContactPage() {
                 </div>
 
                 {/* Logo à droite - Visible uniquement sur desktop */}
-                <Image 
-                  src="/images/CAM-blanc-complet.webp" 
-                  alt="Logo CAM" 
+                {/* //! Logo desktop uniquement */}
+                <Image
+                  src="/images/CAM-blanc-complet.webp"
+                  alt="Logo CAM"
                   width={200}
                   height={200}
                   className="hidden sm:block h-20 w-auto opacity-80 flex-shrink-0"
+                  //! Sur tablette/desktop ≈ 80px / retiré sur mobile
+                  sizes="(min-width: 640px) 80px"
                 />
               </div>
             </div>

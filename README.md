@@ -57,9 +57,9 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 | Page | Description |
 |------|-------------|
 | 🏠 **Accueil** | Présentation des services, statistiques, appels à l'action |
-| 📅 **Réservation** | Sélection d'interventions par catégorie, calcul de durée, option "Sur mesure" avec slider |
+| 📅 **Réservation** | Double mode : recherche directe OU navigation par catégorie, calcul automatique de durée |
 | 📧 **Contact** | Formulaire de contact + carte Leaflet de la zone d'intervention |
-| 💰 **Tarifs** | Grille tarifaire dynamique générée depuis JSON avec code couleur (vert/jaune/rouge) |
+| 💰 **Tarifs** | Grille tarifaire dynamique générée depuis JSON avec code couleur (vert/orange/rouge/gris) |
 | ⚖️ **Mentions légales** | Informations légales obligatoires |
 | ✅ **Confirmation** | Page de confirmation après réservation |
 | 🔍 **404** | Page d'erreur personnalisée avec image et navigation |
@@ -67,16 +67,16 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 ### Fonctionnalités techniques
 
 ✅ **SEO optimisé** : Sitemap XML, balises meta, structured data Schema.org, Open Graph  
-✅ **PWA** : Manifest, service worker, installation native, mode hors ligne  
-✅ **Images optimisées** : Next.js Image avec lazy loading, formats WebP/AVIF  
-✅ **Système de réservation intelligent** : Filtrage automatique, sélection multi-interventions, calcul dynamique  
-✅ **Base de données JSON** : Services avec tri automatique par durée, code couleur intelligent  
+✅ **PWA iOS/Android** : Installation native avec prompts spécifiques iOS (Safari) et Android (Chrome)  
+✅ **Images optimisées** : Next.js Image avec lazy loading, formats WebP, attribut sizes responsive  
+✅ **Double mode de recherche** : Recherche directe OU navigation par catégorie pour tous types d'utilisateurs  
+✅ **Base de données JSON** : 100+ services avec tri automatique par durée, code couleur intelligent  
 ✅ **Tarifs dynamiques** : Génération automatique avec recherche en temps réel, accordéons, code couleur  
 ✅ **Formulaire intelligent** : Validation côté client + API Nodemailer côté serveur  
 ✅ **Carte interactive** : Leaflet avec cercle de 30km, chargement dynamique (SSR désactivé)  
 ✅ **Accessibilité** : Skip link, ARIA labels, navigation au clavier, lecteurs d'écran  
-✅ **Responsive** : Menu burger mobile, grilles adaptatives, breakpoints Tailwind  
-✅ **Performance** : Optimisation des assets, code splitting, lazy loading
+✅ **Mobile-First** : Bouton "Réserver" toujours visible sur mobile, menu burger optimisé  
+✅ **Performance** : Lighthouse 95+, optimisation des assets, code splitting, lazy loading
 
 ---
 
@@ -237,13 +237,12 @@ cam/
 │       └── CAM-orange-complet.webp  # Logo orange
 │
 ├── .env                              # Variables d'environnement (non committé)
+├── env.example                       # Template des variables d'environnement
 ├── package.json                      # Dépendances npm
 ├── next.config.ts                    # Configuration Next.js
 ├── tailwind.config.ts                # Configuration Tailwind
 ├── tsconfig.json                     # Configuration TypeScript
-├── DEPLOY_DOCKER.MD                  # Guide déploiement Docker
-├── GUIDE.md                          # Documentation complète
-├── SERVICES_JSON.md                  # Documentation services.json
+├── GUIDE.md                          # Documentation complète pour maintenance
 └── README.md                         # Ce fichier
 ```
 
@@ -271,7 +270,9 @@ cam/
 | `SMTP_PASS` | Mot de passe SMTP | `votre-mot-de-passe` |
 | `SMTP_FROM` | Adresse d'envoi avec nom | `Garage <contact@votre-domaine.fr>` |
 | `CONTACT_RECEIVER` | Destinataire des messages clients | `votre-email@exemple.fr` |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp | `33600000000` |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp (format international) | `33600000000` |
+| `NEXT_PUBLIC_AUTODOC_REF_CODE` | Code parrainage Autodoc | `votre-code` |
+| `NEXT_PUBLIC_AUTODOC_REF_URL` | URL Autodoc | `https://www.auto-doc.fr/` |
 
 ### Configuration Next.js (next.config.ts)
 
@@ -335,7 +336,8 @@ SMTP_PASS="votre-app-password-16-caracteres"
 
 2. **Configurer les variables d'environnement**
    - Dans Vercel : Settings → Environment Variables
-   - Ajoutez toutes les variables de `.env`
+   - Ajoutez toutes les variables de `env.example`
+   - ⚠️ **Important** : Ne PAS ajouter `PORT` ou `NODE_ENV` (Vercel les gère automatiquement)
 
 3. **Déployer**
    - Le site se déploie automatiquement à chaque push sur `main`
@@ -348,6 +350,8 @@ Vercel détecte Next.js automatiquement :
 - **Node version** : 18.x ou 20.x
 - **Build command** : `next build`
 - **Install command** : `pnpm install`
+- **Environment** : Production (automatique)
+- **Port** : Géré automatiquement par Vercel
 
 ---
 
@@ -414,11 +418,13 @@ Vercel détecte Next.js automatiquement :
 ```
 
 #### Fonctionnalités PWA
-- ✅ **Installation native** : Bouton "Ajouter à l'écran d'accueil"
+- ✅ **Installation native** : Prompts personnalisés iOS (Safari) et Android (Chrome)
+- ✅ **Détection intelligente** : Message spécifique si l'utilisateur est sur Chrome iOS (redirection vers Safari)
 - ✅ **Mode standalone** : Fonctionne comme une app native
 - ✅ **Icônes adaptatives** : 192x192 et 512x512
 - ✅ **Theme color** : Barre d'adresse colorée sur mobile
 - ✅ **Mode hors ligne** : Service worker pour cache basique
+- ✅ **LocalStorage** : Mémorisation du refus pendant 7 jours
 
 #### Avantages pour l'utilisateur
 - 📱 **Installation rapide** : Un clic pour ajouter à l'écran d'accueil
@@ -443,11 +449,10 @@ Vercel détecte Next.js automatiquement :
 Pour une documentation complète du projet, consultez :
 
 - **[GUIDE.md](./GUIDE.md)** : Guide complet avec architecture, maintenance, troubleshooting
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** : Détails techniques de l'architecture
 
 Le GUIDE.md contient :
 - Explication détaillée de chaque page et composant
-- Configuration Cal.com, Nodemailer, Cloudinary
+- Configuration Cal.com, Nodemailer
 - Instructions de maintenance et évolutions
 - Résolution de problèmes courants
 - Checklist de démarrage rapide
@@ -549,14 +554,26 @@ Les tarifs sont générés automatiquement depuis `src/app/data/services.json` :
 
 ### Système de réservation intelligent
 
-La page booking permet de :
-1. **Filtrage automatique** : Seules les interventions avec durée numérique sont affichées
-2. **Sélectionner une catégorie** : Entretien, Freinage, Moteur, etc.
-3. **Choisir des interventions** : Sélection multiple avec code couleur
-4. **Option "Autre / Sur mesure"** : Slider pour définir une durée personnalisée (1h à 8h)
-5. **Calcul automatique** : Durée totale calculée en temps réel
-6. **Redirection Cal.com** : Vers l'événement correspondant (1h, 2h, 3h, etc.)
-7. **Gestion des limites** : Alerte si durée > 8h avec redirection vers contact
+La page booking offre **deux modes de navigation** :
+
+#### Mode 1 : Recherche directe
+- Barre de recherche globale (nom, description, catégorie)
+- Idéal pour les utilisateurs qui savent ce qu'ils cherchent
+- Résultats filtrés en temps réel
+- Tri automatique par durée croissante
+
+#### Mode 2 : Navigation par catégorie
+- Sélection d'une catégorie (Entretien, Freinage, Moteur, etc.)
+- Affichage des interventions de cette catégorie
+- Sélection multiple avec code couleur
+- Option "Autre / Sur mesure" avec slider (1h à 8h)
+
+#### Fonctionnalités communes
+1. **Filtrage automatique** : Seules les interventions avec durée numérique sont réservables
+2. **Calcul automatique** : Durée totale calculée en temps réel
+3. **Redirection Cal.com** : Vers l'événement correspondant (1h, 1h30, 2h, etc.)
+4. **Gestion des limites** : Alerte si durée > 8h avec redirection vers contact
+5. **Mobile-First** : Bouton "Réserver" toujours visible dans le header mobile
 
 **Règle de filtrage** : Les interventions avec `duree: null` ou `duree: "Variable"` n'apparaissent pas dans le booking (client doit contacter directement).
 
@@ -637,6 +654,7 @@ Projet sous licence **MIT** – libre d'utilisation et de modification, à condi
 
 ---
 
-**Dernière mise à jour** : Octobre 2025  
+**Dernière mise à jour** : Novembre 2025  
 **Version** : 1.0.0  
-**Accessibilité** : WCAG 2.1 niveau AA ♿
+**Accessibilité** : WCAG 2.1 niveau AA ♿  
+**Déploiement** : Vercel (Production)

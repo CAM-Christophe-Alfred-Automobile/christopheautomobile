@@ -51,7 +51,6 @@ export default function BookingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState<"search" | "category">("search"); // Mode par défaut : recherche
 
-
   //! Catégories uniques + option "Autre"
   const categories = [
     ...Array.from(new Set(servicesData.map((s) => s.categorie))),
@@ -80,7 +79,8 @@ export default function BookingPage() {
         (searchQuery === "" ||
           s.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
           s.categorie.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase())))
+          (s.description &&
+            s.description.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
     // Trier par durée croissante
@@ -126,14 +126,17 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-[#0F0F0F] to-gray-900 text-white relative">
-      {/* Logo en filigrane */}
+      {/* //! Logo filigrane géant (pas prioritaire) */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
         <Image
           src="/images/CAM-blanc-complet.webp"
-          alt=""
+          alt="Logo Christophe AutoMobile en filigrane"
           width={600}
           height={600}
           className="w-[600px] h-auto"
+          loading="lazy" //! charge après le contenu important
+          //! Mobile n’a pas besoin d’une image géante
+          sizes="(max-width: 768px) 200px, 600px"
         />
       </div>
 
@@ -172,7 +175,7 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2  className="text-sm sm:text-base font-bold text-blue-300 mb-1">
+                    <h2 className="text-sm sm:text-base font-bold text-blue-300 mb-1">
                       💳 Acompte requis
                     </h2>
                     <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
@@ -211,7 +214,7 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2  className="text-sm sm:text-base font-bold text-amber-300 mb-1 tex">
+                    <h2 className="text-sm sm:text-base font-bold text-amber-300 mb-1 tex">
                       🔧 Achat de pièces
                     </h2>
 
@@ -253,8 +256,18 @@ export default function BookingPage() {
                   : "bg-gray-800 text-gray-400 hover:bg-gray-700"
               }`}
             >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="w-5 h-5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
               <span className="whitespace-nowrap">Rechercher directement</span>
             </button>
@@ -269,8 +282,18 @@ export default function BookingPage() {
                   : "bg-gray-800 text-gray-400 hover:bg-gray-700"
               }`}
             >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              <svg
+                className="w-5 h-5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                />
               </svg>
               <span className="whitespace-nowrap">Parcourir par catégorie</span>
             </button>
@@ -280,7 +303,9 @@ export default function BookingPage() {
           {searchMode === "search" && (
             <div className="px-6 sm:px-0">
               <p className="text-center text-gray-400 mb-4 text-sm">
-                💡 Tapez directement ce que vous cherchez (ex: &quot;vidange&quot;, &quot;plaquettes&quot;, &quot;diagnostic&quot;)
+                💡 Tapez directement ce que vous cherchez (ex:
+                &quot;vidange&quot;, &quot;plaquettes&quot;,
+                &quot;diagnostic&quot;)
               </p>
               <SearchField
                 value={searchQuery}
@@ -293,9 +318,14 @@ export default function BookingPage() {
 
           {/* Mode catégorie */}
           {searchMode === "category" && (
-            <div className={`px-6 sm:px-0 ${!categorie ? "pb-[60vh] sm:pb-0" : ""}`}>
+            <div
+              className={`px-6 sm:px-0 ${
+                !categorie ? "pb-[60vh] sm:pb-0" : ""
+              }`}
+            >
               <p className="text-center text-gray-400 mb-4 text-sm">
-                💡 Sélectionnez d&#39;abord une catégorie, puis choisissez vos interventions
+                💡 Sélectionnez d&#39;abord une catégorie, puis choisissez vos
+                interventions
               </p>
               <SelectCategorie
                 categorie={categorie}
@@ -360,8 +390,10 @@ export default function BookingPage() {
         )}
 
         {/* Prestations - Afficher si : (mode recherche + recherche active) OU (mode catégorie + catégorie sélectionnée) */}
-        {((searchMode === "search" && searchQuery) || 
-          (searchMode === "category" && categorie && categorie !== "Autre / Sur mesure")) && (
+        {((searchMode === "search" && searchQuery) ||
+          (searchMode === "category" &&
+            categorie &&
+            categorie !== "Autre / Sur mesure")) && (
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
               <label className="font-semibold text-lg text-amber-400">
@@ -375,7 +407,8 @@ export default function BookingPage() {
             {prestations.length === 0 ? (
               <div className="text-center py-12 bg-gray-800/30 border border-gray-700 rounded-xl">
                 <p className="text-gray-400 text-lg mb-4">
-                  Aucune intervention trouvée{searchQuery && ` pour "${searchQuery}"`}
+                  Aucune intervention trouvée
+                  {searchQuery && ` pour "${searchQuery}"`}
                 </p>
                 {searchMode === "search" && (
                   <button
