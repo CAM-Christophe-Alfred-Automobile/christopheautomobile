@@ -50,7 +50,7 @@ export default function Header() {
       <div className="max-w mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-2">
           {/* LOGO - Cliquable, ramène à l'accueil */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center z-10">
             {/* //! Logo Header — optimisé */}
             <Image
               src="/images/CAM-blanc-complet.webp"
@@ -64,10 +64,10 @@ export default function Header() {
             />
           </Link>
 
-          {/* BOUTON RÉSERVER MOBILE - Visible uniquement sur mobile */}
+          {/* BOUTON RÉSERVER MOBILE - Centré */}
           <Link
             href="/booking"
-            className="md:hidden relative group bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-gray-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-amber-500/25 transform hover:scale-105 active:scale-95"
+            className="md:hidden relative group bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-gray-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-amber-500/25 transform hover:scale-105 active:scale-95 z-20"
           >
             {/* Icône calendrier */}
             <svg 
@@ -87,6 +87,31 @@ export default function Header() {
             {/* Effet de brillance */}
             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </Link>
+
+          {/* MENU BURGER MOBILE - À droite */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-gray-300 hover:text-white p-1 z-10"
+            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={
+                  isMenuOpen
+                    ? "M6 18L18 6M6 6l12 12"
+                    : "M4 6h16M4 12h16M4 18h16"
+                }
+              />
+            </svg>
+          </button>
 
           {/* NAVIGATION DESKTOP */}
           <nav className="hidden md:flex space-x-8">
@@ -139,33 +164,6 @@ export default function Header() {
               ></span>
             </Link>
           </nav>
-
-          {/* MENU BURGER MOBILE */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-300 hover:text-white"
-              aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} // ✅ label dynamique
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={
-                    isMenuOpen
-                      ? "M6 18L18 6M6 6l12 12"
-                      : "M4 6h16M4 12h16M4 18h16"
-                  }
-                />
-              </svg>
-            </button>
-          </div>
         </div>
 
         {/* MENU MOBILE */}
