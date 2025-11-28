@@ -67,9 +67,25 @@ export default function Header() {
           {/* BOUTON RÉSERVER MOBILE - Visible uniquement sur mobile */}
           <Link
             href="/booking"
-            className="md:hidden bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 px-4 py-2 rounded-lg font-bold text-sm hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg"
+            className="md:hidden relative group bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-gray-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-amber-500/25 transform hover:scale-105 active:scale-95"
           >
+            {/* Icône calendrier */}
+            <svg 
+              className="w-4 h-4 mr-2 inline-block" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2.5} 
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
+              />
+            </svg>
             Réserver
+            {/* Effet de brillance */}
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </Link>
 
           {/* NAVIGATION DESKTOP */}
