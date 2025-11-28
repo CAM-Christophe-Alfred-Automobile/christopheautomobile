@@ -66,8 +66,8 @@
     "categorie": "Entretien",
     "service": "Vidange boîte auto",
     "description": "Huile + crépine sans rinçage",
-    "duree": 150,
-    "prix": 70
+    "duree": null,
+    "prix": "à partir de 70€"
   },
   {
     "categorie": "Entretien",

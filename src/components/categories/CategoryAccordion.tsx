@@ -64,11 +64,10 @@ export default function CategoryAccordion({
               : "border border-gray-700"
           }`}
         >
-          <Disclosure.Button className="cursor-pointer w-full flex items-start justify-between px-4 py-2 sm:py-3 bg-gray-800/50 text-amber-400 border-b border-gray-700 hover:bg-gray-800/70 transition-colors"
->
-<h2 className="text-sm sm:text-lg font-bold text-left leading-tight">
-  {categorie}
-</h2>
+          <Disclosure.Button className="cursor-pointer w-full flex items-start justify-between px-4 py-2 sm:py-3 bg-gray-800/50 text-amber-400 border-b border-gray-700 hover:bg-gray-800/70 transition-colors">
+            <h2 className="text-sm sm:text-lg font-bold text-left leading-tight">
+              {categorie}
+            </h2>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-400 font-normal">
                 {services.length} intervention{services.length > 1 ? "s" : ""}

@@ -110,8 +110,11 @@ export default function IOSInstallPrompt() {
     // Conditions pour afficher :
     // 1. C'est un appareil iOS (iPhone, iPad, ou iOS 17+)
     // 2. L'app n'est PAS déjà installée (pas en mode standalone)
-    // 3. L'utilisateur n'a pas refusé OU le délai de 7 jours est expiré
-    if (isIOSDevice() && !isInStandaloneMode && hasExpired) {
+    // 3. Pour Safari : toujours afficher (même si fermé sur Chrome)
+    //    Pour Chrome/autres : vérifier si l'utilisateur n'a pas refusé
+    const shouldShow = isChromeOrOtherBrowser ? hasExpired : true;
+    
+    if (isIOSDevice() && !isInStandaloneMode && shouldShow) {
       // Attendre 5 secondes avant d'afficher la bannière (moins intrusif)
       // Laisse le temps à l'utilisateur de voir le site avant d'être interrompu
       setTimeout(() => {
