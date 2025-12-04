@@ -234,7 +234,6 @@ cam/
 │       ├── footer/
 │       │   └── CAM-blanc-reduit.webp # Logo footer
 │       ├── CAM-blanc-complet.webp   # Logo principal
-│       └── CAM-orange-complet.webp  # Logo orange
 │
 ├── .env                              # Variables d'environnement (non committé)
 ├── env.example                       # Template des variables d'environnement

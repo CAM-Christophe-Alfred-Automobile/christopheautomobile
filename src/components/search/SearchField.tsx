@@ -31,7 +31,7 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface SearchFieldProps {
   value: string;
@@ -81,12 +81,21 @@ export default function SearchField({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg 
+          className="w-full pl-12 pr-12 py-3 bg-gray-800 border border-gray-700 rounded-lg 
                      text-xs md:text-sm
                      placeholder:text-[13px] md:placeholder:text-sm
                      placeholder-gray-500 focus:outline-none focus:border-amber-500
                      focus:ring-1 focus:ring-amber-500 transition-colors"
         />
+        {value && (
+          <button
+            onClick={() => onChange("")}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Effacer la recherche"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {showResultCount && value && resultCount !== undefined && (

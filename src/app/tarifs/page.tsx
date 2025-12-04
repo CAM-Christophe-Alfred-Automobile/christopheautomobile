@@ -79,9 +79,19 @@ export default function TarifsPage() {
   }, [searchQuery]);
 
   // Grouper les services filtrés par catégorie
-  const categories = Array.from(
+  const categoriesList = Array.from(
     new Set(filteredAndSortedServices.map((s) => s.categorie))
   );
+  
+  // Trier les catégories pour que "Autre interventions" soit toujours en dernier
+  const categories = categoriesList.sort((a, b) => {
+    // Si a est "Autre interventions", le mettre après b
+    if (a === "Autre interventions") return 1;
+    // Si b est "Autre interventions", le mettre après a
+    if (b === "Autre interventions") return -1;
+    // Sinon, ordre alphabétique
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">

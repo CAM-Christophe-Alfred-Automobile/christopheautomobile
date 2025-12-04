@@ -5,7 +5,6 @@ import { Header, Footer, InfoModal } from "@/components";
 import Whatsapp from "@/components/whatsapp/Whatsapp";
 import SelectCategorie from "@/components/categories/SelectCategorie";
 import ServiceCard, {
-  ColorLegend,
   getColorClasses,
 } from "@/components/services/ServiceCard";
 import Image from "next/image";
@@ -46,16 +45,29 @@ export default function BookingPage() {
   const [categorie, setCategorie] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [dureeTotale, setDureeTotale] = useState<number | null>(null);
+  const [prixTotal, setPrixTotal] = useState<number | string | null>(null);
   const [dureePersonnalisee, setDureePersonnalisee] = useState<number>(60);
   const [showReservationWarning, setShowReservationWarning] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState<"search" | "category">("search"); // Mode par défaut : recherche
+  const [isCatOpen, setIsCatOpen] = useState(false);
 
-  //! Catégories uniques + option "Autre"
-  const categories = [
+  //! Catégories uniques + tri avec cas spéciaux à la fin
+  const categoriesList = [
     ...Array.from(new Set(servicesData.map((s) => s.categorie))),
-    "Autre / Sur mesure",
+    "Intervention sur devis",
   ];
+
+  // Tri spécial : ordre alphabétique sauf "Autre interventions" et "Intervention sur devis" à la fin
+  const categories = categoriesList.sort((a, b) => {
+    // Cas spéciaux à mettre à la fin
+    if (a === "Intervention sur devis") return 1; // Toujours en dernier
+    if (b === "Intervention sur devis") return -1;
+    if (a === "Autre interventions") return 1; // Avant-dernier
+    if (b === "Autre interventions") return -1;
+    // Sinon ordre alphabétique
+    return a.localeCompare(b);
+  });
 
   // Fonction pour normaliser la durée (convertir en nombre pour le tri)
   const normalizeDuree = (duree: number | string | null): number => {
@@ -97,12 +109,14 @@ export default function BookingPage() {
         : [...prev, service]
     );
     setDureeTotale(null);
+    setPrixTotal(null);
   };
 
   //! Supprimer une intervention sélectionnée
   const removeSelected = (service: string) => {
     setSelected((prev) => prev.filter((s) => s !== service));
     setDureeTotale(null);
+    setPrixTotal(null);
   };
 
   //! Récupérer les détails des interventions sélectionnées
@@ -110,18 +124,64 @@ export default function BookingPage() {
     selected.includes(s.service)
   );
 
-  //! Calcul durée totale
+  //! Calcul durée et prix totaux
   const calculerDuree = () => {
-    if (categorie === "Autre / Sur mesure") {
+    if (categorie === "Intervention sur devis") {
       setDureeTotale(dureePersonnalisee);
+      // Prix sur devis pour "Intervention sur devis"
+      setPrixTotal(null);
       return;
     }
     if (selected.length === 0) return;
-    const durees = servicesData
-      .filter((s) => selected.includes(s.service))
-      .map((s) => (typeof s.duree === "number" ? s.duree : 0));
-    const total = durees.reduce((acc, cur) => acc + cur, 0);
-    setDureeTotale(total);
+
+    const services = servicesData.filter((s) => selected.includes(s.service));
+
+    // Calcul durée totale
+    const durees = services.map((s) =>
+      typeof s.duree === "number" ? s.duree : 0
+    );
+    const totalDuree = durees.reduce((acc, cur) => acc + cur, 0);
+    setDureeTotale(totalDuree);
+
+    // Calcul prix total (vérifier si tous les services ont un prix numérique ou variable)
+    let hasVariablePrices = false;
+    let fixedPricesTotal = 0;
+
+    for (const service of services) {
+      // Prix numérique standard
+      if (typeof service.prix === "number") {
+        fixedPricesTotal += service.prix;
+      }
+      // Prix avec "à partir de" - extraire le montant et l'ajouter
+      else if (
+        typeof service.prix === "string" &&
+        (service.prix.toLowerCase().includes("à partir de") ||
+          service.prix.includes("À partir de"))
+      ) {
+        hasVariablePrices = true;
+        // Extraire le nombre du format "À partir de XX€"
+        const match = service.prix.match(/(\d+)/);
+        if (match && match[1]) {
+          const minimumAmount = parseInt(match[1], 10);
+          if (!isNaN(minimumAmount)) {
+            fixedPricesTotal += minimumAmount;
+          }
+        }
+      }
+      // Autre format de prix ou null
+      else {
+        hasVariablePrices = true;
+      }
+    }
+
+    // Si au moins un prix est variable, afficher "à partir de" + total
+    if (hasVariablePrices) {
+      setPrixTotal(`à partir de ${fixedPricesTotal}€`);
+    }
+    // Sinon, afficher le total numérique
+    else {
+      setPrixTotal(fixedPricesTotal);
+    }
   };
 
   return (
@@ -238,7 +298,7 @@ export default function BookingPage() {
         </div>
 
         {/* Choix du mode : Recherche OU Catégorie */}
-        <div className="relative z-0 mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0">
+        <div className="relative mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0">
           <label className="relative z-0 block mb-6 font-semibold text-lg sm:text-xl text-amber-400 text-center">
             1. Comment souhaitez-vous trouver votre intervention ?
           </label>
@@ -249,6 +309,7 @@ export default function BookingPage() {
               onClick={() => {
                 setSearchMode("search");
                 setCategorie("");
+                setIsCatOpen(false);
               }}
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
                 searchMode === "search"
@@ -271,10 +332,12 @@ export default function BookingPage() {
               </svg>
               <span className="whitespace-nowrap">Rechercher directement</span>
             </button>
+
             <button
               onClick={() => {
                 setSearchMode("category");
                 setSearchQuery("");
+                setIsCatOpen(false);
               }}
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
                 searchMode === "category"
@@ -320,7 +383,7 @@ export default function BookingPage() {
           {searchMode === "category" && (
             <div
               className={`px-6 sm:px-0 ${
-                !categorie ? "pb-[60vh] sm:pb-0" : ""
+                isCatOpen && !categorie ? "pb-[60vh] sm:pb-0" : ""
               }`}
             >
               <p className="text-center text-gray-400 mb-4 text-sm">
@@ -332,31 +395,111 @@ export default function BookingPage() {
                 setCategorie={(value) => {
                   setCategorie(value);
                   setDureeTotale(null);
+                  setIsCatOpen(false);
                 }}
                 categories={categories}
+                onOpenChange={setIsCatOpen}
               />
             </div>
           )}
         </div>
 
-        {/* Durée personnalisée pour "Autre / Sur mesure" */}
-        {categorie === "Autre / Sur mesure" && (
+        {/* Durée personnalisée pour "Intervention sur devis" */}
+        {categorie === "Intervention sur devis" && (
           <div className="mb-8 max-w-2xl mx-auto">
+            {/* Avertissement important */}
+            <div className="mb-6 bg-amber-600/20 border-2 border-amber-500/50 rounded-xl p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-500/30 border border-amber-400/50 flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-amber-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-bold text-amber-400 text-lg mb-2">
+                    Important : Contact préalable requis
+                  </h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    Pour réserver cette catégorie d&#39;intervention, vous devez{" "}
+                    <strong>
+                      obligatoirement contacter Christophe au préalable
+                    </strong>{" "}
+                    afin d&#39;établir avec lui la durée estimée des travaux.
+                  </p>
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    <a
+                      href="/contact"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-sm transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <span>Page Contact</span>
+                    </a>
+                    <a
+                      href={`tel:${siteConfig.phone.replace(/\s/g, "")}`}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-sm transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
+                      <span>Appeler</span>
+                    </a>
+                    <Whatsapp
+                      message="Bonjour Christophe, j'aimerais réserver une intervention personnalisée. Pouvez-vous m'aider à déterminer la durée nécessaire ?"
+                      label="WhatsApp"
+                      size="sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <label className="block mb-3 font-semibold text-lg text-amber-400">
               2. Choisissez la durée de l&#39;intervention
             </label>
             <div className="bg-gray-800/50 border-2 border-gray-700 rounded-xl p-6">
               <p className="text-gray-300 mb-4">
-                💡 <strong>Deux cas possibles :</strong>
+                💡 <strong>Après avoir contacté le mécanicien :</strong>
               </p>
-              <ul className="text-gray-300 mb-4 space-y-2 list-disc list-inside">
-                <li>Vous avez convenu d&apos;une durée avec le mécanicien</li>
-                <li>
-                  Votre besoin ne correspond pas aux interventions listées
-                </li>
-              </ul>
+              <p className="text-gray-300 mb-4">
+                Utilisez le curseur ci-dessous pour sélectionner la durée
+                d&#39;intervention estimée par Christophe. Cette information est
+                essentielle pour réserver le bon créneau de temps dans le
+                calendrier.
+              </p>
               <p className="text-amber-400 mb-4 text-sm">
-                👉 Ajustez la durée estimée avec le curseur :
+                🕒 Ajustez la durée estimée avec le curseur :
               </p>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4">
@@ -393,15 +536,28 @@ export default function BookingPage() {
         {((searchMode === "search" && searchQuery) ||
           (searchMode === "category" &&
             categorie &&
-            categorie !== "Autre / Sur mesure")) && (
-          <div className="mb-8">
+            categorie !== "Intervention sur devis")) && (
+          <div className="mb-8 relative z-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
               <label className="font-semibold text-lg text-amber-400">
                 2. Sélectionnez vos interventions
               </label>
 
               {/* Légende des couleurs */}
-              <ColorLegend />
+              <div className="flex flex-wrap gap-3 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded border-2 border-green-500 bg-green-500/20"></div>
+                  <span className="text-gray-400">≤ 2h30</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded border-2 border-orange-500 bg-orange-500/20"></div>
+                  <span className="text-gray-400">2h30 - 3h30</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded border-2 border-red-500 bg-red-500/20"></div>
+                  <span className="text-gray-400">&gt; 3h30</span>
+                </div>
+              </div>
             </div>
 
             {prestations.length === 0 ? (
@@ -426,6 +582,7 @@ export default function BookingPage() {
                     key={p.service}
                     service={p.service}
                     duree={p.duree}
+                    prix={p.prix}
                     description={p.description}
                     isSelected={selected.includes(p.service)}
                     onSelect={() => handleSelect(p.service)}
@@ -461,6 +618,7 @@ export default function BookingPage() {
                     onClick={() => {
                       setSelected([]);
                       setDureeTotale(null);
+                      setPrixTotal(null);
                     }}
                     className="
     relative cursor-pointer px-4 py-2 rounded-lg
@@ -505,6 +663,14 @@ export default function BookingPage() {
                             {service.description}
                           </p>
                         )}
+                        {service.prix !== undefined &&
+                          service.prix !== null && (
+                            <p className="text-xs text-amber-400 font-medium mt-1">
+                              {typeof service.prix === "number"
+                                ? `${service.prix}€`
+                                : service.prix}
+                            </p>
+                          )}
                       </div>
                       <span
                         className={`text-xs font-medium whitespace-nowrap px-3 py-0.5 rounded border ${
@@ -552,7 +718,7 @@ export default function BookingPage() {
         )}
 
         {/* Bouton Calcul */}
-        {(selected.length > 0 || categorie === "Autre / Sur mesure") && (
+        {(selected.length > 0 || categorie === "Intervention sur devis") && (
           <div className="text-center mb-10">
             <button
               onClick={() => {
@@ -561,7 +727,7 @@ export default function BookingPage() {
               }}
               className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all px-3 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer"
             >
-              {categorie === "Autre / Sur mesure"
+              {categorie === "Intervention sur devis"
                 ? `✓ Réserver ${formatDuree(dureePersonnalisee)}`
                 : `✓ Calculer la durée totale (${selected.length} intervention${
                     selected.length > 1 ? "s" : ""
@@ -573,19 +739,83 @@ export default function BookingPage() {
         {/* Résultat */}
         {dureeTotale && (
           <div className="space-y-8">
-            <p className="text-center text-lg">
-              ⏱{" "}
-              {categorie === "Autre / Sur mesure"
-                ? "Durée sélectionnée"
-                : "Durée totale estimée"}{" "}
-              :{" "}
-              <span className="font-semibold text-amber-400">
-                {formatDuree(dureeTotale)}
-              </span>
-            </p>
-            {categorie === "Autre / Sur mesure" && (
+            <div className="space-y-2 max-w-md mx-auto bg-gray-800/40 rounded-xl p-4 border border-amber-500/20">
+              <p className="text-center text-lg flex items-center justify-center gap-2">
+                <svg
+                  className="w-5 h-5 text-amber-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-gray-300">
+                  {categorie === "Intervention sur devis"
+                    ? "Durée sélectionnée"
+                    : "Durée totale estimée"}{" "}
+                  :
+                </span>{" "}
+                <span className="font-bold text-amber-400">
+                  {formatDuree(dureeTotale)}
+                </span>
+              </p>
+
+              {prixTotal !== null && (
+                <div className="space-y-2">
+                  <p className="text-center text-lg flex items-center justify-center gap-2 mt-2">
+                    <svg
+                      className="w-5 h-5 text-amber-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      />
+                    </svg>
+                    <span className="text-gray-300">Prix total :</span>{" "}
+                    <span className="font-bold text-amber-400">
+                      {typeof prixTotal === "number"
+                        ? `${prixTotal}€`
+                        : prixTotal}
+                    </span>
+                  </p>
+
+                  {typeof prixTotal === "string" &&
+                    prixTotal.includes("à partir de") && (
+                      <p className="text-center text-xs text-blue-300 mt-1">
+                        <svg
+                          className="w-4 h-4 inline mr-1 mb-0.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        Le tarif exact sera déterminé par le mécanicien après
+                        vérification du modèle et de l’état de votre véhicule,
+                        afin de garantir un prix juste et adapté.
+                      </p>
+                    )}
+                </div>
+              )}
+            </div>
+            {categorie === "Intervention sur devis" && (
               <p className="text-center text-sm text-gray-400 -mt-4">
-                💬 Intervention personnalisée ou besoin spécifique
+                💬 Intervention personnalisée nécessitant un devis préalable
               </p>
             )}
             {/* ⚠️ Avertissement avant réservation */}
@@ -655,6 +885,9 @@ export default function BookingPage() {
             )}
           </div>
         )}
+
+        {/* Espace fixe pour que le footer reste toujours en bas */}
+        <div className="h-0"></div>
       </main>
 
       <Footer />

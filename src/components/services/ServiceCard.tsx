@@ -102,7 +102,7 @@ interface ServiceCardProps {
   service: string;
   duree: number | string | null;
   description?: string;
-  prix?: string;
+  prix?: number | string | null;
   isSelected?: boolean;
   onSelect?: () => void;
   showCheckbox?: boolean;
@@ -152,16 +152,16 @@ export default function ServiceCard({
       </div>
 
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        {prix && (
-          <span className="text-amber-400 font-bold text-lg whitespace-nowrap text-sm sm:text-base">
-            {prix}
-          </span>
-        )}
         <span
-          className={`text-xs font-medium whitespace-nowrap px-2 py-0.5 rounded border ${colors.badge}`}
+          className={`text-xs sm:text-sm font-medium whitespace-nowrap px-2 py-1 rounded border ${colors.badge}`}
         >
           ⏱ {formatDuree(duree)}
         </span>
+        {prix !== undefined && prix !== null && (
+          <span className="text-xs text-amber-400 font-medium mt-0.5">
+            {typeof prix === 'number' ? `${prix}€` : prix}
+          </span>
+        )}
       </div>
     </CardWrapper>
   );
