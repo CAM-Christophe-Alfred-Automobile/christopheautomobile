@@ -687,11 +687,36 @@ vercel --prod
 - Vercel détecte Next.js automatiquement
 - Build command : `next build`
 - Output directory : `.next`
-- Node version : 18.x ou 20.x
+- Node version : 20.x ou supérieur (requis pour Next.js 16+)
 
 ---
 
 ## 🔧 MAINTENANCE ET ÉVOLUTIONS
+
+### Mise à jour vers Next.js 16 et Node.js 20
+
+Le projet a été mis à jour vers Next.js 16.0.7 et React 19.2.1 pour résoudre des vulnérabilités signalées par Vercel.
+
+**Prérequis important :** Next.js 16 nécessite Node.js 20.9.0 ou supérieur.
+
+**Commandes pour mettre à jour Node.js via NVM :**
+```bash
+# Installation de Node.js 20
+nvm install 20
+
+# Utilisation de Node.js 20
+nvm use 20
+
+# Définir comme version par défaut
+nvm alias default 20
+```
+
+**Commandes pour mettre à jour Next.js et React :**
+```bash
+pnpm add next@latest react@latest react-dom@latest
+```
+
+**Note :** Aucune modification de code n'a été nécessaire pour cette mise à jour, mais assurez-vous toujours de tester l'application après une mise à jour majeure.
 
 ### Modifier les tarifs
 

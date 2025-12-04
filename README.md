@@ -86,8 +86,8 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 
 | Technologie | Version | Description |
 |-------------|---------|-------------|
-| **Next.js** | 15.5.3 | Framework React avec App Router (SSR/SSG) |
-| **React** | 18.3.1 | Bibliothèque UI |
+| **Next.js** | 16.0.7 | Framework React avec App Router (SSR/SSG) |
+| **React** | 19.2.1 | Bibliothèque UI |
 | **TypeScript** | 5.x | Typage statique |
 | **Tailwind CSS** | 4.x | Framework CSS utility-first |
 
@@ -115,7 +115,7 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 
 ### Prérequis
 
-- Node.js 18.x ou 20.x
+- Node.js 20.x ou supérieur (requis pour Next.js 16+)
 - pnpm (recommandé) ou npm
 - Compte Gmail (pour Nodemailer)
 - Compte Cal.com (pour les réservations)
@@ -346,7 +346,7 @@ SMTP_PASS="votre-app-password-16-caracteres"
 ### Configuration automatique
 
 Vercel détecte Next.js automatiquement :
-- **Node version** : 18.x ou 20.x
+- **Node version** : 20.x (requis pour Next.js 16+)
 - **Build command** : `next build`
 - **Install command** : `pnpm install`
 - **Environment** : Production (automatique)
@@ -653,7 +653,7 @@ Projet sous licence **MIT** – libre d'utilisation et de modification, à condi
 
 ---
 
-**Dernière mise à jour** : Novembre 2025  
-**Version** : 1.0.0  
+**Dernière mise à jour** : Décembre 2025  
+**Version** : 1.1.0  
 **Accessibilité** : WCAG 2.1 niveau AA ♿  
 **Déploiement** : Vercel (Production)
