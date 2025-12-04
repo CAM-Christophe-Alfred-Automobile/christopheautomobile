@@ -813,9 +813,7 @@ export default function BookingPage() {
             >
               {categorie === "Intervention sur devis"
                 ? `✓ Réserver ${formatDuree(dureePersonnalisee)}`
-                : `✓ Calculer la durée totale (${selected.length} intervention${
-                    selected.length > 1 ? "s" : ""
-                  })`}
+                : `✓ Calculer la durée totale & le tarif final`}
             </button>
           </div>
         )}
