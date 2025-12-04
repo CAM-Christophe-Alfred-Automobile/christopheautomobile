@@ -26,9 +26,8 @@
  */
 
 "use client";
-import { Listbox } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/24/solid";
-import { } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface SelectCategorieProps {
   categorie: string;
@@ -43,68 +42,96 @@ export default function SelectCategorie({
   categories,
   onOpenChange,
 }: SelectCategorieProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fermer le dropdown si on clique en dehors
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        onOpenChange?.(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onOpenChange]);
+
+  // Notifier le parent quand l'état du dropdown change
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleSelectOption = (cat: string) => {
+    setCategorie(cat);
+    setIsOpen(false);
+  };
+
   return (
-    <div className="w-full">
-      <Listbox value={categorie} onChange={setCategorie}>
-        {({ open }) => {
-          onOpenChange?.(open);
-          return (
-        <div className="relative z-[9999]">
-          <Listbox.Button className="relative z-0 cursor-pointer w-full rounded-xl border-2 border-amber-500 bg-gray-900 py-3 px-4 text-white text-sm md:text-base flex justify-between items-center focus:ring-2 focus:ring-amber-500/40 focus:border-amber-400 outline-none transition-all">
-            <span className={categorie ? "text-white" : "text-gray-400"}>
-              {categorie || "- Sélectionnez une catégorie -"}
-            </span>
-            <ChevronUpDownIcon className="h-5 w-5 text-amber-400" />
-          </Listbox.Button>
+    <div className="w-full" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={toggleDropdown}
+        className="relative z-0 cursor-pointer w-full rounded-xl border-2 border-amber-500 bg-gray-900 py-3 px-4 text-white text-sm md:text-base flex justify-between items-center focus:ring-2 focus:ring-amber-500/40 focus:border-amber-400 outline-none transition-all"
+      >
+        <span className={categorie ? "text-white" : "text-gray-400"}>
+          {categorie || "- Sélectionnez une catégorie -"}
+        </span>
+        <ChevronUpDownIcon className={`h-5 w-5 text-amber-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
 
-            <Listbox.Options className="z-[9999] mt-1 w-full max-h-[70vh] bg-gray-900 border-2 border-amber-500 rounded-xl text-white relative overflow-hidden">
-              <div className="absolute inset-0 bg-gray-900 pointer-events-none"></div>
-              <div className="relative z-10 overflow-y-auto max-h-[70vh]">
-              {categories.map((cat) => (
-                <Listbox.Option
+      {isOpen && (
+        <div className="z-[9999] mt-1 w-full max-h-[70vh] bg-gray-900 border-2 border-amber-500 rounded-xl text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-gray-900 pointer-events-none"></div>
+          <div className="relative z-10 overflow-y-auto max-h-[70vh]">
+            {categories.map((cat) => {
+              // Couleur spéciale pour "Intervention sur devis"
+              const isSpecialCategory = cat === "Intervention sur devis";
+              const isSelected = cat === categorie;
+              
+              return (
+                <div
                   key={cat}
-                  value={cat}
-                  className={({ active }) => {
-                    // Couleur spéciale pour "Intervention sur devis"
-                    const isSpecialCategory = cat === "Intervention sur devis";
-
-                    return `cursor-pointer select-none px-4 py-2 transition-colors ${
-                      active
-                        ? "bg-gray-500/20 text-amber-400"
-                        : isSpecialCategory
-                        ? "text-red-400"
-                        : "text-white"
-                    } ${
-                      isSpecialCategory
-                        ? "border-t border-gray-700 mt-1 pt-3"
-                        : ""
-                    }`;
-                  }}
+                  onClick={() => handleSelectOption(cat)}
+                  className={`cursor-pointer select-none px-4 py-2 transition-colors ${
+                    isSelected
+                      ? "bg-gray-500/20 text-amber-400"
+                      : isSpecialCategory
+                      ? "text-red-400"
+                      : "text-white"
+                  } ${
+                    isSpecialCategory
+                      ? "border-t border-gray-700 mt-1 pt-3"
+                      : ""
+                  }`}
                 >
-                  {({ selected }) => (
-                    <div className="flex justify-between items-center">
-                      <span
-                        className={
-                          selected
-                            ? "font-semibold text-amber-400"
-                            : cat === "Intervention sur devis"
-                            ? "font-medium text-red-400"
-                            : "font-normal"
-                        }
-                      >
-                        {cat === "Intervention sur devis" && "⚠️ "}
-                        {cat}
-                      </span>
-                    </div>
-                  )}
-                </Listbox.Option>
-              ))}
-              </div>
-            </Listbox.Options>
+                  <div className="flex justify-between items-center">
+                    <span
+                      className={
+                        isSelected
+                          ? "font-semibold text-amber-400"
+                          : cat === "Intervention sur devis"
+                          ? "font-medium text-red-400"
+                          : "font-normal"
+                      }
+                    >
+                      {cat === "Intervention sur devis" && "⚠️ "}
+                      {cat}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-          );
-        }}
-      </Listbox>
+      )}
     </div>
   );
 }

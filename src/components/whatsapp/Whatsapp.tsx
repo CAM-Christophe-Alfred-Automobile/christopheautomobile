@@ -36,6 +36,7 @@ interface WhatsappProps {
   label?: string;
   size?: "sm" | "md" | "lg";
   iconOnly?: boolean;
+  className?: string;
 }
 
 export default function Whatsapp({
@@ -43,6 +44,7 @@ export default function Whatsapp({
   label = "Écrire sur WhatsApp",
   size = "md",
   iconOnly = false,
+  className = "",
 }: WhatsappProps) {
   const phoneNumber = siteConfig.whatsapp.number;
   
@@ -71,7 +73,7 @@ export default function Whatsapp({
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 transition rounded-lg font-semibold text-white shadow-md ${sizeClasses}`}
+      className={`inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 transition rounded-lg font-semibold text-white shadow-md ${sizeClasses} ${className}`}
     >
       {/* Icône WhatsApp SVG */}
       <svg

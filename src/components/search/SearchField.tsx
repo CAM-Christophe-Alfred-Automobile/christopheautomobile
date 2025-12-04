@@ -50,7 +50,7 @@ export default function SearchField({
   //! Texte placeholder responsive
   const placeholderDesktop =
     "Rechercher une intervention (ex: vidange, freinage, diagnostic...)";
-  const placeholderMobile = "Rechercher une intervention...";
+  const placeholderMobile = "Rechercher une intervention... ";
 
   const [placeholder, setPlaceholder] = useState(placeholderDesktop);
 
