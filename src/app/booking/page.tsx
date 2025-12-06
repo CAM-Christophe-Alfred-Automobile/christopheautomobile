@@ -221,9 +221,9 @@ export default function BookingPage() {
             {/* Informations importantes */}
             <div className="grid sm:grid-cols-2 gap-4 mt-6" role="region" aria-label="Informations importantes">
               {/* Acompte */}
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-5">
+              <div className="bg-gray-800/40 rounded-xl p-5 border-l-4 border-blue-500">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center" aria-hidden="true">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center" aria-hidden="true">
                     <svg
                       className="w-5 h-5 text-blue-400"
                       fill="currentColor"
@@ -238,30 +238,30 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm sm:text-base font-bold text-blue-300 mb-1">
-                      💳 Acompte requis
+                    <h2 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                      Acompte requis
                     </h2>
-                    <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                       Un acompte vous sera demandé lors de la réservation pour
                       garantir votre créneau. Le montant varie selon la durée de
-                      l’intervention, de{" "}
-                      <strong className="text-amber-300">
+                      l'intervention, de{" "}
+                      <strong className="text-gray-200">
                         15 € à 70 € maximum
                       </strong>
                       .
                     </p>
 
-                    <p className="text-xs sm:text-sm text-blue-300 mt-1 font-medium">
-                      ✓ Déduit du prix final
+                    <p className="text-xs sm:text-sm text-gray-300 mt-2 flex items-center gap-1">
+                      <span className="text-green-400">✓</span> Déduit du prix final
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Achat de pièces */}
-              <div className="bg-amber-900/20 border border-amber-500/30 rounded-xl p-2">
+              <div className="bg-gray-800/40 rounded-xl p-5 border-l-4 border-amber-500">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-500/20 border border-amber-400/30 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
                     <svg
                       className="w-5 h-5 text-amber-400"
                       fill="none"
@@ -277,21 +277,21 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm sm:text-base font-bold text-amber-300 mb-1 tex">
-                      🔧 Achat de pièces
+                    <h2 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                      Achat de pièces
                     </h2>
 
-                    <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                       Si le mécanicien doit s&#39;occuper de commander les
                       pièces, merci de{" "}
-                      <strong className="text-amber-300">
+                      <strong className="text-gray-200">
                         le contacter avant de réserver
                       </strong>{" "}
                       afin de confirmer les références et le coût des pièces.
                       <br />
                       Un acompte de{" "}
-                      <strong className="text-amber-300">40 %</strong> du total
-                      des pièces sera demandé avant l’achat.
+                      <strong className="text-gray-200">40 %</strong> du total
+                      des pièces sera demandé avant l'achat.
                     </p>
                   </div>
                 </div>
