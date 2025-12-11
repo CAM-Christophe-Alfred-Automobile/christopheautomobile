@@ -71,11 +71,21 @@
   },
   {
     "categorie": "Entretien",
-    "service": "Nettoyage moteur",
-    "description": "Extérieur + Vérification fuites",
-    "duree": 45,
-    "prix": 30
+    "service": "Vidange direction assistée",
+    "description": "purge + remplissage",
+    "duree": 75,
+    "prix": 40
   },
+  {
+    "categorie": "Entretien",
+    "service": "Vidange pont AV/AR unité",
+    "description": "étanchéité",
+    "duree": 75,
+    "prix": 40
+  },
+
+
+
 
   {
     "categorie": "Freinage",
@@ -154,6 +164,18 @@
     "duree": 160,
     "prix": 70
   },
+  {
+    "categorie": "Freinage",
+    "service": "Détection panne de freinage",
+    "description": "Détection",
+    "duree": 60,
+    "prix": "à partir de 30€"
+  },
+
+
+
+
+
 
   {
     "categorie": "Moteur",
@@ -211,13 +233,7 @@
     "duree": 60,
     "prix": 40
   },
-  {
-    "categorie": "Moteur",
-    "service": "Injecteurs (4)",
-    "description": "Dépose / repose ensemble",
-    "duree": null,
-    "prix": "à partir de 60€"
-  },
+
   {
     "categorie": "Moteur",
     "service": "Pompe à injection",
@@ -344,7 +360,13 @@
     "duree": 140,
     "prix": 70
   },
-
+  {
+    "categorie": "Moteur",
+    "service": "Poulie damper ",
+    "description": "alternateur autre",
+    "duree": 160,
+    "prix": 60
+  },
 
 
 
@@ -384,8 +406,20 @@
     "prix": 25
   },
 
-
-
+  {
+    "categorie": "Refroidissement",
+    "service": "Pompe externe distribution",
+    "description": "Remplacement",
+    "duree": null,
+    "prix": "à partir de 80€"
+  },
+  {
+    "categorie": "Refroidissement",
+    "service": "Détection de fuite",
+    "description": "controle étanchéité",
+    "duree": 100,
+    "prix": 40
+  },
 
 
 
@@ -438,8 +472,27 @@
     "duree": 160,
     "prix": 40
   },
-
-
+{
+    "categorie": "Transmission",
+    "service": "Renvoi de vitesse",
+    "description": "Remplacement",
+    "duree": 200,
+    "prix": 80
+  },
+{
+    "categorie": "Transmission",
+    "service": "Fector",
+    "description": "Remplacement",
+    "duree": 180,
+    "prix": 60
+  },
+{
+    "categorie": "Transmission",
+    "service": "Palier arbre de transmission",
+    "description": "Remplacement",
+    "duree": 190,
+    "prix": "à partir de 90€"
+  },
 
 
   {
@@ -521,13 +574,34 @@
   },
   {
     "categorie": "Suspension / Direction",
-    "service": "Silentblocs train AV / AR",
+    "service": "Silent blocs train AV / AR",
     "description": "Remplacement",
     "duree": 200,
     "prix": 100
   },
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Silent bloc barre stabilisatrice (paire)",
+    "description": "Remplacement ",
+    "duree": 60,
+    "prix": 40
+  },
 
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Barre de direction (paire)",
+    "description": "Remplacement ",
+    "duree": 60,
+    "prix": 40
+  },
 
+  {
+    "categorie": "Suspension / Direction",
+    "service": "Fusée (unité)",
+    "description": "Remplacement ",
+    "duree": 150,
+    "prix": "à partir de 60€"
+  },
 
 
   {
@@ -781,5 +855,26 @@
     "description": "Dépannage sur zone",
     "duree": "Variable",
     "prix": "à partir de 40€"
+  },
+    {
+    "categorie": "Autre interventions",
+    "service": "Pare choc",
+    "description": "Remplacement",
+    "duree": 140,
+    "prix": 80
+  },
+  {
+    "categorie": "Autre interventions",
+    "service": "Essuie-glace (paire)",
+    "description": "Remplacement",
+    "duree": 30,
+    "prix": 10
+  },
+  {
+    "categorie": "Autre interventions",
+    "service": "Cerine",
+    "description": "Remplissage",
+    "duree": 120,
+    "prix": 60
   }
 ]

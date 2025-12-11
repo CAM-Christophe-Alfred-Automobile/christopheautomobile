@@ -3,11 +3,11 @@
 // -----------------------------------------------------------------------------
 //! 🎯 OBJECTIF :
 // Afficher la page des tarifs sous forme de liste filtrable,
-// triée par durée, avec un affichage SEO-friendly et une navigation claire.
+// triée par ordre alphabétique (A-Z), avec un affichage SEO-friendly et une navigation claire.
 //
 //! 💡 FONCTIONNALITÉS PRINCIPALES :
 // - Recherche en temps réel sur les prestations
-// - Tri automatique par durée croissante
+// - Tri automatique par ordre alphabétique (A-Z)
 // - Groupement par catégories avec accordéons (ouverture globale possible)
 // - Code couleur par temps d’intervention
 // - Modale Autodoc pour les pièces détachées
@@ -51,12 +51,9 @@ export default function TarifsPage() {
     year: "numeric",
   });
 
-  // Fonction pour normaliser la durée (convertir en nombre pour le tri)
-  const normalizeDuree = (duree: number | string | null): number => {
-    if (duree === null || duree === undefined) return Infinity; // Les null à la fin
-    if (typeof duree === "number") return duree;
-    // Si c'est une string ("variable", "Sur devis", etc.), mettre à la fin
-    return Infinity;
+  // Fonction pour vérifier si une prestation est "Sur devis"
+  const isSurDevis = (duree: number | string | null): boolean => {
+    return duree === null || duree === undefined || duree === "Sur devis";
   };
 
   // Filtrer et trier les services
@@ -72,9 +69,22 @@ export default function TarifsPage() {
       );
     });
 
-    // Trier par durée croissante
+    // Trier par ordre alphabétique, avec "Sur devis" à la fin
     return filtered.sort((a, b) => {
-      return normalizeDuree(a.duree) - normalizeDuree(b.duree);
+      const aEstSurDevis = isSurDevis(a.duree);
+      const bEstSurDevis = isSurDevis(b.duree);
+      
+      // Si les deux sont "Sur devis", tri alphabétique entre eux
+      if (aEstSurDevis && bEstSurDevis) {
+        return a.service.localeCompare(b.service, 'fr');
+      }
+      // Si seulement a est "Sur devis", le mettre après b
+      if (aEstSurDevis) return 1;
+      // Si seulement b est "Sur devis", le mettre après a
+      if (bEstSurDevis) return -1;
+      
+      // Sinon, tri alphabétique normal (A-Z)
+      return a.service.localeCompare(b.service, 'fr');
     });
   }, [searchQuery]);
 

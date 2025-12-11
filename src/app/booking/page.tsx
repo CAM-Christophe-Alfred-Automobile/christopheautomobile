@@ -71,15 +71,12 @@ export default function BookingPage() {
     return a.localeCompare(b);
   });
 
-  // Fonction pour normaliser la durée (convertir en nombre pour le tri)
-  const normalizeDuree = (duree: number | string | null): number => {
-    if (duree === null || duree === undefined) return Infinity; // Les null à la fin
-    if (typeof duree === "number") return duree;
-    // Si c'est une string ("variable", "Sur devis", etc.), mettre à la fin
-    return Infinity;
+  // Fonction pour vérifier si une prestation est "Sur devis"
+  const isSurDevis = (duree: number | string | null): boolean => {
+    return duree === null || duree === undefined || duree === "Sur devis";
   };
 
-  //! Prestations filtrées + recherche + tri par durée croissante
+  //! Prestations filtrées + recherche + tri alphabétique
   const prestations = useMemo(() => {
     const filtered = servicesData.filter(
       (s) =>
@@ -97,9 +94,9 @@ export default function BookingPage() {
             s.description.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
-    // Trier par durée croissante
+    // Trier par ordre alphabétique (A-Z)
     return filtered.sort((a, b) => {
-      return normalizeDuree(a.duree) - normalizeDuree(b.duree);
+      return a.service.localeCompare(b.service, 'fr');
     });
   }, [categorie, searchQuery, searchMode]);
 
