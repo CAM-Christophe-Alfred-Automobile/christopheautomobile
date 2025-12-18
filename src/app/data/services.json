@@ -8,6 +8,14 @@
   },
   {
     "categorie": "Entretien",
+    "service": "Nettoyage EGR ou FAP ou ADBLUE",
+    "description": "",
+    "duree": null,
+    "prix": "à partir de 45€"
+  },
+
+  {
+    "categorie": "Entretien",
     "service": "Vidange + filtre à huile",
     "description": "",
     "duree": 40,
