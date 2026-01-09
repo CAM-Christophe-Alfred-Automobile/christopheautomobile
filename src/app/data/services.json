@@ -1,4 +1,11 @@
 [
+   {
+    "categorie": "Entretien",
+    "service": "Revision engin/pl",
+    "description": "Huile moteur,filtre a huile a gazoil,a air,habitacle,hydraulique,dessiccateur.",
+    "duree": 60,
+    "prix": 200
+  },
   {
     "categorie": "Entretien",
     "service": "Vidange moteur seule",
@@ -94,7 +101,13 @@
 
 
 
-
+{
+    "categorie": "Freinage",
+    "service": "Détection panne de freinage /bruit",
+    "description": "Détection",
+    "duree": 60,
+    "prix": 40
+  },
   {
     "categorie": "Freinage",
     "service": "Plaquettes (essieu)",
@@ -175,7 +188,7 @@
   {
     "categorie": "Freinage",
     "service": "Détection panne de freinage",
-    "description": "Détection",
+    "description": "Inspection, détection",
     "duree": 60,
     "prix": "à partir de 30€"
   },
@@ -184,7 +197,42 @@
 
 
 
+  {
+    "categorie": "Moteur",
+    "service": "Couvre culasse",
+    "description": "Remplacement / étanchéité",
+    "duree": 140,
+    "prix": 70
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Arbre à came",
+    "description": "remplacement avec palier si équipé avec clavette si équipé avec visserie",
+    "duree": 540,
+    "prix": 270
+  },
 
+  {
+    "categorie": "Moteur",
+    "service": "Poussoir (culasse)",
+    "description": "remplacement la totalité du culasse",
+    "duree": 600,
+    "prix": 300
+  },
+{
+    "categorie": "Moteur",
+    "service": "Carter haut moteur ",
+    "description": "remplacement ",
+    "duree": 300,
+    "prix": 70
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Pompe à huile  ",
+    "description": "remplacement + controle étancheité carter huile et huile moteur + filtre neuf ",
+    "duree": 500,
+    "prix": 180
+  },
   {
     "categorie": "Moteur",
     "service": "Courroie distribution + pompe à eau",
@@ -192,6 +240,16 @@
     "duree": 480,
     "prix": 170
   },
+{
+    "categorie": "Moteur",
+    "service": "Problème moteur / Bruit provenant du moteur",
+    "description": "Inspection, détection",
+    "duree": 60,
+    "prix": 40
+  },
+
+
+
   {
     "categorie": "Moteur",
     "service": "Courroie accessoire",
@@ -503,6 +561,14 @@
   },
 
 
+
+   {
+    "categorie": "Suspension / Direction",
+    "service": "Détection bruit de suspension / direction ",
+    "description": "Inspection, détection",
+    "duree": 60,
+    "prix": 40
+  },
   {
     "categorie": "Suspension / Direction",
     "service": "Amortisseurs (paire)",
@@ -718,14 +784,28 @@
 
   {
     "categorie": "Climatisation",
-    "service": "Compresseur de clim",
+    "service": "Compresseur de climatisation",
     "description": "Remplacement",
     "duree": 240,
     "prix": 80
   },
+   {
+    "categorie": "Climatisation",
+    "service": "Radiateur chauffage",
+    "description": "Remplacement",
+    "duree": 400,
+    "prix": 190
+  },
+   {
+    "categorie": "Climatisation",
+    "service": "Tuyau de climatisation",
+    "description": "Remplacement",
+    "duree": 90,
+    "prix": 50
+  },
   {
     "categorie": "Climatisation",
-    "service": "Condenseur de clim",
+    "service": "Condenseur de climatisation",
     "description": "Remplacement",
     "duree": 120,
     "prix": 70
