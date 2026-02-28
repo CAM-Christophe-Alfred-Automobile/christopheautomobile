@@ -36,6 +36,8 @@ import { Header, Footer, InfoModal, CategoryAccordion } from "@/components";
 import servicesData from "@/app/data/services.json";
 import { ColorLegend } from "@/components/services/ServiceCard";
 import SearchField from "@/components/search/SearchField";
+import Min60Modal from "@/components/modals/Min60Modal"; 
+
 
 // ✅ Import dynamique de ta modale (empêche le SSR)
 const AutodocModal = dynamic(() => import("@/components/modals/autodocModal"), {
@@ -109,7 +111,7 @@ export default function TarifsPage() {
       {/* 🔹 En-tête du site avec navigation principale */}
       {/* ------------------------------------------------------------------ */}
       <Header />
-
+<Min60Modal />
       <main className="flex-1 p-8 text-white">
         <div className="max-w-7xl mx-auto">
           {/* En-tête */}

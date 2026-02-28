@@ -10,6 +10,8 @@ import ServiceCard, {
 import Image from "next/image";
 import SearchField from "@/components/search/SearchField";
 import { siteConfig } from "@/config/site";
+import Min60Modal from "@/components/modals/Min60Modal"; 
+
 
 //! Convertir minutes → format h:mm
 const formatDuree = (minutes: number | string | null) => {
@@ -200,6 +202,7 @@ export default function BookingPage() {
       </div>
 
       <Header />
+      <Min60Modal />
 
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-12 max-w-5xl relative" role="main">
         <div className="sm:mb-12 mb-4 relative">
