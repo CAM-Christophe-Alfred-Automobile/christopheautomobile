@@ -123,13 +123,12 @@ export default function Min60Modal({
                 </p>
               </div>
 
-              <ul className="space-y-2">
+               <ul className="space-y-2">
                 <li className="flex gap-2">
                   <span className="mt-1 h-2 w-2 rounded-full bg-sky-400/80" />
                   <span>
-                    Selon le véhicule, l’accessibilité ou la nature de
-                    l’intervention,{" "}
-                    <strong>le tarif peut être ajusté avant intervention</strong>.
+                    Si plusieurs petites interventions sont réalisées lors du même
+                    déplacement, <strong>le tarif pourra être adapté</strong>.
                   </span>
                 </li>
                 <li className="flex gap-2">
