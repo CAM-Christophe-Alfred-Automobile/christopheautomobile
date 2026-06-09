@@ -15,7 +15,11 @@ export default function Min60Modal({
   const okBtnRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    setIsOpen(true);
+    const hasSeenModal = sessionStorage.getItem("min60ModalSeen");
+    if (!hasSeenModal) {
+      setIsOpen(true);
+      sessionStorage.setItem("min60ModalSeen", "true");
+    }
   }, []);
 
   const close = () => {
