@@ -113,6 +113,7 @@ export default function ContactPage() {
                   alt="Logo CAM"
                   width={200}
                   height={200}
+                  priority
                   className="hidden sm:block h-20 w-auto opacity-80 flex-shrink-0"
                   style={{ width: "auto", height: "auto" }}
                   //! Sur tablette/desktop ≈ 80px / retiré sur mobile

@@ -107,9 +107,6 @@ export default function ContactForm() {
     });
   };
 
-  /**
-   * Gère la sélection de fichiers
-   */
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     
@@ -121,12 +118,27 @@ export default function ContactForm() {
     }
 
     setIsSubmitting(true);
-    setStatus({ type: "info", message: "Traitement des images en cours..." });
+    setStatus({ type: "info", message: "Traitement des images en cours (cela peut prendre quelques secondes pour les formats HEIC)..." });
 
     try {
       const newAttachments = [...attachments];
-      for (const file of newFiles) {
-        if (!file.type.startsWith("image/")) continue; // Ignorer les non-images
+      for (let file of newFiles) {
+        const isHeic = file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif");
+        if (!file.type.startsWith("image/") && !isHeic) continue; // Ignorer les non-images
+
+        if (isHeic) {
+          try {
+            // Importation dynamique pour ne pas alourdir la page au chargement initial
+            const heic2any = (await import("heic2any")).default;
+            const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+            const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+            file = new File([finalBlob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" });
+          } catch (err) {
+            console.error("Erreur de conversion HEIC", err);
+            throw new Error("Erreur de conversion HEIC");
+          }
+        }
+
         const base64 = await compressImage(file);
         newAttachments.push({
           name: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
@@ -135,8 +147,13 @@ export default function ContactForm() {
       }
       setAttachments(newAttachments);
       setStatus(null);
-    } catch (err) {
-      setStatus({ type: "error", message: "Erreur lors du traitement des images." });
+    } catch (err: any) {
+      console.error(err);
+      if (err.message === "Erreur de conversion HEIC" || (err.message && err.message.includes('HEIF'))) {
+        setStatus({ type: "error", message: "Le format HEIC de cet appareil n'est pas supporté. Merci de nous envoyer ces photos via WhatsApp." });
+      } else {
+        setStatus({ type: "error", message: "Erreur lors du traitement des images. Ce format n'est peut-être pas supporté." });
+      }
     } finally {
       setIsSubmitting(false);
       e.target.value = ''; // Reset l'input
@@ -317,7 +334,7 @@ export default function ContactForm() {
               <input
                 type="file"
                 multiple
-                accept="image/jpeg, image/png, image/webp, image/heic"
+                accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}
                 disabled={attachments.length >= 4 || isSubmitting}

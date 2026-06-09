@@ -113,6 +113,7 @@ export default function AutodocModal() {
                 quality={85}
                 priority
                 className="rounded-full object-cover shadow-lg ring-2 ring-amber-500/20"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
 

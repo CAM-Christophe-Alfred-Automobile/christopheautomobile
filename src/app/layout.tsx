@@ -87,7 +87,7 @@ export default function RootLayout({
   return (
     // ⚠️ Aucun texte ou retour entre <html> et <body>
     // pour éviter l’erreur "Whitespace text nodes cannot be a child of <html>"
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
         {/* 🔍 Schémas JSON-LD pour le SEO (LocalBusiness, Organization, Website) */}
         <SchemaMount />
