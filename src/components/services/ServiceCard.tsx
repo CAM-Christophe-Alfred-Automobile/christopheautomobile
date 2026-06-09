@@ -151,15 +151,17 @@ export default function ServiceCard({
         )}
       </div>
 
-      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        <span
-          className={`text-xs sm:text-sm font-medium whitespace-nowrap px-2 py-1 rounded border ${colors.badge}`}
-        >
-          ⏱ {formatDuree(duree)}
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <span className="text-base sm:text-lg text-amber-400 font-bold leading-none">
+          {prix !== undefined && prix !== null
+            ? (typeof prix === 'number' ? `${prix}€` : prix)
+            : "Sur devis"}
         </span>
-        {prix !== undefined && prix !== null && (
-          <span className="text-xs text-amber-400 font-medium mt-0.5">
-            {typeof prix === 'number' ? `${prix}€` : prix}
+        {duree !== null && duree !== "Sur devis" && (
+          <span
+            className={`text-xs font-medium whitespace-nowrap px-2 py-0.5 rounded border ${colors.badge}`}
+          >
+            ⏱ {formatDuree(duree)}
           </span>
         )}
       </div>

@@ -24,6 +24,11 @@ export default function LocalBusinessSchema() {
         additionalType: seoConfig.additionalType,
 
         name: seoConfig.name,
+        taxID: seoConfig.siret,
+        sameAs: [
+          seoConfig.googleBusinessUrl,
+          ...seoConfig.socialLinks,
+        ],
         image: `${seoConfig.baseUrl}${seoConfig.images.logo}`,
         telephone: seoConfig.phone,
         email: seoConfig.email,
@@ -31,13 +36,14 @@ export default function LocalBusinessSchema() {
         address: {
           "@type": "PostalAddress",
           addressLocality: seoConfig.address.city,
+          addressRegion: "Bouches-du-Rhône",
           addressCountry: seoConfig.address.country,
         },
         areaServed: [
-          {
-            "@type": "City",
-            name: seoConfig.address.city,
-          },
+          ...seoConfig.serviceArea.cities.map((location) => ({
+            "@type": location === "Bouches-du-Rhône" ? "AdministrativeArea" : "City",
+            name: location,
+          })),
           {
             "@type": "GeoCircle",
             geoMidpoint: {

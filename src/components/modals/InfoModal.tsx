@@ -148,10 +148,9 @@ export default function InfoModal({
               {/* Introduction */}
               <div className="pb-5 border-b border-amber-500/20">
                 <p className="text-base text-gray-300 leading-relaxed font-normal text-left">
-                  Je travaille{" "}
-                  <strong className="text-amber-400 font-bold">seul</strong> sur
-                  vos véhicules, sans équipe ni structure de concession. Chaque
-                  intervention est réalisée avec{" "}
+                  En tant qu'
+                  <strong className="text-amber-400 font-bold">artisan mécanicien indépendant</strong>
+                  , je suis votre interlocuteur unique. Cela me permet de vous garantir un suivi 100% personnalisé et d'intervenir sur votre véhicule avec le plus grand{" "}
                   <strong className="text-amber-400 font-bold">
                     soin, rigueur et transparence
                   </strong>
@@ -176,23 +175,20 @@ export default function InfoModal({
                     </svg>
                   </div>
                   <h3 className="text-[18px] font-bold text-amber-400">
-                    Tarifs = Main d&apos;œuvre uniquement
+                    Main d&apos;œuvre & Pièces
                   </h3>
                 </div>
-                <div   className="text-base text-gray-300 leading-relaxed font-normal text-left">
-                  <span  className="text-gray-400 leading-relaxed">
-                    Les{" "}
+                <div className="text-base text-gray-300 leading-relaxed font-normal text-left">
+                  <span className="text-gray-400 leading-relaxed">
+                    Mes tarifs concernent uniquement la main d&apos;œuvre. Afin d&apos;assurer le bon déroulement de l&apos;intervention,{" "}
                     <strong className="text-white font-bold">
-                      pièces nécessaires aux réparations
-                    </strong>{" "}
-                    doivent être disponibles le jour du rendez-vous afin
-                    d&apos;assurer le bon déroulement de l&apos;intervention. Si
-                    vous le souhaitez, je peux me charger de la commande des
-                    pièces, après versement d&apos;un{" "}
+                      les pièces nécessaires doivent être disponibles le jour de notre rendez-vous
+                    </strong>
+                    . Pour vous simplifier la vie, je peux me charger de la commande de ces pièces (un{" "}
                     <strong className="text-amber-400 font-semibold">
                       acompte de 40 %
                     </strong>{" "}
-                    du montant total, à régler avant toute commande.
+                    sera alors demandé).
                   </span>
                 </div>
               </div>
@@ -221,7 +217,7 @@ export default function InfoModal({
                       •
                     </span>
                     <span className="text-base font-normal">
-                      Les délais peuvent varier selon la complexité des travaux.
+                      La durée d'une intervention est une <strong className="text-white font-bold">estimation</strong> qui peut varier selon le véhicule et la complexité des travaux.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -229,8 +225,7 @@ export default function InfoModal({
                       •
                     </span>
                     <span className="text-base font-normal">
-                      Certains imprévus (pièce défectueuse, grippage, panne
-                      cachée) peuvent nécessiter un délai supplémentaire.
+                      La mécanique réserve parfois des surprises (pièce grippée, dommage caché) qui peuvent nécessiter un délai d'intervention supplémentaire.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -238,11 +233,11 @@ export default function InfoModal({
                       •
                     </span>
                     <span className="text-base font-normal">
-                      Les réparations sont faites{" "}
+                      Mon objectif absolu est un{" "}
                       <strong className="text-white font-bold">
-                        dans la mesure du possible
+                        travail de qualité bien fait
                       </strong>
-                      , avec un suivi personnalisé.
+                      , plutôt qu'une course contre la montre.
                     </span>
                   </li>
                 </ul>
@@ -265,27 +260,27 @@ export default function InfoModal({
                     </svg>
                   </div>
                   <h3 className="text-[18px] font-bold text-green-400">
-                    Tarif fixe après acceptation du devis
+                    Un tarif respecté, sans surprise
                   </h3>
                 </div>
                 <p className="text-base text-gray-300 leading-relaxed font-normal text-left">
-                  Aucune hausse ou baisse ne sera appliquée, sauf si un élément
-                  nouveau est constaté et{" "}
+                  Le tarif convenu lors de votre réservation reste fixe. Si un élément
+                  nouveau est constaté pendant l'intervention, il sera d'abord{" "}
                   <strong className="text-white font-bold">
-                    validé ensemble
+                    discuté et validé avec vous
                   </strong>{" "}
-                  avant toute intervention supplémentaire.
+                  avant toute opération supplémentaire.
                 </p>
               </div>
 
               {/* Engagement délais */}
               <div className="py-5 border-b border-amber-500/20">
                 <p className="text-base text-gray-300 leading-relaxed font-normal text-left">
-                  Je m&apos;engage à faire le{" "}
+                  Je m&apos;engage à intervenir dans les meilleurs délais et à maintenir une{" "}
                   <strong className="text-amber-400 font-bold">
-                    nécessaire dans les meilleurs délais
+                    communication fluide et transparente
                   </strong>{" "}
-                  et à toujours vous tenir informé de l&apos;avancement.
+                  à chaque étape.
                 </p>
               </div>
 

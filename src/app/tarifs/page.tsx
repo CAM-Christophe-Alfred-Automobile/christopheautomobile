@@ -31,13 +31,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic"; 
 import { Header, Footer, InfoModal, CategoryAccordion } from "@/components";
 import servicesData from "@/app/data/services.json";
 import { ColorLegend } from "@/components/services/ServiceCard";
 import SearchField from "@/components/search/SearchField";
-import Min60Modal from "@/components/modals/Min60Modal"; 
-
+import Min60Modal from "@/components/modals/Min60Modal";
+import { ConceptBanner } from "@/components";
 
 // ✅ Import dynamique de ta modale (empêche le SSR)
 const AutodocModal = dynamic(() => import("@/components/modals/autodocModal"), {
@@ -130,15 +131,18 @@ export default function TarifsPage() {
               <strong>la main d&#39;oeuvre uniquement</strong>
             </p>
 
-            {/* 💡 Bouton ouverture modale Autodoc */}
-            <div className="text-center mb-2">
-              <AutodocModal />
-            </div>
-
             {/* Légende des couleurs */}
             <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-sm text-gray-400 text-center">
               <span className="w-full sm:w-auto">Code couleur par durée :</span>
               <ColorLegend />
+            </div>
+          </div>
+
+          {/* Explication du concept */}
+          <div className="mb-8 max-w-4xl mx-auto">
+            <ConceptBanner />
+            <div className="mt-4 text-center">
+              <AutodocModal />
             </div>
           </div>
 
@@ -194,10 +198,10 @@ export default function TarifsPage() {
               )}
             </button>
           </div>
-          {/* Layout en colonnes type masonry avec accordéons */}
-          <div className="lg:columns-2 gap-6 space-y-6">
+          {/* Layout manuel en 2 colonnes (pour éviter les sauts de masonry au clic) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {categories.length === 0 ? (
-              <div className="col-span-2 text-center py-12">
+              <div className="col-span-1 lg:col-span-2 text-center py-12">
                 <p className="text-gray-400 text-lg">Aucune intervention trouvée pour &quot;{searchQuery}&quot;</p>
                 <button
                   onClick={() => setSearchQuery("")}
@@ -207,31 +211,48 @@ export default function TarifsPage() {
                 </button>
               </div>
             ) : (
-              categories.map((categorie) => {
-                // Filtrer les services par catégorie
-                const services = filteredAndSortedServices.filter(
-                  (s) => s.categorie === categorie
-                );
-
-                return (
-                  <CategoryAccordion
-                    key={`${categorie}-${expandAll}-${searchQuery}`}
-                    categorie={categorie}
-                    services={services}
-                    defaultOpen={expandAll || searchQuery !== ""}
-                  />
-                );
-              })
+              <>
+                <div className="flex flex-col gap-6">
+                  {categories.slice(0, Math.ceil(categories.length / 2)).map((categorie) => {
+                    const services = filteredAndSortedServices.filter((s) => s.categorie === categorie);
+                    return (
+                      <CategoryAccordion
+                        key={`${categorie}-${expandAll}-${searchQuery}`}
+                        categorie={categorie}
+                        services={services}
+                        defaultOpen={expandAll || searchQuery !== ""}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="flex flex-col gap-6">
+                  {categories.slice(Math.ceil(categories.length / 2)).map((categorie) => {
+                    const services = filteredAndSortedServices.filter((s) => s.categorie === categorie);
+                    return (
+                      <CategoryAccordion
+                        key={`${categorie}-${expandAll}-${searchQuery}`}
+                        categorie={categorie}
+                        services={services}
+                        defaultOpen={expandAll || searchQuery !== ""}
+                      />
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
 
           {/* Note et date */}
-          <div className="mt-8 text-center space-y-4">
-            <p className="text-gray-400 text-sm">
-              💡 <strong>Besoin d&apos;un devis personnalisé ?</strong>{" "}
-              Contactez moi pour une estimation précise adaptée à votre
-              véhicule.
-            </p>
+          <div className="mt-12 text-center space-y-4">
+            <Link 
+              href="/contact" 
+              className="inline-block px-6 py-4 rounded-xl bg-gray-800/40 border border-gray-700/60 hover:bg-gray-800/80 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 group cursor-pointer"
+            >
+              <p className="text-gray-300 text-sm sm:text-base group-hover:text-white transition-colors">
+                💡 <strong className="text-amber-400">Besoin d&apos;un devis personnalisé ?</strong>{" "}
+                Contactez-moi pour une estimation précise adaptée à votre véhicule.
+              </p>
+            </Link>
             <p className="text-gray-500 text-sm italic">
               Dernière mise à jour : {lastUpdate}
             </p>

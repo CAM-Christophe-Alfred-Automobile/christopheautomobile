@@ -16,6 +16,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import { lato } from "@/fonts";
+import { ConceptBanner } from "@/components";
 
 export default function AtelierSection() {
   return (
@@ -39,6 +40,11 @@ export default function AtelierSection() {
             Je me déplace avec tout l&apos;équipement d&apos;un garage, pour
             que votre véhicule soit entre de bonnes mains, où que vous soyez.
           </p>
+        </div>
+
+        {/* NOUVEAU: Explication du concept */}
+        <div className="mb-12 max-w-4xl mx-auto">
+          <ConceptBanner />
         </div>
 
         {/* Layout principal en grille */}

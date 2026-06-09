@@ -54,7 +54,7 @@ config.autoAddCss = false;
 // -----------------------------------------------------------------------------
 export { metadata } from "@/seo/metadata";
 
-import { WhatsappFloat, InstallPWA, IOSInstallPrompt,  } from "@/components";
+import { WhatsappFloat } from "@/components";
 
 // -----------------------------------------------------------------------------
 // 🔹 Initialisation des polices
@@ -108,9 +108,7 @@ export default function RootLayout({
         {children}
         {/* Bouton flottant WhatsApp sur toutes les pages */}
         <WhatsappFloat />
-        {/* 📱 Gestion de l’installation PWA (bouton flottant intelligent) */}
-        <InstallPWA /> {/* Android/Chrome */}
-        <IOSInstallPrompt /> {/* iOS/Safari */}
+
       </body>
     </html>
   );

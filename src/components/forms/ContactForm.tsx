@@ -55,10 +55,97 @@ export default function ContactForm() {
   const [message, setMessage] = useState("");
 
   //! STATE pour gérer l'affichage des messages de succès/erreur
-  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [status, setStatus] = useState<{ type: "success" | "error" | "info"; message: string } | null>(null);
   
   //! STATE pour gérer l'état de chargement pendant l'envoi
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  //! STATE pour les pièces jointes
+  const [attachments, setAttachments] = useState<{ name: string; content: string }[]>([]);
+
+  /**
+   * Compresse une image côté client avant envoi (évite la limite Vercel de 4.5Mo)
+   */
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          // Convertir en JPEG, qualité 70%
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(dataUrl.split(",")[1]); // Retourne juste le contenu Base64
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  /**
+   * Gère la sélection de fichiers
+   */
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    
+    const newFiles = Array.from(e.target.files);
+    
+    if (attachments.length + newFiles.length > 4) {
+      setStatus({ type: "error", message: "Vous ne pouvez pas envoyer plus de 4 photos." });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus({ type: "info", message: "Traitement des images en cours..." });
+
+    try {
+      const newAttachments = [...attachments];
+      for (const file of newFiles) {
+        if (!file.type.startsWith("image/")) continue; // Ignorer les non-images
+        const base64 = await compressImage(file);
+        newAttachments.push({
+          name: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+          content: base64
+        });
+      }
+      setAttachments(newAttachments);
+      setStatus(null);
+    } catch (err) {
+      setStatus({ type: "error", message: "Erreur lors du traitement des images." });
+    } finally {
+      setIsSubmitting(false);
+      e.target.value = ''; // Reset l'input
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   /**
    * Fonction de validation du formulaire
@@ -112,7 +199,7 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, phone, subject, message }),
+        body: JSON.stringify({ firstName, lastName, email, phone, subject, message, attachments }),
       });
 
       if (!res.ok) throw new Error("Erreur d'envoi");
@@ -125,6 +212,7 @@ export default function ContactForm() {
       setPhone("");
       setSubject("");
       setMessage("");
+      setAttachments([]);
     } catch {
       //! Étape 3 bis : Erreur - Affichage message d'erreur
       setStatus({ type: "error", message: "Impossible d'envoyer le message. Veuillez réessayer." });
@@ -214,6 +302,59 @@ export default function ContactForm() {
           />
         </div>
 
+        {/* Section Pièces Jointes */}
+        <div className="bg-gray-800 border border-gray-600 rounded-lg p-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Photos de votre véhicule (Max 4 photos)
+          </label>
+          
+          <div className="flex items-center gap-4 mb-2">
+            <label className={`flex items-center justify-center px-4 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded cursor-pointer transition-colors text-sm text-white ${attachments.length >= 4 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              <svg className="w-5 h-5 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Ajouter des photos
+              <input
+                type="file"
+                multiple
+                accept="image/jpeg, image/png, image/webp, image/heic"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={attachments.length >= 4 || isSubmitting}
+              />
+            </label>
+            <span className="text-xs text-gray-400">
+              {attachments.length} / 4
+            </span>
+          </div>
+
+          <p className="text-xs text-gray-400 mb-3 italic">
+            Pour l&apos;envoi de vidéos ou d&apos;autres documents, merci de privilégier WhatsApp.
+          </p>
+
+          {/* Liste des fichiers attachés */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {attachments.map((file, index) => (
+                <div key={index} className="flex items-center gap-2 bg-gray-700 px-3 py-1.5 rounded-full border border-gray-600">
+                  <span className="text-xs text-gray-200 truncate max-w-[120px]">
+                    {file.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(index)}
+                    className="text-gray-400 hover:text-red-400 transition-colors cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <button
           type="submit"
           disabled={isSubmitting}
@@ -244,7 +385,11 @@ export default function ContactForm() {
         </button>
 
         {status && (
-          <div className={`p-3 rounded ${status.type === "success" ? "bg-green-800 text-green-200" : "bg-red-800 text-red-200"}`}>
+          <div className={`p-3 rounded text-sm ${
+            status.type === "success" ? "bg-green-800/80 text-green-200 border border-green-700" : 
+            status.type === "error" ? "bg-red-800/80 text-red-200 border border-red-700" :
+            "bg-blue-800/80 text-blue-200 border border-blue-700"
+          }`}>
             {status.message}
           </div>
         )}

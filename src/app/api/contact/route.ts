@@ -37,7 +37,7 @@ import { sendContactEmail } from "@/services/email";
 export async function POST(req: Request) {
   try {
     //! Extraction des données JSON du body de la requête
-    const { firstName, lastName, email, phone, subject, message } = await req.json();
+    const { firstName, lastName, email, phone, subject, message, attachments } = await req.json();
 
     //! Validation côté serveur des champs requis
     // Le téléphone est optionnel, mais tous les autres champs sont obligatoires
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
     //! Envoi de l'email via le service Nodemailer
     // Cette fonction peut throw une erreur si l'envoi échoue
-    await sendContactEmail({ firstName, lastName, email, phone, subject, message });
+    await sendContactEmail({ firstName, lastName, email, phone, subject, message, attachments });
 
     //! Réponse de succès
     return NextResponse.json({ success: true });

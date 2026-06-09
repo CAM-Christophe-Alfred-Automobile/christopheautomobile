@@ -114,6 +114,7 @@ export default function ContactPage() {
                   width={200}
                   height={200}
                   className="hidden sm:block h-20 w-auto opacity-80 flex-shrink-0"
+                  style={{ width: "auto", height: "auto" }}
                   //! Sur tablette/desktop ≈ 80px / retiré sur mobile
                   sizes="(min-width: 640px) 80px"
                 />
@@ -131,11 +132,6 @@ export default function ContactPage() {
                   <span className="text-blue-400 font-semibold">
                     8h30 - 17h30
                   </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="font-medium">Samedi & Dimanche :</span>
-                  <span className="text-red-400 font-semibold">Fermé</span>
                 </div>
               </div>
             </div>

@@ -195,6 +195,7 @@ export default function BookingPage() {
           width={600}
           height={600}
           className="w-[600px] h-auto"
+          style={{ width: "auto", height: "auto" }}
           loading="lazy" //! charge après le contenu important
           //! Mobile n’a pas besoin d’une image géante
           sizes="(max-width: 768px) 200px, 600px"
@@ -204,8 +205,8 @@ export default function BookingPage() {
       <Header />
       <Min60Modal />
 
-      <main className="flex-1 container mx-auto px-4 sm:px-6 py-12 max-w-5xl relative" role="main">
-        <div className="sm:mb-12 mb-4 relative">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 py-12 max-w-7xl relative" role="main">
+        <div className="sm:mb-12 mb-4 relative max-w-5xl mx-auto">
           <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-2xl blur-xl"></div>
           <div className="relative bg-gray-800/30 border border-amber-500/20 rounded-2xl p-4 sm:p-8 backdrop-blur-sm">
             <div className="flex items-start justify-center gap-3 mb-3">
@@ -300,8 +301,13 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* Choix du mode : Recherche OU Catégorie */}
-        <div className="relative mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0">
+        {/* Layout en 2 colonnes sur desktop pour garder le récapitulatif visible */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+          
+          {/* Colonne de gauche : Sélection des interventions */}
+          <div className="flex-1 w-full min-w-0">
+            {/* Choix du mode : Recherche OU Catégorie */}
+            <div className="relative mb-8 w-full max-w-3xl mx-auto pt-4 sm:pt-0 px-4 sm:px-0">
           <label className="relative z-0 block mb-6 font-semibold text-lg sm:text-xl text-amber-400 text-center">
             1. Comment souhaitez-vous trouver votre intervention ?
           </label>
@@ -647,8 +653,11 @@ export default function BookingPage() {
             {prestations.length === 0 ? (
               <div className="text-center py-12 bg-gray-800/30 border border-gray-700 rounded-xl">
                 <p className="text-gray-400 text-lg mb-4">
-                  Aucune intervention trouvée
-                  {searchQuery && ` pour "${searchQuery}"`}
+                  {searchMode === "category" && !categorie 
+                    ? "👆 Veuillez sélectionner une catégorie ci-dessus pour afficher les interventions."
+                    : searchQuery 
+                      ? `Aucune intervention trouvée pour "${searchQuery}"`
+                      : "Aucune intervention trouvée"}
                 </p>
                 {searchMode === "search" && (
                   <button
@@ -678,16 +687,22 @@ export default function BookingPage() {
           </div>
         )}
 
-        {/* Interventions sélectionnées */}
-        {selected.length > 0 && (
-          <div className="mb-8 max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-amber-500/10 to bg-gray-800/30 border border-amber-500/20 rounded-xl p-4 sm:p-6 shadow-lg">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                <h3 className="text-lg md:text-2xl font-bold text-amber-400 flex items-center justify-center gap-2">
+          </div>
+
+          {/* Colonne de droite : Récapitulatif (Sticky) */}
+          {(selected.length > 0 || (categorie === "Intervention sur devis" && hasContactedMechanic === true)) && (
+            <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 lg:sticky lg:top-24 flex flex-col gap-6">
+              
+              {/* Interventions sélectionnées */}
+              {selected.length > 0 && (
+          <div className="mb-8 w-full mx-auto">
+            <div className="bg-gradient-to-r from-amber-500/10 to bg-gray-800/30 border border-amber-500/20 rounded-xl p-3 sm:p-5 shadow-lg">
+              <div className="flex flex-row flex-wrap items-center justify-between gap-3 mb-4">
+                <h3 className="text-base md:text-lg font-bold text-amber-400 flex items-center gap-2">
                   <InfoModal />
-                  Récapitulatif de votre sélection
+                  Sélection
                 </h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <span
                     className="
                     text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-lg whitespace-nowrap
@@ -747,22 +762,25 @@ export default function BookingPage() {
                             {service.description}
                           </p>
                         )}
-                        {service.prix !== undefined &&
-                          service.prix !== null && (
-                            <p className="text-xs text-amber-400 font-medium mt-1">
-                              {typeof service.prix === "number"
-                                ? `${service.prix}€`
-                                : service.prix}
-                            </p>
-                          )}
                       </div>
-                      <span
-                        className={`text-xs font-medium whitespace-nowrap px-3 py-0.5 rounded border ${
-                          getColorClasses(service.duree).badge
-                        }`}
-                      >
-                        ⏱ {formatDuree(service.duree)}
-                      </span>
+                      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                        <span className="text-base sm:text-lg text-amber-400 font-bold leading-none">
+                          {service.prix !== undefined && service.prix !== null
+                            ? typeof service.prix === "number"
+                              ? `${service.prix}€`
+                              : service.prix
+                            : "Sur devis"}
+                        </span>
+                        {service.duree !== null && service.duree !== "Sur devis" && (
+                          <span
+                            className={`text-xs font-medium whitespace-nowrap px-2 py-0.5 rounded border ${
+                              getColorClasses(service.duree).badge
+                            }`}
+                          >
+                            ⏱ {formatDuree(service.duree)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={() => removeSelected(service.service)}
@@ -800,27 +818,33 @@ export default function BookingPage() {
             </div>
           </div>
         )}
-
-        {/* Bouton Calcul - Afficher si des interventions sont sélectionnées ou si c'est sur devis ET qu'il y a eu contact préalable */}
+              {/* Bouton Calcul - Afficher si des interventions sont sélectionnées ou si c'est sur devis ET qu'il y a eu contact préalable */}
         {(selected.length > 0 || (categorie === "Intervention sur devis" && hasContactedMechanic === true)) && (
           <div className="text-center mb-10">
             <button
               onClick={() => {
                 calculerDuree();
                 setShowReservationWarning(true); // 👉 affiche l'encart après calcul
+                setTimeout(() => {
+                  document.getElementById("resultat-reservation")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 100);
               }}
               className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all px-3 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer"
             >
               {categorie === "Intervention sur devis"
-                ? `✓ Réserver ${formatDuree(dureePersonnalisee)}`
-                : `✓ Calculer la durée totale & le tarif final`}
+                ? `✓ Réserver`
+                : `✓ Calculer le tarif`}
             </button>
           </div>
         )}
 
-        {/* Résultat */}
+            </div>
+          )}
+        </div>
+
+        {/* Résultat (déplacé sous le bloc principal) */}
         {dureeTotale && (
-          <div className="space-y-8">
+          <div id="resultat-reservation" className="space-y-8 mt-12 w-full max-w-4xl mx-auto scroll-mt-24">
             <div className="space-y-2 max-w-md mx-auto bg-gray-800/40 rounded-xl p-4 border border-amber-500/20">
               <p className="text-center text-lg flex items-center justify-center gap-2">
                 <svg
@@ -958,10 +982,10 @@ export default function BookingPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex justify-start">
+              <div className="flex justify-center w-full">
                 <iframe
                   src={getCalUrl(dureeTotale)!}
-                  className="w-[90%] md:w-full h-[900px] rounded-xl border-none"
+                  className="w-[100%] md:w-[800px] xl:w-[1000px] h-[900px] rounded-xl border-none"
                 />
               </div>
             )}

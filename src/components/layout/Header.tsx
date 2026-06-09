@@ -59,6 +59,7 @@ export default function Header() {
               height={70}
               priority
               className="h-auto w-[70px]"
+              style={{ width: "auto", height: "auto" }}
               //! Sur mobile : 50px / Sur desktop : 70px
               sizes="(max-width: 768px) 50px, 70px"
             />

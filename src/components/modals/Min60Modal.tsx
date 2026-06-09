@@ -118,28 +118,25 @@ export default function Min60Modal({
             <div className="mt-5 space-y-4 text-sm leading-relaxed text-slate-200">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <p>
-                  Certaines petites prestations sont affichées à{" "}
+                  Pour toute intervention nécessitant un <strong>déplacement à domicile</strong>, le minimum de facturation correspond à <strong>une heure de travail</strong> (soit{" "}
                   <span className="inline-flex items-center rounded-lg bg-sky-500/15 px-2 py-0.5 font-semibold text-sky-200 border border-sky-500/20">
                     60€
-                  </span>{" "}
-                  : c’est le <strong>minimum d’intervention</strong> pour un
-                  déplacement à domicile.
+                  </span>).
                 </p>
               </div>
 
                <ul className="space-y-2">
                 <li className="flex gap-2">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-sky-400/80" />
+                  <span className="mt-1 h-2 w-2 rounded-full bg-sky-400/80 shrink-0" />
                   <span>
-                    Si plusieurs petites interventions sont réalisées lors du même
-                    déplacement, <strong>le tarif pourra être adapté</strong>.
+                    Des <strong>ajustements sont bien sûr possibles au cas par cas</strong>, notamment si plusieurs interventions sont réalisées lors du même déplacement.
                   </span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-cyan-300/80" />
+                  <span className="mt-1 h-2 w-2 rounded-full bg-cyan-300/80 shrink-0" />
                   <span>
-                    Pour une estimation plus précise,{" "}
-                    <strong>n’hésitez pas à prendre contact avant de réserver</strong>.
+                    Pour une estimation précise et adaptée à votre besoin,{" "}
+                    <strong>n’hésitez pas à me contacter avant de réserver</strong>.
                   </span>
                 </li>
               </ul>

@@ -86,9 +86,10 @@ export default function CategoryAccordion({
             enterTo="transform scale-100 opacity-100"
             leave="transition duration-150 ease-out"
             leaveFrom="transform scale-100 opacity-100"
-            leaveTo="transform scale-95 opacity-0 "
+            leaveTo="transform scale-95 opacity-0"
+            unmount={false}
           >
-            <Disclosure.Panel className="p-3 space-y-2">
+            <Disclosure.Panel unmount={false} className="p-3 space-y-2">
               {services.map((service) => {
                 // Gérer l'affichage du prix : ajouter € seulement si c'est un nombre
                 let prixAffiche = "Sur devis";

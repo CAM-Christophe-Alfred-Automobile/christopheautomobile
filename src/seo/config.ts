@@ -28,8 +28,8 @@ export const seoConfig = {
   baseUrl: siteConfig.url,
 
   // 🏷️ Types Schema.org configurables
-  businessTypes: ["LocalBusiness", "AutomotiveBusiness"],
-  additionalType: "https://schema.org/AutomotiveBusiness",
+  businessTypes: ["LocalBusiness", "AutoRepair"],
+  additionalType: "https://schema.org/AutoRepair",
 
   // 📞 Contact
   phone: siteConfig.phone,
@@ -37,6 +37,7 @@ export const seoConfig = {
 
   // 📍 Localisation & zone de service
   address: {
+    streetAddress: siteConfig.address,
     city: siteConfig.city,
     country: "FR",
     countryName: "France",
@@ -45,6 +46,7 @@ export const seoConfig = {
     lat: 43.6403, // Salon-de-Provence
     lon: 5.0970,
     radiusMeters: Number(siteConfig.rayonIntervention) * 1000, // conversion km -> mètres
+    cities: ["Salon-de-Provence", "Aix-en-Provence", "Marseille", "Bouches-du-Rhône"],
   },
 
   // 🖼️ Images
@@ -53,8 +55,13 @@ export const seoConfig = {
      ogImage: "/images/seo/logo-og.png", //1200x630
   },
 
-  // 🌐 Réseaux sociaux
-  socialLinks: [], // à compléter si besoin
+  // 🌐 Réseaux sociaux & Liens externes
+  socialLinks: [
+    "https://www.pappers.fr/entreprise/alfred-christophe-888962883",
+    "https://annuaire-entreprises.data.gouv.fr/etablissement/88896288300037"
+  ],
+  googleBusinessUrl: "https://www.google.com/search?q=Christophe+AutoMobile+(CAM)&kgmid=/g/11mrhqnz4m",
+  siret: "88896288300037",
 
   // 💰 Prix & horaires
   priceRange: "€€",

@@ -54,15 +54,15 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 
 ### Pages principales
 
-| Page | Description |
-|------|-------------|
-| 🏠 **Accueil** | Présentation des services, statistiques, appels à l'action |
-| 📅 **Réservation** | Double mode : recherche directe OU navigation par catégorie, calcul automatique de durée |
-| 📧 **Contact** | Formulaire de contact + carte Leaflet de la zone d'intervention |
-| 💰 **Tarifs** | Grille tarifaire dynamique générée depuis JSON avec code couleur (vert/orange/rouge/gris) |
-| ⚖️ **Mentions légales** | Informations légales obligatoires |
-| ✅ **Confirmation** | Page de confirmation après réservation |
-| 🔍 **404** | Page d'erreur personnalisée avec image et navigation |
+| Page                    | Description                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| 🏠 **Accueil**          | Présentation des services, statistiques, appels à l'action                                |
+| 📅 **Réservation**      | Double mode : recherche directe OU navigation par catégorie, calcul automatique de durée  |
+| 📧 **Contact**          | Formulaire de contact + carte Leaflet de la zone d'intervention                           |
+| 💰 **Tarifs**           | Grille tarifaire dynamique générée depuis JSON avec code couleur (vert/orange/rouge/gris) |
+| ⚖️ **Mentions légales** | Informations légales obligatoires                                                         |
+| ✅ **Confirmation**     | Page de confirmation après réservation                                                    |
+| 🔍 **404**              | Page d'erreur personnalisée avec image et navigation                                      |
 
 ### Fonctionnalités techniques
 
@@ -84,30 +84,30 @@ Ce projet est conçu comme un **template réutilisable** pour tout professionnel
 
 ### Frontend
 
-| Technologie | Version | Description |
-|-------------|---------|-------------|
-| **Next.js** | 16.0.7 | Framework React avec App Router (SSR/SSG) |
-| **React** | 19.2.1 | Bibliothèque UI |
-| **TypeScript** | 5.x | Typage statique |
-| **Tailwind CSS** | 4.x | Framework CSS utility-first |
+| Technologie      | Version | Description                               |
+| ---------------- | ------- | ----------------------------------------- |
+| **Next.js**      | 16.0.7  | Framework React avec App Router (SSR/SSG) |
+| **React**        | 19.2.1  | Bibliothèque UI                           |
+| **TypeScript**   | 5.x     | Typage statique                           |
+| **Tailwind CSS** | 4.x     | Framework CSS utility-first               |
 
 ### Intégrations & Services
 
-| Technologie | Version | Description |
-|-------------|---------|-------------|
-| **Cal.com** | 1.5.3 | Système de réservation (iframe intégré) |
-| **Leaflet** | 1.9.4 | Cartes interactives OpenStreetMap |
-| **React Leaflet** | 5.0.0 | Composants React pour Leaflet |
-| **Nodemailer** | 7.0.6 | Envoi d'emails via SMTP |
+| Technologie       | Version | Description                             |
+| ----------------- | ------- | --------------------------------------- |
+| **Cal.com**       | 1.5.3   | Système de réservation (iframe intégré) |
+| **Leaflet**       | 1.9.4   | Cartes interactives OpenStreetMap       |
+| **React Leaflet** | 5.0.0   | Composants React pour Leaflet           |
+| **Nodemailer**    | 7.0.6   | Envoi d'emails via SMTP                 |
 
 ### Outils de développement
 
-| Outil | Description |
-|-------|-------------|
-| **pnpm** | Gestionnaire de paquets rapide |
-| **ESLint** | Linter JavaScript/TypeScript |
-| **FontAwesome** | Bibliothèque d'icônes |
-| **Vercel** | Plateforme de déploiement |
+| Outil           | Description                    |
+| --------------- | ------------------------------ |
+| **pnpm**        | Gestionnaire de paquets rapide |
+| **ESLint**      | Linter JavaScript/TypeScript   |
+| **FontAwesome** | Bibliothèque d'icônes          |
+| **Vercel**      | Plateforme de déploiement      |
 
 ---
 
@@ -162,7 +162,8 @@ CONTACT_RECEIVER="votre-email@exemple.fr"
 
 ```
 
-⚠️ **Important** : 
+⚠️ **Important** :
+
 - Pour SMTP avec **Hostinger**, utilisez votre mot de passe email normal
 - Pour SMTP avec **Gmail**, vous devez créer un **App Password** (voir section ci-dessous)
 - Les tarifs sont générés dynamiquement depuis le fichier JSON, pas d'image externe
@@ -251,27 +252,27 @@ cam/
 
 ### Variables d'environnement
 
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_SITE_NAME` | Nom du site/entreprise | `CAM` |
-| `NEXT_PUBLIC_SITE_EMAIL` | Email public du site | `contact@cam.fr` |
-| `NEXT_PUBLIC_SITE_PHONE` | Téléphone | `+33 6 00 00 00 00` |
-| `NEXT_PUBLIC_SITE_ADDRESS` | Adresse complète | `123 Rue Example, 13000 Ville` |
-| `NEXT_PUBLIC_CITY` | Ville d'intervention | `Salon-de-Provence` |
-| `NEXT_PUBLIC_RAYON_INTERVENTION` | Rayon en km | `30` |
-| `NEXT_PUBLIC_SIRET` | Numéro SIRET (14 chiffres) | `12345678901234` |
-| `NEXT_PUBLIC_OWNER_NAME` | Nom complet du propriétaire | `Christophe Dupont` |
-| `NEXT_PUBLIC_CAL_COM_URL` | URL complète de l'iframe Cal.com | `https://cal.com/username?theme=dark&embed=true` |
-| `NEXT_PUBLIC_CAL_COM_USERNAME` | Username Cal.com | `votre-username` |
-| `SMTP_HOST` | Serveur SMTP (Hostinger, Gmail, etc.) | `smtp.hostinger.com` |
-| `SMTP_PORT` | Port SMTP (465 pour SSL, 587 pour TLS) | `465` |
-| `SMTP_USER` | Identifiant SMTP (adresse email) | `contact@votre-domaine.fr` |
-| `SMTP_PASS` | Mot de passe SMTP | `votre-mot-de-passe` |
-| `SMTP_FROM` | Adresse d'envoi avec nom | `Garage <contact@votre-domaine.fr>` |
-| `CONTACT_RECEIVER` | Destinataire des messages clients | `votre-email@exemple.fr` |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp (format international) | `33600000000` |
-| `NEXT_PUBLIC_AUTODOC_REF_CODE` | Code parrainage Autodoc | `votre-code` |
-| `NEXT_PUBLIC_AUTODOC_REF_URL` | URL Autodoc | `https://www.auto-doc.fr/` |
+| Variable                         | Description                            | Exemple                                          |
+| -------------------------------- | -------------------------------------- | ------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_NAME`          | Nom du site/entreprise                 | `CAM`                                            |
+| `NEXT_PUBLIC_SITE_EMAIL`         | Email public du site                   | `contact@cam.fr`                                 |
+| `NEXT_PUBLIC_SITE_PHONE`         | Téléphone                              | `+33 6 00 00 00 00`                              |
+| `NEXT_PUBLIC_SITE_ADDRESS`       | Adresse complète                       | `123 Rue Example, 13000 Ville`                   |
+| `NEXT_PUBLIC_CITY`               | Ville d'intervention                   | `Salon-de-Provence`                              |
+| `NEXT_PUBLIC_RAYON_INTERVENTION` | Rayon en km                            | `30`                                             |
+| `NEXT_PUBLIC_SIRET`              | Numéro SIRET (14 chiffres)             | `12345678901234`                                 |
+| `NEXT_PUBLIC_OWNER_NAME`         | Nom complet du propriétaire            | `Christophe Dupont`                              |
+| `NEXT_PUBLIC_CAL_COM_URL`        | URL complète de l'iframe Cal.com       | `https://cal.com/username?theme=dark&embed=true` |
+| `NEXT_PUBLIC_CAL_COM_USERNAME`   | Username Cal.com                       | `votre-username`                                 |
+| `SMTP_HOST`                      | Serveur SMTP (Hostinger, Gmail, etc.)  | `smtp.hostinger.com`                             |
+| `SMTP_PORT`                      | Port SMTP (465 pour SSL, 587 pour TLS) | `465`                                            |
+| `SMTP_USER`                      | Identifiant SMTP (adresse email)       | `contact@votre-domaine.fr`                       |
+| `SMTP_PASS`                      | Mot de passe SMTP                      | `votre-mot-de-passe`                             |
+| `SMTP_FROM`                      | Adresse d'envoi avec nom               | `Garage <contact@votre-domaine.fr>`              |
+| `CONTACT_RECEIVER`               | Destinataire des messages clients      | `votre-email@exemple.fr`                         |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER`    | Numéro WhatsApp (format international) | `33600000000`                                    |
+| `NEXT_PUBLIC_AUTODOC_REF_CODE`   | Code parrainage Autodoc                | `votre-code`                                     |
+| `NEXT_PUBLIC_AUTODOC_REF_URL`    | URL Autodoc                            | `https://www.auto-doc.fr/`                       |
 
 ### Configuration Next.js (next.config.ts)
 
@@ -315,13 +316,13 @@ SMTP_PASS="votre-app-password-16-caracteres"
 
 ## 🧰 Scripts disponibles
 
-| Commande | Description |
-|----------|-------------|
-| `pnpm install` | Installe les dépendances |
-| `pnpm run dev` | Démarre le serveur de développement |
-| `pnpm run build` | Build pour la production |
-| `pnpm start` | Lance le serveur de production |
-| `pnpm run lint` | Vérifie le code avec ESLint |
+| Commande         | Description                         |
+| ---------------- | ----------------------------------- |
+| `pnpm install`   | Installe les dépendances            |
+| `pnpm run dev`   | Démarre le serveur de développement |
+| `pnpm run build` | Build pour la production            |
+| `pnpm start`     | Lance le serveur de production      |
+| `pnpm run lint`  | Vérifie le code avec ESLint         |
 
 ---
 
@@ -346,6 +347,7 @@ SMTP_PASS="votre-app-password-16-caracteres"
 ### Configuration automatique
 
 Vercel détecte Next.js automatiquement :
+
 - **Node version** : 20.x (requis pour Next.js 16+)
 - **Build command** : `next build`
 - **Install command** : `pnpm install`
@@ -368,24 +370,28 @@ Vercel détecte Next.js automatiquement :
 ### SEO Avancé
 
 #### Métadonnées complètes
+
 - ✅ **Title & Description** : Optimisés pour chaque page
 - ✅ **Open Graph** : Partage sur réseaux sociaux (Facebook, Twitter)
 - ✅ **Canonical URLs** : Évite le duplicate content
 - ✅ **Attribut lang** : `lang="fr"` sur `<html>`
 
 #### Structure et indexation
+
 - ✅ **Sitemap XML** : `/sitemap.xml` généré automatiquement
 - ✅ **Robots.txt** : `/robots.txt` pour les crawlers
 - ✅ **Structure sémantique** : HTML5 (`<header>`, `<nav>`, `<main>`, `<footer>`, `<article>`)
 - ✅ **Headings hiérarchiques** : H1 → H2 → H3 respectés
 
 #### Schema.org (Structured Data)
+
 - ✅ **LocalBusiness** : Informations du garage (nom, adresse, téléphone)
 - ✅ **Service** : Liste des prestations avec prix
 - ✅ **Organization** : Identité de l'entreprise
 - ✅ **BreadcrumbList** : Fil d'Ariane
 
 #### Performance SEO
+
 - ✅ **Core Web Vitals** : LCP, FID, CLS optimisés
 - ✅ **Lighthouse Score** : 95+ sur toutes les pages
 - ✅ **Mobile-First** : Indexation mobile prioritaire
@@ -393,6 +399,7 @@ Vercel détecte Next.js automatiquement :
 ### PWA (Progressive Web App)
 
 #### Manifest Web App
+
 ```json
 {
   "name": "CAM - Mécanicien à Domicile",
@@ -417,6 +424,7 @@ Vercel détecte Next.js automatiquement :
 ```
 
 #### Fonctionnalités PWA
+
 - ✅ **Installation native** : Prompts personnalisés iOS (Safari) et Android (Chrome)
 - ✅ **Détection intelligente** : Message spécifique si l'utilisateur est sur Chrome iOS (redirection vers Safari)
 - ✅ **Mode standalone** : Fonctionne comme une app native
@@ -426,6 +434,7 @@ Vercel détecte Next.js automatiquement :
 - ✅ **LocalStorage** : Mémorisation du refus pendant 7 jours
 
 #### Avantages pour l'utilisateur
+
 - 📱 **Installation rapide** : Un clic pour ajouter à l'écran d'accueil
 - 🚀 **Chargement instantané** : Cache des ressources statiques
 - 📶 **Hors ligne** : Accès aux pages visitées même sans connexion
@@ -450,6 +459,7 @@ Pour une documentation complète du projet, consultez :
 - **[GUIDE.md](./GUIDE.md)** : Guide complet avec architecture, maintenance, troubleshooting
 
 Le GUIDE.md contient :
+
 - Explication détaillée de chaque page et composant
 - Configuration Cal.com, Nodemailer
 - Instructions de maintenance et évolutions
@@ -476,36 +486,37 @@ Le GUIDE.md contient :
 
 #### Logique des durées et réservabilité
 
-| Type de durée | Valeur | Affichage | Réservable ? | Usage |
-|--------------|--------|-----------|--------------|-------|
-| **Durée fixe** | `120` (nombre) | `⏱ 2h` | ✅ Oui | Intervention standardisée |
-| **Sur devis** | `null` | `⏱ Sur devis` | ❌ Non | Dépend du véhicule/diagnostic |
-| **Variable** | `"Variable"` | `⏱ Variable` | ❌ Non | Durée imprévisible |
+| Type de durée  | Valeur         | Affichage     | Réservable ? | Usage                         |
+| -------------- | -------------- | ------------- | ------------ | ----------------------------- |
+| **Durée fixe** | `120` (nombre) | `⏱ 2h`        | ✅ Oui       | Intervention standardisée     |
+| **Sur devis**  | `null`         | `⏱ Sur devis` | ❌ Non       | Dépend du véhicule/diagnostic |
+| **Variable**   | `"Variable"`   | `⏱ Variable`  | ❌ Non       | Durée imprévisible            |
 
 **Règle importante** : Seules les interventions avec une **durée numérique** sont réservables sur la page booking.
 
 #### Logique des prix
 
-| Type de prix | Valeur | Affichage | Exemple d'usage |
-|-------------|--------|-----------|------------------|
-| **Prix fixe** | `30` (nombre) | `30€` | Prix standard connu |
+| Type de prix     | Valeur              | Affichage         | Exemple d'usage              |
+| ---------------- | ------------------- | ----------------- | ---------------------------- |
+| **Prix fixe**    | `30` (nombre)       | `30€`             | Prix standard connu          |
 | **Prix minimum** | `"À partir de 60€"` | `À partir de 60€` | Prix variable selon véhicule |
-| **Sur devis** | `null` | `Sur devis` | Prix totalement variable |
+| **Sur devis**    | `null`              | `Sur devis`       | Prix totalement variable     |
 
 **Note** : Le prix n'affecte PAS la réservabilité. Une intervention avec `prix: null` mais `duree: 120` reste réservable.
 
 #### Code couleur automatique (basé sur la durée)
 
-| Couleur | Durée | Badge | Usage |
-|---------|-------|-------|-------|
-| 🟢 **Vert** | ≤ 2h30 (150 min) | Bordure + badge verts | Interventions rapides |
+| Couleur       | Durée                     | Badge                   | Usage                  |
+| ------------- | ------------------------- | ----------------------- | ---------------------- |
+| 🟢 **Vert**   | ≤ 2h30 (150 min)          | Bordure + badge verts   | Interventions rapides  |
 | 🟠 **Orange** | 2h30 - 3h30 (150-210 min) | Bordure + badge oranges | Interventions moyennes |
-| 🔴 **Rouge** | > 3h30 (210 min) | Bordure + badge rouges | Interventions longues |
-| ⚪ **Gris** | `null` ou non numérique | Bordure + badge gris | Sur devis / Variable |
+| 🔴 **Rouge**  | > 3h30 (210 min)          | Bordure + badge rouges  | Interventions longues  |
+| ⚪ **Gris**   | `null` ou non numérique   | Bordure + badge gris    | Sur devis / Variable   |
 
 #### Tri automatique
 
 Les interventions sont automatiquement triées par **durée croissante** dans chaque catégorie :
+
 1. Interventions rapides en premier (30 min, 45 min, 60 min...)
 2. Interventions longues ensuite
 3. Interventions "Sur devis" en dernier
@@ -513,35 +524,39 @@ Les interventions sont automatiquement triées par **durée croissante** dans ch
 #### Exemples pratiques
 
 **Intervention réservable avec prix variable :**
+
 ```json
 {
   "service": "Pompe à injection",
-  "duree": 240,  // ✅ Réservable (durée connue)
-  "prix": "À partir de 100€"  // Prix varie selon modèle
+  "duree": 240, // ✅ Réservable (durée connue)
+  "prix": "À partir de 100€" // Prix varie selon modèle
 }
 ```
 
 **Intervention sur devis (non réservable) :**
+
 ```json
 {
   "service": "Capteur PMH",
-  "duree": null,  // ❌ Non réservable
-  "prix": "À partir de 35€"  // Peut quand même indiquer un prix minimum
+  "duree": null, // ❌ Non réservable
+  "prix": "À partir de 35€" // Peut quand même indiquer un prix minimum
 }
 ```
 
 **Intervention standard (réservable) :**
+
 ```json
 {
   "service": "Vidange moteur",
-  "duree": 35,  // ✅ Réservable
-  "prix": 30  // Prix fixe
+  "duree": 35, // ✅ Réservable
+  "prix": 30 // Prix fixe
 }
 ```
 
 ### Page Tarifs dynamique
 
 Les tarifs sont générés automatiquement depuis `src/app/data/services.json` :
+
 - **Recherche en temps réel** : Filtre par nom, catégorie ou description
 - **Code couleur intelligent** : Basé sur la durée (vert/orange/rouge/gris)
 - **Tri automatique** : Par durée croissante dans chaque catégorie
@@ -556,18 +571,21 @@ Les tarifs sont générés automatiquement depuis `src/app/data/services.json` :
 La page booking offre **deux modes de navigation** :
 
 #### Mode 1 : Recherche directe
+
 - Barre de recherche globale (nom, description, catégorie)
 - Idéal pour les utilisateurs qui savent ce qu'ils cherchent
 - Résultats filtrés en temps réel
 - Tri automatique par durée croissante
 
 #### Mode 2 : Navigation par catégorie
+
 - Sélection d'une catégorie (Entretien, Freinage, Moteur, etc.)
 - Affichage des interventions de cette catégorie
 - Sélection multiple avec code couleur
 - Option "Autre / Sur mesure" avec slider (1h à 8h)
 
 #### Fonctionnalités communes
+
 1. **Filtrage automatique** : Seules les interventions avec durée numérique sont réservables
 2. **Calcul automatique** : Durée totale calculée en temps réel
 3. **Redirection Cal.com** : Vers l'événement correspondant (1h, 1h30, 2h, etc.)
@@ -579,6 +597,7 @@ La page booking offre **deux modes de navigation** :
 ### Base de données JSON
 
 Le fichier `services.json` contient tous les services :
+
 ```json
 {
   "categorie": "Entretien",
@@ -590,6 +609,7 @@ Le fichier `services.json` contient tous les services :
 ```
 
 Utilisé par :
+
 - Page **booking** : Filtrage et sélection des interventions réservables
 - Page **tarifs** : Affichage complet avec recherche, tri et code couleur
 
@@ -616,6 +636,7 @@ Utilisé par :
 ### Configuration Cal.com requise
 
 Créer les événements suivants sur Cal.com :
+
 - `/1h` - 1 heure
 - `/1h30` - 1 heure 30
 - `/2h` - 2 heures

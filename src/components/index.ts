@@ -25,12 +25,11 @@ export { default as Header } from "./layout/Header";
 export { default as CategoryAccordion } from "./categories/CategoryAccordion";
 export { default as ContactForm } from "./forms/ContactForm";
 export { default as InfoModal } from "./modals/InfoModal";
+export { default as ConceptBanner } from "./ui/ConceptBanner";
 export { default as NeonCAM } from "./ui/NeonCAM";
 export { default as Whatsapp } from "./whatsapp/Whatsapp";
 export { default as WhatsappFloat } from "./whatsapp/WhatsappFloat";
 
-export { default as InstallPWA } from "./PWA/InstallPWA";
-export { default as IOSInstallPrompt } from "./PWA/IOSInstallPrompt";
 
 export { default as ServiceCard } from "./services/ServiceCard";
 export { default as SearchField } from "./search/SearchField";

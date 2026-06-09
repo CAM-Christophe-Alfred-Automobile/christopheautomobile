@@ -36,6 +36,7 @@ export async function sendContactEmail({
   phone,
   subject,
   message,
+  attachments,
 }: {
   firstName: string;
   lastName: string;
@@ -43,6 +44,7 @@ export async function sendContactEmail({
   phone?: string;
   subject: string;
   message: string;
+  attachments?: { name: string; content: string }[];
 }) {
   // ✅ Vérifie que les infos nécessaires sont présentes
   if (!siteConfig.smtp.host || !siteConfig.contact.receiver) {
@@ -53,12 +55,19 @@ export async function sendContactEmail({
 
   try {
     const full_name = `${firstName} ${lastName}`;
+    
+    const mailAttachments = attachments?.map(file => ({
+      filename: file.name,
+      content: file.content,
+      encoding: 'base64'
+    })) || [];
 
     await transporter.sendMail({
       from: siteConfig.smtp.from, // ✅ Adresse d’envoi centralisée
       to: siteConfig.contact.receiver, // ✅ Destinataire du site
       replyTo: email,
       subject: `Contact (${siteConfig.name}) : ${subject}`, // ✅ inclut le nom du site
+      attachments: mailAttachments,
       html: `
         <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
           <div style="max-width: 600px; margin: auto; background-color: white; padding: 20px; border-radius: 8px;">
