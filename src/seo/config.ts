@@ -58,7 +58,8 @@ export const seoConfig = {
   // 🌐 Réseaux sociaux & Liens externes
   socialLinks: [
     "https://www.pappers.fr/entreprise/alfred-christophe-888962883",
-    "https://annuaire-entreprises.data.gouv.fr/etablissement/88896288300037"
+    "https://annuaire-entreprises.data.gouv.fr/etablissement/88896288300037",
+    "https://www.pagesjaunes.fr/pros/64414245"
   ],
   googleBusinessUrl: "https://www.google.com/search?q=Christophe+AutoMobile+(CAM)&kgmid=/g/11mrhqnz4m",
   siret: "88896288300037",
