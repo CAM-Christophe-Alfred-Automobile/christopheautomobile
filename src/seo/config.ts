@@ -66,7 +66,7 @@ export const seoConfig = {
 
   // 💰 Prix & horaires
   priceRange: "€€",
-  openingHours: "Mo-Sa 08:00-19:00",
+  openingHours: "Mo-Fr 09:00-17:30",
 
   // 🏷️ Mots-clés SEO optimisés
   keywords: [
