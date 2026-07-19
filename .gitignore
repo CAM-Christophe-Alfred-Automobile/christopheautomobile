@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# claude code local config
+.claude/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -50,3 +53,5 @@ next-env.d.ts
 .flaskenv*
 !.env.project
 !.env.vault
+
+.git-credentials-local

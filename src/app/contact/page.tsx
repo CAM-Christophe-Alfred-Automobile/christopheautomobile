@@ -27,6 +27,7 @@ import { Header, Footer, ContactForm } from "@/components";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { siteConfig } from "@/config/site";
+import Whatsapp from "@/components/whatsapp/Whatsapp";
 /**
  * Chargement dynamique du composant MapZone
  *
@@ -77,17 +78,6 @@ export default function ContactPage() {
                   <div className="space-y-1 text-gray-300 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-blue-400 min-w-[70px]">
-                        Téléphone :
-                      </span>
-                      <a
-                        href={`tel:${siteConfig.phone}`}
-                        className="hover:text-amber-400 transition-colors underline"
-                      >
-                        {siteConfig.phone}
-                      </a>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-blue-400 min-w-[70px]">
                         Mail :
                       </span>
                       <a
@@ -99,10 +89,29 @@ export default function ContactPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-blue-400 min-w-[70px]">
+                        Téléphone :
+                      </span>
+                      <a
+                        href={`tel:${siteConfig.phone}`}
+                        className="hover:text-amber-400 transition-colors underline"
+                      >
+                        {siteConfig.phone}
+                      </a>
+                      <span className="text-gray-500">(réponse plus rapide par WhatsApp)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-blue-400 min-w-[70px]">
                         Localisation :
                       </span>
                       <span>{siteConfig.city}</span>
                     </div>
+                  </div>
+                  <div className="mt-3">
+                    <Whatsapp
+                      message="Bonjour Christophe, j'aimerais avoir des informations."
+                      label="Écrire sur WhatsApp"
+                      size="sm"
+                    />
                   </div>
                 </div>
 

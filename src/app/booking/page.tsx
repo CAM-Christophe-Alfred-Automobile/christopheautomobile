@@ -486,6 +486,12 @@ export default function BookingPage() {
                       afin d&#39;établir avec lui la durée estimée des travaux.
                     </p>
                     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-3" role="group" aria-label="Options de contact">
+                      <Whatsapp
+                        message="Bonjour Christophe, j'aimerais réserver une intervention personnalisée. Pouvez-vous m'aider à déterminer la durée nécessaire ?"
+                        label="WhatsApp (réponse rapide)"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      />
                       <a
                         href="/contact"
                         className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm transition-colors border border-gray-600"
@@ -509,7 +515,7 @@ export default function BookingPage() {
                       </a>
                       <a
                         href={`tel:${siteConfig.phone.replace(/\s/g, "")}`}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-sm transition-colors border border-amber-500"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm transition-colors border border-gray-600"
                         aria-label="Appeler Christophe au téléphone"
                       >
                         <svg
@@ -528,12 +534,6 @@ export default function BookingPage() {
                         </svg>
                         <span>Appeler</span>
                       </a>
-                      <Whatsapp
-                        message="Bonjour Christophe, j'aimerais réserver une intervention personnalisée. Pouvez-vous m'aider à déterminer la durée nécessaire ?"
-                        label="WhatsApp"
-                        size="sm"
-                        className="w-full sm:w-auto !bg-gray-700 hover:!bg-gray-600 !border !border-gray-600"
-                      />
                     </div>
                     
                     <div className="mt-4 pt-3 border-t border-red-500/30">
@@ -956,9 +956,13 @@ export default function BookingPage() {
                   contacter directement.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                  <Whatsapp
+                    message="Bonjour Christophe, je souhaite planifier une intervention longue (plus d'une journée)."
+                    label="Sur WhatsApp"
+                  />
                   <a
                     href="/contact"
-                    className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 transition px-6 py-3 rounded-lg font-semibold text-white shadow-md"
+                    className="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 transition px-6 py-3 rounded-lg font-semibold text-white shadow-md border border-gray-600"
                   >
                     <svg
                       className="w-5 h-5"
@@ -975,10 +979,6 @@ export default function BookingPage() {
                     </svg>
                     <span>Via la page Contact</span>
                   </a>
-                  <Whatsapp
-                    message="Bonjour Christophe, je souhaite planifier une intervention longue (plus d'une journée)."
-                    label="Sur WhatsApp"
-                  />
                 </div>
               </div>
             ) : (
