@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Client {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  phone         String?
+  email         String?
+  address       String?
+  notes         String?
+  abbyReference String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  vehicles Vehicle[]
+
+  @@index([lastName, firstName])
+}
+
+model Vehicle {
+  id       String  @id @default(cuid())
+  clientId String
+  client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  plate            String?
+  make             String?
+  model            String?
+  year             Int?
+  mileage          Int?
+  mileageUpdatedAt DateTime?
+  notes            String?
+
+  sold   Boolean   @default(false)
+  soldAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  interventions      Intervention[]
+  plannedRepairs     PlannedRepair[]
+  maintenanceRecords MaintenanceRecord[]
+
+  @@index([clientId])
+}
+
+model Intervention {
+  id        String   @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  endDate     DateTime? // si l'intervention s'étale sur plusieurs jours
+  description String
+  normalPrice Decimal? @db.Decimal(10, 2) // prix normal / de référence, avant remise
+  price       Decimal? @db.Decimal(10, 2) // prix final facturé au client
+  photos      String[] @default([]) // photos de pièces endommagées / notes manuscrites
+  photosBefore String[] @default([]) // état du véhicule avant intervention
+  photosAfter  String[] @default([]) // état du véhicule après intervention
+  notes       String? // points clés / outils spéciaux à prévoir la prochaine fois
+  vehicleCondition String? // annexe : état constaté (ex: plaquettes ~50%, pneu AV usé)
+
+  mileage    Int? // kilométrage au moment de l'intervention
+  hoursSpent Decimal? @db.Decimal(5, 2) // temps passé, en heures
+
+  status          String    @default("done") // draft (en cours sur place) | done (terminée)
+  chronoStartedAt DateTime? // si non nul, le chrono tourne actuellement pour cette intervention
+
+  abbyInvoiceNumber String? @unique
+
+  maintenanceTypeId String?
+  maintenanceType   MaintenanceType? @relation(fields: [maintenanceTypeId], references: [id])
+
+  partsUsed PartUsed[]
+  payments  Payment[]
+
+  createdAt DateTime @default(now())
+
+  @@index([vehicleId])
+}
+
+model Payment {
+  id             String       @id @default(cuid())
+  interventionId String
+  intervention   Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+
+  amount Decimal @db.Decimal(10, 2)
+  method String? // "cash" | "card" | "transfer" | "check" — moyen de paiement reçu
+  date   DateTime @default(now()) // date à laquelle le paiement a été reçu (utilisé pour la synchro espèces vers Finance Copilot)
+  note   String? // ex: "Acompte avant intervention"
+
+  createdAt DateTime @default(now())
+
+  @@index([interventionId])
+}
+
+model PartUsed {
+  id             String       @id @default(cuid())
+  interventionId String
+  intervention   Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+
+  designation String // ex: "Huile moteur 5w30", "Filtre à huile"
+  reference   String? // référence pièce/produit
+  quantity    String? // ex: "4L", "1", "2 unités"
+  link        String? // lien produit exact (ex: page Autodoc de la pièce achetée)
+
+  price          Decimal? @db.Decimal(10, 2)
+  boughtByClient Boolean  @default(false) // pièce achetée par le client lui-même (vs. par CAM)
+
+  createdAt DateTime @default(now())
+
+  @@index([interventionId])
+}
+
+model PlannedRepair {
+  id        String  @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  description String
+  targetDate  DateTime?
+  status      String   @default("pending") // pending | done | cancelled
+  priority    String   @default("normal") // normal | urgent
+
+  partsNote      String? // pièces / huile prévues pour ce devis
+  estimatedPrice Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vehicleId])
+}
+
+model MaintenanceType {
+  id                    String  @id @default(cuid())
+  key                   String  @unique
+  label                 String
+  defaultIntervalMonths Int?
+  defaultIntervalKm     Int?
+  isActive              Boolean @default(true)
+  sortOrder             Int     @default(0)
+
+  interventions Intervention[]
+  records       MaintenanceRecord[]
+}
+
+model ShopSettings {
+  id         String   @id @default(cuid())
+  hourlyRate Decimal  @default(60) @db.Decimal(6, 2)
+  updatedAt  DateTime @updatedAt
+}
+
+model StockPart {
+  id           String  @id @default(cuid())
+  name         String
+  reference    String?
+  category     String?
+  quantity     Int     @default(1)
+  location     String? // emplacement dans le garage (ex: "Étagère A, bac 3")
+  condition    String? // Neuf | Bon état | Usé | Hors service
+  notes        String?
+  vehicleMake  String?
+  vehicleModel String?
+  vehicleYears String?
+  aiSummary    String? // résumé de l'identification IA (Gemini), modifiable
+
+  photos StockPhoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StockPhoto {
+  id          String    @id @default(cuid())
+  stockPartId String
+  stockPart   StockPart @relation(fields: [stockPartId], references: [id], onDelete: Cascade)
+
+  url String
+
+  createdAt DateTime @default(now())
+
+  @@index([stockPartId])
+}
+
+model MaintenanceRecord {
+  id        String  @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  maintenanceTypeId String
+  maintenanceType   MaintenanceType @relation(fields: [maintenanceTypeId], references: [id])
+
+  lastDoneDate           DateTime?
+  lastDoneMileage        Int?
+  intervalMonthsOverride Int?
+  intervalKmOverride     Int?
+  updatedByClient        Boolean @default(false) // true si signalé par le client via la fiche publique (à vérifier)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([vehicleId, maintenanceTypeId])
+}

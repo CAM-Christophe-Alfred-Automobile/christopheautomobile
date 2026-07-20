@@ -49,6 +49,12 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# local sqlite artifacts (production uses postgresql via DATABASE_URL)
+*.db
+*.db-shm
+*.db-wal
+/data/
+
 .env*
 .flaskenv*
 !.env.project

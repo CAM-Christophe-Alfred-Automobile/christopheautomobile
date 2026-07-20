@@ -27,10 +27,15 @@
 
 "use client";
 import { MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site";
 
 export default function WhatsAppFloatingButton() {
+  const pathname = usePathname();
   const whatsappLink = `https://wa.me/${siteConfig.whatsapp.number}`;
+
+  // Le CRM privé (/admin) a ses propres outils de contact — pas de widget du site public ici.
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 group">

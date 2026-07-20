@@ -43,6 +43,15 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["@heroicons/react", "@fortawesome/react-fontawesome"],
   },
 
+  // Autorise l'accès en développement depuis le réseau local (téléphone, etc.)
+  allowedDevOrigins: ["192.168.1.18"],
+
+  // Inclut le moteur Prisma (output custom) dans le bundle des routes admin,
+  // sinon Vercel ne trouve pas le Query Engine au runtime (rhel-openssl-3.0.x).
+  outputFileTracingIncludes: {
+    "/api/admin/**/*": ["./src/generated/prisma/**/*"],
+  },
+
   // Headers de sécurité et performance
   async headers() {
     return [
