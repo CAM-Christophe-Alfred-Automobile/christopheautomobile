@@ -275,9 +275,25 @@ export default function MentionsLegalesPage() {
             </div>
           </section>
 
-          {/* 9. CONTACT */}
+          {/* 9. ASSURANCE PROFESSIONNELLE */}
+          <section className="mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-semibold text-amber-600 mb-3 sm:mb-4">9. Assurance professionnelle</h2>
+            <div className="text-sm sm:text-base text-gray-300 space-y-2">
+              <p>
+                Dans le cadre de son activité de réparation et de vente de véhicules automobiles, {siteConfig.name}
+                est couvert par une assurance Responsabilité Civile Professionnelle et Responsabilité Civile Automobile.
+              </p>
+              <p><strong>Assureur :</strong> Groupama Assurances (contrat GARASSUR)</p>
+              <p><strong>Courtier :</strong> ETIK Assurance</p>
+              <p className="text-sm text-gray-400 mt-2">
+                ℹ️ Attestation d&apos;assurance disponible sur demande auprès de {siteConfig.name}.
+              </p>
+            </div>
+          </section>
+
+          {/* 10. CONTACT */}
           <section>
-            <h2 className="text-xl sm:text-2xl font-semibold text-amber-600 mb-3 sm:mb-4">9. Contact</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-amber-600 mb-3 sm:mb-4">10. Contact</h2>
             <div className="text-sm sm:text-base text-gray-300 space-y-2">
               <p>Pour toute question concernant ces mentions légales ou l&apos;utilisation de vos données personnelles, vous pouvez nous contacter :</p>
               <ul className="list-none ml-4 mt-3 space-y-2">

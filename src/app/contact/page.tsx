@@ -113,6 +113,9 @@ export default function ContactPage() {
                       size="sm"
                     />
                   </div>
+                  <p className="mt-3 text-xs text-gray-400 flex items-center gap-1.5">
+                    🛡️ Assuré Responsabilité Civile Professionnelle (Groupama)
+                  </p>
                 </div>
 
                 {/* Logo à droite - Visible uniquement sur desktop */}
