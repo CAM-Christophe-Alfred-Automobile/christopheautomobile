@@ -6,6 +6,7 @@ import SearchField from "@/components/search/SearchField";
 import AlertBadge from "@/components/admin/AlertBadge";
 import type { AlertStatus } from "@/services/admin/maintenanceAlerts";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 interface ClientRow {
   id: string;
@@ -71,6 +72,8 @@ export default function AdminClientsPage() {
         a.firstName.localeCompare(b.firstName, "fr", { sensitivity: "base" })
     );
   }, [clients, search]);
+
+  useScrollRestoration(!loading);
 
   return (
     <div>

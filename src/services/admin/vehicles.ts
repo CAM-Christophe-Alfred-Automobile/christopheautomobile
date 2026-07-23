@@ -26,6 +26,26 @@ export async function setVehicleSold(id: string, sold: boolean) {
   });
 }
 
+export async function reassignVehicleOwner(vehicleId: string, newClientId: string) {
+  const vehicle = await prisma.vehicle.findUniqueOrThrow({
+    where: { id: vehicleId },
+    include: { client: true },
+  });
+  const previousOwnerName = [vehicle.client.firstName, vehicle.client.lastName !== "." ? vehicle.client.lastName : null]
+    .filter(Boolean)
+    .join(" ");
+
+  return prisma.vehicle.update({
+    where: { id: vehicleId },
+    data: {
+      clientId: newClientId,
+      previousOwnerName,
+      sold: false,
+      soldAt: null,
+    },
+  });
+}
+
 export async function addVehicle(clientId: string, data: VehicleInput) {
   return prisma.vehicle.create({
     data: {

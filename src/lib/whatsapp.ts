@@ -53,6 +53,20 @@ export function buildFinishWorkMessage(params: {
   return parts.join("\n\n");
 }
 
+export function buildPartsOrderMessage(params: {
+  firstName: string;
+  vehicleLabel: string;
+  parts: { designation: string; link: string }[];
+}): string {
+  const { firstName, vehicleLabel, parts } = params;
+  const lines = [
+    `Bonjour ${firstName}, ici CAM Christophe Auto-Mobile. Voici ${parts.length > 1 ? "les pièces" : "la pièce"} à commander pour votre ${vehicleLabel} :`,
+    ...parts.map((p) => `• ${p.designation} :\n${p.link}`),
+    "Dites-moi quand vous l'avez reçue pour qu'on planifie l'intervention.",
+  ];
+  return lines.join("\n\n");
+}
+
 export function buildQuoteMessage(params: {
   firstName: string;
   vehicleLabel: string;

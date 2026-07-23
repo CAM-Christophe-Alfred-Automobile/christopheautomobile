@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import AlertBadge from "@/components/admin/AlertBadge";
 import VehicleQrCode from "@/components/admin/VehicleQrCode";
 import { computeMaintenanceAlert } from "@/services/admin/maintenanceAlerts";
-import { buildWhatsAppLink, buildRelanceMessage, buildQuoteMessage } from "@/lib/whatsapp";
+import { buildWhatsAppLink, buildRelanceMessage, buildQuoteMessage, buildPartsOrderMessage } from "@/lib/whatsapp";
+import { MAINTENANCE_PART_HINTS, buildSupplierSearchUrl } from "@/lib/maintenancePartHints";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -39,6 +40,7 @@ interface PartUsed {
   link: string | null;
   price: string | number | null;
   boughtByClient: boolean;
+  stockPartId: string | null;
 }
 
 interface Payment {
@@ -60,6 +62,7 @@ interface Intervention {
   photosBefore: string[];
   photosAfter: string[];
   notes: string | null;
+  toolLink: string | null;
   vehicleCondition: string | null;
   mileage: number | null;
   hoursSpent: string | number | null;
@@ -103,6 +106,7 @@ interface Vehicle {
   mileage: number | null;
   sold: boolean;
   soldAt: string | null;
+  previousOwnerName: string | null;
   interventions: Intervention[];
   plannedRepairs: PlannedRepair[];
   maintenanceRecords: MaintenanceRecord[];
@@ -116,6 +120,7 @@ interface ClientDetail {
   email: string | null;
   address: string | null;
   notes: string | null;
+  isPersonal: boolean;
   vehicles: Vehicle[];
 }
 
@@ -295,11 +300,154 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           clientPhone={client.phone}
           clientEmail={client.email}
           hourlyRate={hourlyRate}
+          isPersonal={client.isPersonal}
           onChanged={load}
         />
       ))}
 
       <AddVehicleForm clientId={client.id} onAdded={load} />
+    </div>
+  );
+}
+
+function ReassignOwnerButton({ vehicleId, vehicleTitle }: { vehicleId: string; vehicleTitle: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<{ id: string; firstName: string; lastName: string }[]>([]);
+  const [newFirstName, setNewFirstName] = useState("");
+  const [newLastName, setNewLastName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open || !query.trim()) {
+      setResults([]);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      fetch(`/api/admin/clients?q=${encodeURIComponent(query)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success) setResults(d.clients.slice(0, 6));
+        });
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [query, open]);
+
+  async function reassignTo(newClientId: string) {
+    if (!confirm(`Changer le propriétaire de "${vehicleTitle}" ?`)) return;
+    setSaving(true);
+    const res = await fetch(`/api/admin/vehicles/${vehicleId}/reassign`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ newClientId }),
+    }).then((r) => r.json());
+    setSaving(false);
+    if (res.success) router.push(`/admin/clients/${res.vehicle.clientId}`);
+  }
+
+  async function createAndReassign(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newFirstName || !newLastName) return;
+    if (
+      !confirm(
+        `Changer le propriétaire de "${vehicleTitle}" vers un nouveau client "${newFirstName} ${newLastName}" ?`
+      )
+    )
+      return;
+    setSaving(true);
+    const res = await fetch(`/api/admin/vehicles/${vehicleId}/reassign`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        newClient: { firstName: newFirstName, lastName: newLastName, phone: newPhone || null },
+      }),
+    }).then((r) => r.json());
+    setSaving(false);
+    if (res.success) router.push(`/admin/clients/${res.vehicle.clientId}`);
+  }
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="text-xs text-gray-400 hover:text-white cursor-pointer">
+        🔄 Changer de propriétaire
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      onClick={() => setOpen(false)}
+    >
+      <div
+        className="bg-gray-900 border border-gray-700 rounded-xl p-4 space-y-3 max-w-sm w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-gray-300">Changer de propriétaire</p>
+          <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-300 cursor-pointer text-sm">
+            ✕
+          </button>
+        </div>
+        <div>
+          <label className="block text-[11px] text-gray-500 mb-0.5">Client existant</label>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher un client..."
+            className={inputClass}
+          />
+          {results.length > 0 && (
+            <ul className="mt-1 border border-gray-700 rounded-lg overflow-hidden">
+              {results.map((c) => (
+                <li key={c.id}>
+                  <button
+                    onClick={() => reassignTo(c.id)}
+                    disabled={saving}
+                    className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-800 cursor-pointer disabled:opacity-50"
+                  >
+                    {c.firstName} {c.lastName !== "." ? c.lastName : ""}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="pt-2 border-t border-gray-800">
+          <p className="text-[11px] text-gray-500 mb-1">Ou nouveau client</p>
+          <form onSubmit={createAndReassign} className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                placeholder="Prénom"
+                value={newFirstName}
+                onChange={(e) => setNewFirstName(e.target.value)}
+                className={inputClass}
+              />
+              <input
+                placeholder="Nom"
+                value={newLastName}
+                onChange={(e) => setNewLastName(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <input
+              placeholder="Téléphone (optionnel)"
+              value={newPhone}
+              onChange={(e) => setNewPhone(e.target.value)}
+              className={inputClass}
+            />
+            <button
+              type="submit"
+              disabled={saving || !newFirstName || !newLastName}
+              className="w-full text-xs px-3 py-1.5 rounded bg-amber-500 text-gray-900 font-semibold disabled:opacity-50 cursor-pointer"
+            >
+              Créer et assigner
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
@@ -311,6 +459,7 @@ function VehiclePanel({
   clientPhone,
   clientEmail,
   hourlyRate,
+  isPersonal,
   onChanged,
 }: {
   vehicle: Vehicle;
@@ -319,6 +468,7 @@ function VehiclePanel({
   clientPhone: string | null;
   clientEmail: string | null;
   hourlyRate: number;
+  isPersonal: boolean;
   onChanged: () => void;
 }) {
   const title = [vehicle.make, vehicle.model, vehicle.plate].filter(Boolean).join(" ") || "Véhicule";
@@ -456,6 +606,7 @@ function VehiclePanel({
             <button onClick={startEditVehicle} className="text-xs text-gray-400 hover:text-white cursor-pointer">
               Modifier
             </button>
+            <ReassignOwnerButton vehicleId={vehicle.id} vehicleTitle={title} />
             <button
               onClick={toggleSold}
               className="text-xs text-gray-400 hover:text-white cursor-pointer"
@@ -472,6 +623,10 @@ function VehiclePanel({
         </div>
       )}
 
+      {vehicle.previousOwnerName && (
+        <p className="text-[11px] text-gray-500 -mt-4">Anciennement à : {vehicle.previousOwnerName}</p>
+      )}
+
       {vehicle.sold ? (
         <p className="text-xs text-blue-400">
           Véhicule vendu{vehicle.soldAt ? ` le ${new Date(vehicle.soldAt).toLocaleDateString("fr-FR")}` : ""} — plus
@@ -483,6 +638,7 @@ function VehiclePanel({
           maintenanceTypes={maintenanceTypes}
           clientFirstName={clientFirstName}
           clientPhone={clientPhone}
+          isPersonal={isPersonal}
           onChanged={onChanged}
         />
       )}
@@ -490,6 +646,9 @@ function VehiclePanel({
         vehicle={vehicle}
         maintenanceTypes={maintenanceTypes}
         hourlyRate={hourlyRate}
+        isPersonal={isPersonal}
+        clientFirstName={clientFirstName}
+        clientPhone={clientPhone}
         onChanged={onChanged}
       />
       <PlannedRepairsPanel
@@ -497,6 +656,7 @@ function VehiclePanel({
         clientFirstName={clientFirstName}
         clientPhone={clientPhone}
         clientEmail={clientEmail}
+        isPersonal={isPersonal}
         onChanged={onChanged}
       />
     </section>
@@ -508,16 +668,19 @@ function MaintenancePanel({
   maintenanceTypes,
   clientFirstName,
   clientPhone,
+  isPersonal,
   onChanged,
 }: {
   vehicle: Vehicle;
   maintenanceTypes: MaintenanceType[];
   clientFirstName: string;
   clientPhone: string | null;
+  isPersonal: boolean;
   onChanged: () => void;
 }) {
   const vehicleLabel = [vehicle.make, vehicle.model, vehicle.plate].filter(Boolean).join(" ") || "votre véhicule";
   const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
+  const [partsHintTypeId, setPartsHintTypeId] = useState<string | null>(null);
   const [lastDoneDate, setLastDoneDate] = useState("");
   const [lastDoneMileage, setLastDoneMileage] = useState("");
   const [intervalOverride, setIntervalOverride] = useState("");
@@ -583,7 +746,7 @@ function MaintenancePanel({
                         🙋 Client
                       </span>
                     )}
-                    {(alert.status === "soon" || alert.status === "overdue") && clientPhone && (
+                    {!isPersonal && (alert.status === "soon" || alert.status === "overdue") && clientPhone && (
                       <a
                         href={buildWhatsAppLink(
                           clientPhone,
@@ -606,6 +769,48 @@ function MaintenancePanel({
                     <AlertBadge status={alert.status} />
                   </div>
                 </div>
+
+                {MAINTENANCE_PART_HINTS[type.key] && (
+                  <div className="mt-1">
+                    <button
+                      onClick={() => setPartsHintTypeId(partsHintTypeId === type.id ? null : type.id)}
+                      className="text-[11px] text-gray-500 hover:text-amber-400 cursor-pointer"
+                    >
+                      🛒 Pièces nécessaires {partsHintTypeId === type.id ? "▲" : "▼"}
+                    </button>
+                    {partsHintTypeId === type.id && (
+                      <div className="mt-1 space-y-1">
+                        {vehicle.plate && (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(vehicle.plate!);
+                              window.open("https://www.auto-doc.fr/", "_blank");
+                            }}
+                            className="text-[11px] text-green-400 hover:text-green-300 cursor-pointer text-left"
+                            title="Copie la plaque et ouvre Autodoc — colle-la dans le champ immatriculation pour filtrer toutes les pièces sur ce véhicule exact"
+                          >
+                            🚗 Copier la plaque ({vehicle.plate}) + ouvrir Autodoc
+                          </button>
+                        )}
+                        <ul className="space-y-0.5">
+                          {MAINTENANCE_PART_HINTS[type.key].map((partTerm) => (
+                            <li key={partTerm}>
+                              <a
+                                href={buildSupplierSearchUrl(partTerm, vehicle.make, vehicle.model)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-amber-400 hover:text-amber-300"
+                                title={`Chercher "${partTerm}" pour ce véhicule sur Autodoc`}
+                              >
+                                🔍 {partTerm}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {editingTypeId === type.id ? (
                   <div className="mt-2 space-y-2">
@@ -703,11 +908,17 @@ function InterventionHistory({
   vehicle,
   maintenanceTypes,
   hourlyRate,
+  isPersonal,
+  clientFirstName,
+  clientPhone,
   onChanged,
 }: {
   vehicle: Vehicle;
   maintenanceTypes: MaintenanceType[];
   hourlyRate: number;
+  isPersonal: boolean;
+  clientFirstName: string;
+  clientPhone: string | null;
   onChanged: () => void;
 }) {
   const router = useRouter();
@@ -1165,27 +1376,29 @@ function InterventionHistory({
                 onChange={(e) => setHoursSpent(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-[11px] text-gray-500 mb-0.5">Prix €</label>
-              <div className="flex gap-1">
-                <input
-                  type="number"
-                  placeholder="Prix €"
-                  className={inputClass}
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={calculatePrice}
-                  disabled={!hoursSpent}
-                  title={`Calculer : heures × ${hourlyRate}€/h`}
-                  className="px-2 rounded-lg border border-gray-600 text-xs text-gray-300 hover:border-amber-500 hover:text-amber-400 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Calc.
-                </button>
+            {!isPersonal && (
+              <div>
+                <label className="block text-[11px] text-gray-500 mb-0.5">Prix €</label>
+                <div className="flex gap-1">
+                  <input
+                    type="number"
+                    placeholder="Prix €"
+                    className={inputClass}
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={calculatePrice}
+                    disabled={!hoursSpent}
+                    title={`Calculer : heures × ${hourlyRate}€/h`}
+                    className="px-2 rounded-lg border border-gray-600 text-xs text-gray-300 hover:border-amber-500 hover:text-amber-400 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Calc.
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* 8. Photos avant / après */}
@@ -1261,10 +1474,18 @@ function InterventionHistory({
                     Reprendre
                   </a>
                 </div>
-                <PaymentsSection intervention={i} onChanged={onChanged} />
+                {!isPersonal && <PaymentsSection intervention={i} onChanged={onChanged} />}
               </li>
             ) : (
-              <InterventionRow key={i.id} intervention={i} onChanged={onChanged} />
+              <InterventionRow
+                key={i.id}
+                intervention={i}
+                isPersonal={isPersonal}
+                clientFirstName={clientFirstName}
+                clientPhone={clientPhone}
+                vehicleLabel={[vehicle.make, vehicle.model, vehicle.plate].filter(Boolean).join(" ") || "votre véhicule"}
+                onChanged={onChanged}
+              />
             )
           )}
         </ul>
@@ -1275,9 +1496,17 @@ function InterventionHistory({
 
 function InterventionRow({
   intervention,
+  isPersonal,
+  clientFirstName,
+  clientPhone,
+  vehicleLabel,
   onChanged,
 }: {
   intervention: Intervention;
+  isPersonal: boolean;
+  clientFirstName: string;
+  clientPhone: string | null;
+  vehicleLabel: string;
   onChanged: () => void;
 }) {
   const [uploadingCategory, setUploadingCategory] = useState<"before" | "after" | "damage" | null>(null);
@@ -1286,6 +1515,7 @@ function InterventionRow({
   const damageFileInputRef = useRef<HTMLInputElement>(null);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesDraft, setNotesDraft] = useState(intervention.notes ?? "");
+  const [toolLinkDraft, setToolLinkDraft] = useState(intervention.toolLink ?? "");
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceDraft, setPriceDraft] = useState(intervention.price != null ? String(intervention.price) : "");
   const [normalPriceDraft, setNormalPriceDraft] = useState(
@@ -1300,6 +1530,32 @@ function InterventionRow({
     price: "",
     boughtByClient: false,
   });
+  const [stockResults, setStockResults] = useState<{ id: string; name: string; reference: string | null; quantity: number }[]>(
+    []
+  );
+  const [selectedStock, setSelectedStock] = useState<{ id: string; name: string; quantity: number } | null>(null);
+  const [quantityUsed, setQuantityUsed] = useState("1");
+
+  useEffect(() => {
+    if (selectedStock || !part.designation.trim()) {
+      setStockResults([]);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      fetch(`/api/admin/stock?q=${encodeURIComponent(part.designation)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success) setStockResults(d.parts.slice(0, 5));
+        });
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [part.designation, selectedStock]);
+
+  function selectStockPart(sp: { id: string; name: string; reference: string | null; quantity: number }) {
+    setPart((p) => ({ ...p, designation: sp.name, reference: sp.reference ?? p.reference }));
+    setSelectedStock({ id: sp.id, name: sp.name, quantity: sp.quantity });
+    setStockResults([]);
+  }
 
   async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>, category: "before" | "after" | "damage") {
     const file = e.target.files?.[0];
@@ -1342,7 +1598,7 @@ function InterventionRow({
     await fetch(`/api/admin/interventions/${intervention.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notes: notesDraft || null }),
+      body: JSON.stringify({ notes: notesDraft || null, toolLink: toolLinkDraft || null }),
     });
     setEditingNotes(false);
     onChanged();
@@ -1374,9 +1630,14 @@ function InterventionRow({
         link: part.link || null,
         price: part.price ? Number(part.price) : null,
         boughtByClient: part.boughtByClient,
+        stockPartId: selectedStock?.id ?? null,
+        quantityUsed: selectedStock && quantityUsed ? Number(quantityUsed) : null,
       }),
     });
     setPart({ designation: "", reference: "", quantity: "", link: "", price: "", boughtByClient: false });
+    setSelectedStock(null);
+    setStockResults([]);
+    setQuantityUsed("1");
     setShowPartForm(false);
     onChanged();
   }
@@ -1408,79 +1669,80 @@ function InterventionRow({
           — {intervention.description}
         </span>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {editingPrice ? (
-            <span className="flex items-center gap-1.5 flex-wrap justify-end">
-              <span className="flex items-center gap-1">
-                <span className="text-[10px] text-gray-500">Normal</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="—"
-                  className="w-16 px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
-                  value={normalPriceDraft}
-                  onChange={(e) => setNormalPriceDraft(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && savePrice()}
-                />
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="text-[10px] text-gray-500">Facturé</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  autoFocus
-                  className="w-16 px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
-                  value={priceDraft}
-                  onChange={(e) => setPriceDraft(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && savePrice()}
-                />
-              </span>
-              <button onClick={savePrice} className="text-green-400 hover:text-green-300 cursor-pointer text-xs" title="Enregistrer">
-                ✓
-              </button>
-              <button
-                onClick={() => {
-                  setPriceDraft(intervention.price != null ? String(intervention.price) : "");
-                  setNormalPriceDraft(intervention.normalPrice != null ? String(intervention.normalPrice) : "");
-                  setEditingPrice(false);
-                }}
-                className="text-gray-500 hover:text-gray-300 cursor-pointer text-xs"
-                title="Annuler"
-              >
-                ✕
-              </button>
-            </span>
-          ) : (
-            <button
-              onClick={() => setEditingPrice(true)}
-              className="text-right cursor-pointer"
-              title="Modifier le prix normal / facturé (celui utilisé sur le récapitulatif)"
-            >
-              {priceNum != null ? (
-                <span className="text-amber-400">
-                  {priceNum}€
-                  {totalPaid > 0 && (
-                    <span
-                      className="ml-1"
-                      title={
-                        remaining != null && remaining > 0.005
-                          ? `Payé ${totalPaid}€ — reste ${remaining.toFixed(2)}€`
-                          : "Payé intégralement"
-                      }
-                    >
-                      {remaining != null && remaining > 0.005 ? "🔶" : "✅"}
-                    </span>
-                  )}
-                  {discountPct != null && (
-                    <span className="text-gray-500 text-[10px] ml-1 block leading-tight">
-                      normal {normalPriceNum}€ · -{discountPct}%
-                    </span>
-                  )}
+          {!isPersonal &&
+            (editingPrice ? (
+              <span className="flex items-center gap-1.5 flex-wrap justify-end">
+                <span className="flex items-center gap-1">
+                  <span className="text-[10px] text-gray-500">Normal</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="—"
+                    className="w-16 px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
+                    value={normalPriceDraft}
+                    onChange={(e) => setNormalPriceDraft(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && savePrice()}
+                  />
                 </span>
-              ) : (
-                <span className="text-amber-400">+ prix</span>
-              )}
-            </button>
-          )}
+                <span className="flex items-center gap-1">
+                  <span className="text-[10px] text-gray-500">Facturé</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    autoFocus
+                    className="w-16 px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
+                    value={priceDraft}
+                    onChange={(e) => setPriceDraft(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && savePrice()}
+                  />
+                </span>
+                <button onClick={savePrice} className="text-green-400 hover:text-green-300 cursor-pointer text-xs" title="Enregistrer">
+                  ✓
+                </button>
+                <button
+                  onClick={() => {
+                    setPriceDraft(intervention.price != null ? String(intervention.price) : "");
+                    setNormalPriceDraft(intervention.normalPrice != null ? String(intervention.normalPrice) : "");
+                    setEditingPrice(false);
+                  }}
+                  className="text-gray-500 hover:text-gray-300 cursor-pointer text-xs"
+                  title="Annuler"
+                >
+                  ✕
+                </button>
+              </span>
+            ) : (
+              <button
+                onClick={() => setEditingPrice(true)}
+                className="text-right cursor-pointer"
+                title="Modifier le prix normal / facturé (celui utilisé sur le récapitulatif)"
+              >
+                {priceNum != null ? (
+                  <span className="text-amber-400">
+                    {priceNum}€
+                    {totalPaid > 0 && (
+                      <span
+                        className="ml-1"
+                        title={
+                          remaining != null && remaining > 0.005
+                            ? `Payé ${totalPaid}€ — reste ${remaining.toFixed(2)}€`
+                            : "Payé intégralement"
+                        }
+                      >
+                        {remaining != null && remaining > 0.005 ? "🔶" : "✅"}
+                      </span>
+                    )}
+                    {discountPct != null && (
+                      <span className="text-gray-500 text-[10px] ml-1 block leading-tight">
+                        normal {normalPriceNum}€ · -{discountPct}%
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-amber-400">+ prix</span>
+                )}
+              </button>
+            ))}
           <button
             onClick={deleteThisIntervention}
             className="text-gray-600 hover:text-red-400 cursor-pointer"
@@ -1502,7 +1764,7 @@ function InterventionRow({
         <div className="text-xs text-gray-500 mt-1 whitespace-pre-wrap">📋 {intervention.vehicleCondition}</div>
       )}
 
-      <PaymentsSection intervention={intervention} onChanged={onChanged} />
+      {!isPersonal && <PaymentsSection intervention={intervention} onChanged={onChanged} />}
 
       {(
         [
@@ -1563,6 +1825,23 @@ function InterventionRow({
               value={notesDraft}
               onChange={(e) => setNotesDraft(e.target.value)}
             />
+            <div className="flex gap-1">
+              <input
+                className={inputClass}
+                placeholder="Lien pour acheter l'outil spécial (si pas encore en ta possession)"
+                value={toolLinkDraft}
+                onChange={(e) => setToolLinkDraft(e.target.value)}
+              />
+              <a
+                href={`https://www.auto-doc.fr/search?keyword=${encodeURIComponent(notesDraft)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Chercher un outil sur Autodoc"
+                className="flex-shrink-0 px-2 flex items-center rounded-lg border border-gray-700 text-xs text-gray-400 hover:border-amber-500 hover:text-amber-400"
+              >
+                🔍
+              </a>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={saveNotes}
@@ -1573,6 +1852,7 @@ function InterventionRow({
               <button
                 onClick={() => {
                   setNotesDraft(intervention.notes ?? "");
+                  setToolLinkDraft(intervention.toolLink ?? "");
                   setEditingNotes(false);
                 }}
                 className="px-2 py-1 rounded border border-gray-600 text-xs cursor-pointer"
@@ -1581,13 +1861,26 @@ function InterventionRow({
               </button>
             </div>
           </div>
-        ) : intervention.notes ? (
-          <button
-            onClick={() => setEditingNotes(true)}
-            className="text-xs text-gray-400 hover:text-amber-400 cursor-pointer text-left whitespace-pre-wrap"
-          >
-            📝 {intervention.notes}
-          </button>
+        ) : intervention.notes || intervention.toolLink ? (
+          <div className="flex items-start gap-1.5">
+            <button
+              onClick={() => setEditingNotes(true)}
+              className="text-xs text-gray-400 hover:text-amber-400 cursor-pointer text-left whitespace-pre-wrap"
+            >
+              📝 {intervention.notes}
+            </button>
+            {intervention.toolLink && (
+              <a
+                href={intervention.toolLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Acheter l'outil spécial mentionné"
+                className="flex-shrink-0 text-amber-400 hover:text-amber-300"
+              >
+                🔧🔗
+              </a>
+            )}
+          </div>
         ) : (
           <button
             onClick={() => setEditingNotes(true)}
@@ -1606,6 +1899,9 @@ function InterventionRow({
                 key={p.id}
                 className="group inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border border-gray-700 bg-gray-800/50 text-gray-300"
               >
+                {p.stockPartId && (
+                  <span title="Décompté du stock">📦</span>
+                )}
                 {p.designation}
                 {p.quantity ? ` (${p.quantity})` : ""}
                 {p.reference ? ` — réf. ${p.reference}` : ""}
@@ -1626,6 +1922,24 @@ function InterventionRow({
                     🔗
                   </a>
                 )}
+                {p.link && !isPersonal && clientPhone && (
+                  <a
+                    href={buildWhatsAppLink(
+                      clientPhone,
+                      buildPartsOrderMessage({
+                        firstName: clientFirstName,
+                        vehicleLabel,
+                        parts: [{ designation: p.designation, link: p.link }],
+                      })
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Envoyer ce lien au client par WhatsApp pour qu'il commande la pièce"
+                    className="text-green-400 hover:text-green-300"
+                  >
+                    📤
+                  </a>
+                )}
                 <a
                   href={`/admin/parts-search?q=${encodeURIComponent(p.reference || p.designation)}`}
                   title="Rechercher cette pièce sur d'autres véhicules"
@@ -1644,15 +1958,80 @@ function InterventionRow({
             ))}
           </div>
         )}
+        {!isPersonal &&
+          clientPhone &&
+          intervention.partsUsed.filter((p) => p.link).length > 1 && (
+            <a
+              href={buildWhatsAppLink(
+                clientPhone,
+                buildPartsOrderMessage({
+                  firstName: clientFirstName,
+                  vehicleLabel,
+                  parts: intervention.partsUsed
+                    .filter((p): p is typeof p & { link: string } => !!p.link)
+                    .map((p) => ({ designation: p.designation, link: p.link })),
+                })
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mb-1 text-xs text-green-400 hover:text-green-300 cursor-pointer"
+            >
+              📤 Envoyer toutes les pièces au client par WhatsApp
+            </a>
+          )}
         {showPartForm ? (
           <form onSubmit={handleAddPart} className="grid sm:grid-cols-4 gap-1.5">
-            <input
-              placeholder="Pièce / huile (ex: Huile 5w30)"
-              required
-              className={`${inputClass} sm:col-span-2`}
-              value={part.designation}
-              onChange={(e) => setPart((p) => ({ ...p, designation: e.target.value }))}
-            />
+            <div className="sm:col-span-2 relative">
+              <input
+                placeholder="Pièce / huile (ex: Huile 5w30)"
+                required
+                className={inputClass}
+                value={part.designation}
+                onChange={(e) => {
+                  setPart((p) => ({ ...p, designation: e.target.value }));
+                  setSelectedStock(null);
+                }}
+              />
+              {stockResults.length > 0 && (
+                <ul className="absolute z-10 left-0 right-0 mt-1 bg-gray-900 border border-gray-700 rounded-lg overflow-hidden shadow-lg">
+                  {stockResults.map((sp) => (
+                    <li key={sp.id}>
+                      <button
+                        type="button"
+                        onClick={() => selectStockPart(sp)}
+                        className="w-full text-left px-2 py-1.5 text-xs text-gray-300 hover:bg-gray-800 cursor-pointer"
+                      >
+                        📦 {sp.name} {sp.reference ? `— réf. ${sp.reference}` : ""}{" "}
+                        <span className="text-gray-500">(stock: {sp.quantity})</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {selectedStock && (
+                <div className="flex items-center gap-1.5 mt-1 text-[11px] text-amber-400">
+                  <span>📦 lié au stock (dispo : {selectedStock.quantity})</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStock(null)}
+                    className="text-gray-500 hover:text-gray-300 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+            {selectedStock && (
+              <input
+                type="number"
+                min={1}
+                max={selectedStock.quantity}
+                placeholder="Qté à décompter"
+                className={inputClass}
+                value={quantityUsed}
+                onChange={(e) => setQuantityUsed(e.target.value)}
+              />
+            )}
             <div className="flex gap-1">
               <input
                 placeholder="Référence"
@@ -1709,7 +2088,11 @@ function InterventionRow({
               </button>
               <button
                 type="button"
-                onClick={() => setShowPartForm(false)}
+                onClick={() => {
+                  setShowPartForm(false);
+                  setSelectedStock(null);
+                  setStockResults([]);
+                }}
                 className="px-2 py-1 rounded border border-gray-600 text-xs cursor-pointer"
               >
                 Annuler
@@ -1852,12 +2235,14 @@ function PlannedRepairsPanel({
   clientFirstName,
   clientPhone,
   clientEmail,
+  isPersonal,
   onChanged,
 }: {
   vehicle: Vehicle;
   clientFirstName: string;
   clientPhone: string | null;
   clientEmail: string | null;
+  isPersonal: boolean;
   onChanged: () => void;
 }) {
   const [showForm, setShowForm] = useState(false);
@@ -1957,14 +2342,16 @@ function PlannedRepairsPanel({
             value={partsNote}
             onChange={(e) => setPartsNote(e.target.value)}
           />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Prix estimé €"
-            className={inputClass}
-            value={estimatedPrice}
-            onChange={(e) => setEstimatedPrice(e.target.value)}
-          />
+          {!isPersonal && (
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Prix estimé €"
+              className={inputClass}
+              value={estimatedPrice}
+              onChange={(e) => setEstimatedPrice(e.target.value)}
+            />
+          )}
           <button
             type="submit"
             className="sm:col-span-4 px-3 py-2 rounded-lg bg-amber-500 text-gray-900 text-sm font-semibold cursor-pointer"
@@ -1994,12 +2381,12 @@ function PlannedRepairsPanel({
                       — prévu le {new Date(r.targetDate).toLocaleDateString("fr-FR")}
                     </span>
                   )}
-                  {r.estimatedPrice != null && (
+                  {!isPersonal && r.estimatedPrice != null && (
                     <span className="text-amber-400"> — {r.estimatedPrice}€ estimé</span>
                   )}
                 </span>
                 <div className="flex items-center gap-2 text-xs flex-shrink-0">
-                  {clientPhone && (
+                  {!isPersonal && clientPhone && (
                     <a
                       href={buildWhatsAppLink(
                         clientPhone,
@@ -2019,7 +2406,7 @@ function PlannedRepairsPanel({
                       Devis WhatsApp
                     </a>
                   )}
-                  {clientEmail && (
+                  {!isPersonal && clientEmail && (
                     <button
                       onClick={() => sendQuoteByEmail(r.id)}
                       disabled={sendingQuoteId === r.id}

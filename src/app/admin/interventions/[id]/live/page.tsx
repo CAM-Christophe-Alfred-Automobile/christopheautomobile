@@ -39,6 +39,7 @@ interface InterventionData {
       phone: string | null;
       email: string | null;
       address: string | null;
+      isPersonal: boolean;
     };
   };
 }
@@ -124,7 +125,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
       body: JSON.stringify({ chronoStartedAt: new Date().toISOString() }),
     });
 
-    if (isFirstStart && data?.vehicle.client.phone) {
+    if (isFirstStart && data?.vehicle.client.phone && !data.vehicle.client.isPersonal) {
       const vehicleLabel =
         [data.vehicle.make, data.vehicle.model, data.vehicle.plate].filter(Boolean).join(" ") || "votre véhicule";
       setStartWhatsAppUrl(
@@ -227,7 +228,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
       body: JSON.stringify({
         description: finalDescription,
         maintenanceTypeId: finalMaintenanceTypeId || null,
-        price: finalPrice ? Number(finalPrice) : null,
+        price: !data.vehicle.client.isPersonal && finalPrice ? Number(finalPrice) : null,
         hoursSpent: totalHours,
         vehicleCondition: vehicleConditionUpdate,
         status: "done",
@@ -249,7 +250,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     }
 
     const effectivePhone = clientPhone || data.vehicle.client.phone;
-    if (effectivePhone) {
+    if (effectivePhone && !data.vehicle.client.isPersonal) {
       const vehicleLabel =
         [data.vehicle.make, data.vehicle.model, data.vehicle.plate].filter(Boolean).join(" ") || "votre véhicule";
       setFinishWhatsAppUrl(
@@ -469,18 +470,20 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
               </option>
             ))}
           </select>
-          <div>
-            <label className="block text-[11px] text-gray-500 mb-0.5">
-              Prix € (calculé : {currentHoursSpent().toFixed(2)}h × {hourlyRate}€/h)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              className={inputClass}
-              value={finalPrice}
-              onChange={(e) => setFinalPrice(e.target.value)}
-            />
-          </div>
+          {!data.vehicle.client.isPersonal && (
+            <div>
+              <label className="block text-[11px] text-gray-500 mb-0.5">
+                Prix € (calculé : {currentHoursSpent().toFixed(2)}h × {hourlyRate}€/h)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                className={inputClass}
+                value={finalPrice}
+                onChange={(e) => setFinalPrice(e.target.value)}
+              />
+            </div>
+          )}
 
           <div className="pt-2 border-t border-gray-800">
             <p className="text-[11px] text-gray-500 mb-1.5">Contrôle usure (optionnel, en %)</p>

@@ -3,14 +3,23 @@
 import { useState } from "react";
 import QRCode from "qrcode";
 
-async function generateBrandedQr(url: string): Promise<string> {
+const COLORS = [
+  { name: "Noir", hex: "#000000" },
+  { name: "Vert", hex: "#16a34a" },
+  { name: "Rouge", hex: "#dc2626" },
+  { name: "Bleu", hex: "#2563eb" },
+  { name: "Jaune", hex: "#eab308" },
+  { name: "Rose", hex: "#db2777" },
+];
+
+async function generateBrandedQr(url: string, darkColor: string): Promise<string> {
   const size = 512;
   const canvas = document.createElement("canvas");
   await QRCode.toCanvas(canvas, url, {
     width: size,
     margin: 2,
     errorCorrectionLevel: "H",
-    color: { dark: "#000000ff", light: "#ffffff00" },
+    color: { dark: `${darkColor}ff`, light: "#ffffff00" },
   });
 
   const ctx = canvas.getContext("2d");
@@ -36,13 +45,23 @@ export default function VehicleQrCode({ vehicleId }: { vehicleId: string }) {
   const [open, setOpen] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [publicUrl, setPublicUrl] = useState("");
+  const [color, setColor] = useState(COLORS[0].hex);
+
+  async function generate(hex: string, url: string) {
+    const png = await generateBrandedQr(url, hex);
+    setDataUrl(png);
+  }
 
   async function handleOpen() {
     const url = `${window.location.origin}/vehicule/${vehicleId}`;
     setPublicUrl(url);
-    const png = await generateBrandedQr(url);
-    setDataUrl(png);
+    await generate(color, url);
     setOpen(true);
+  }
+
+  async function handleColorChange(hex: string) {
+    setColor(hex);
+    await generate(hex, publicUrl);
   }
 
   return (
@@ -84,6 +103,19 @@ export default function VehicleQrCode({ vehicleId }: { vehicleId: string }) {
                 }}
               />
             )}
+            <div className="flex items-center justify-center gap-2">
+              {COLORS.map((c) => (
+                <button
+                  key={c.hex}
+                  onClick={() => handleColorChange(c.hex)}
+                  title={c.name}
+                  className={`w-6 h-6 rounded-full cursor-pointer border-2 ${
+                    color === c.hex ? "border-white" : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
             <p className="text-[11px] text-gray-500 break-all">{publicUrl}</p>
             {dataUrl && (
               <a

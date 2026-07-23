@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 interface StockPhoto {
   id: string;
@@ -35,6 +36,8 @@ export default function StockListPage() {
     }, 300);
     return () => clearTimeout(timeout);
   }, [query]);
+
+  useScrollRestoration(!loading);
 
   return (
     <div>

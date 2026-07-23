@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const CATEGORIES = [
+  "Consommables",
   "Moteur",
   "Freinage",
   "Suspension",

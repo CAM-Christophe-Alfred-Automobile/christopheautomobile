@@ -8,6 +8,7 @@ export interface InterventionInput {
   price?: number | null;
   maintenanceTypeId?: string | null;
   notes?: string | null;
+  toolLink?: string | null;
   mileage?: number | null;
   hoursSpent?: number | null;
   vehicleCondition?: string | null;
@@ -123,14 +124,38 @@ export interface PartUsedInput {
   link?: string | null;
   price?: number | null;
   boughtByClient?: boolean;
+  stockPartId?: string | null;
+  quantityUsed?: number | null;
 }
 
 export async function addPartUsed(interventionId: string, data: PartUsedInput) {
+  if (data.stockPartId && data.quantityUsed) {
+    return prisma.$transaction(async (tx) => {
+      const stockPart = await tx.stockPart.findUniqueOrThrow({ where: { id: data.stockPartId! } });
+      await tx.stockPart.update({
+        where: { id: data.stockPartId! },
+        data: { quantity: Math.max(0, stockPart.quantity - data.quantityUsed!) },
+      });
+      return tx.partUsed.create({ data: { ...data, interventionId } });
+    });
+  }
   return prisma.partUsed.create({ data: { ...data, interventionId } });
 }
 
 export async function removePartUsed(id: string) {
-  return prisma.partUsed.delete({ where: { id } });
+  return prisma.$transaction(async (tx) => {
+    const part = await tx.partUsed.findUniqueOrThrow({ where: { id } });
+    if (part.stockPartId && part.quantityUsed) {
+      const stockPart = await tx.stockPart.findUnique({ where: { id: part.stockPartId } });
+      if (stockPart) {
+        await tx.stockPart.update({
+          where: { id: part.stockPartId },
+          data: { quantity: stockPart.quantity + part.quantityUsed },
+        });
+      }
+    }
+    return tx.partUsed.delete({ where: { id } });
+  });
 }
 
 export interface PaymentInput {

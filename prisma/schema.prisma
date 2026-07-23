@@ -18,6 +18,7 @@ model Client {
   address       String?
   notes         String?
   abbyReference String?  @unique
+  isPersonal    Boolean  @default(false) // véhicule perso (le sien / celui de sa femme) — pas un vrai client, exclu de la liste clients
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -41,6 +42,8 @@ model Vehicle {
 
   sold   Boolean   @default(false)
   soldAt DateTime?
+
+  previousOwnerName String? // ancien propriétaire connu, affiché en petit (non modifiable) après un changement de propriétaire
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -66,6 +69,7 @@ model Intervention {
   photosBefore String[] @default([]) // état du véhicule avant intervention
   photosAfter  String[] @default([]) // état du véhicule après intervention
   notes       String? // points clés / outils spéciaux à prévoir la prochaine fois
+  toolLink    String? // lien pour acheter l'outil spécial mentionné dans les notes, si pas encore en sa possession
   vehicleCondition String? // annexe : état constaté (ex: plaquettes ~50%, pneu AV usé)
 
   mileage    Int? // kilométrage au moment de l'intervention
@@ -115,9 +119,14 @@ model PartUsed {
   price          Decimal? @db.Decimal(10, 2)
   boughtByClient Boolean  @default(false) // pièce achetée par le client lui-même (vs. par CAM)
 
+  stockPartId  String? // si renseigné, décompte automatiquement le stock lié
+  stockPart    StockPart? @relation(fields: [stockPartId], references: [id], onDelete: SetNull)
+  quantityUsed Int? // quantité décomptée du stock (entier, indépendant du texte libre "quantity")
+
   createdAt DateTime @default(now())
 
   @@index([interventionId])
+  @@index([stockPartId])
 }
 
 model PlannedRepair {
@@ -172,7 +181,8 @@ model StockPart {
   vehicleYears String?
   aiSummary    String? // résumé de l'identification IA (Gemini), modifiable
 
-  photos StockPhoto[]
+  photos    StockPhoto[]
+  partsUsed PartUsed[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

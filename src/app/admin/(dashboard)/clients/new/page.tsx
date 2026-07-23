@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
   "placeholder-gray-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors";
 
-export default function NewClientPage() {
+function NewClientForm() {
   const router = useRouter();
+  const isPersonal = useSearchParams().get("personal") === "1";
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -33,7 +34,7 @@ export default function NewClientPage() {
       const res = await fetch("/api/admin/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, isPersonal }),
       });
       const data = await res.json();
 
@@ -52,7 +53,7 @@ export default function NewClientPage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-semibold mb-6">Nouveau client</h1>
+      <h1 className="text-2xl font-semibold mb-6">{isPersonal ? "Nouveau véhicule personnel" : "Nouveau client"}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -121,9 +122,17 @@ export default function NewClientPage() {
           disabled={loading || !form.firstName || !form.lastName}
           className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Création..." : "Créer le client"}
+          {loading ? "Création..." : isPersonal ? "Créer le véhicule" : "Créer le client"}
         </button>
       </form>
     </div>
+  );
+}
+
+export default function NewClientPage() {
+  return (
+    <Suspense fallback={<p className="text-gray-400 text-sm">Chargement...</p>}>
+      <NewClientForm />
+    </Suspense>
   );
 }

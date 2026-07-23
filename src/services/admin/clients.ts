@@ -33,19 +33,35 @@ function computeClientAlertStatus(client: ClientWithRelations): AlertStatus {
 
 export async function listClients(query?: string) {
   const clients = await prisma.client.findMany({
-    where: query
-      ? {
-          OR: [
-            { firstName: { contains: query, mode: "insensitive" } },
-            { lastName: { contains: query, mode: "insensitive" } },
-            { phone: { contains: query, mode: "insensitive" } },
-            { email: { contains: query, mode: "insensitive" } },
-            { vehicles: { some: { plate: { contains: query, mode: "insensitive" } } } },
-          ],
-        }
-      : undefined,
+    where: {
+      isPersonal: false,
+      ...(query
+        ? {
+            OR: [
+              { firstName: { contains: query, mode: "insensitive" } },
+              { lastName: { contains: query, mode: "insensitive" } },
+              { phone: { contains: query, mode: "insensitive" } },
+              { email: { contains: query, mode: "insensitive" } },
+              { vehicles: { some: { plate: { contains: query, mode: "insensitive" } } } },
+            ],
+          }
+        : {}),
+    },
     include: clientWithRelations,
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+  });
+
+  return clients.map((client) => ({
+    ...client,
+    alertStatus: computeClientAlertStatus(client),
+  }));
+}
+
+export async function listPersonalClients() {
+  const clients = await prisma.client.findMany({
+    where: { isPersonal: true },
+    include: clientWithRelations,
+    orderBy: [{ firstName: "asc" }],
   });
 
   return clients.map((client) => ({
@@ -80,6 +96,7 @@ export interface ClientInput {
   address?: string | null;
   notes?: string | null;
   abbyReference?: string | null;
+  isPersonal?: boolean;
 }
 
 export async function createClient(data: ClientInput) {
