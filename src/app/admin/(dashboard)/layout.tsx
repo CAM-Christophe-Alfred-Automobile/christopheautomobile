@@ -9,6 +9,7 @@ const TOP_LEVEL_PATHS = [
   "/admin",
   "/admin/mes-vehicules",
   "/admin/stock",
+  "/admin/qr-codes",
   "/admin/settings/maintenance-types",
   "/admin/settings/sync-clients",
 ];
@@ -32,6 +33,11 @@ const NAV_ITEMS = [
     href: "/admin/stock",
     label: "Stock",
     isActive: (path: string) => path.startsWith("/admin/stock"),
+  },
+  {
+    href: "/admin/qr-codes",
+    label: "QR codes",
+    isActive: (path: string) => path.startsWith("/admin/qr-codes"),
   },
   {
     href: "/admin/settings/maintenance-types",
