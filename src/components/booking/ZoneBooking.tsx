@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
 
 const AUTRE = "__autre__";
+const SEUIL_ANNEE_MOTORISATIONS_RECENTES = 2016;
 
 interface ZoneBookingProps {
   dureeTotale: number;
@@ -68,6 +69,7 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
   const [vMarque, setVMarque] = useState("");
   const [vModeleChoice, setVModeleChoice] = useState("");
   const [vModeleLibre, setVModeleLibre] = useState("");
+  const [vAnnee, setVAnnee] = useState("");
   const [vMotorChoice, setVMotorChoice] = useState("");
   const [vMotorLibre, setVMotorLibre] = useState("");
   const [immatriculation, setImmatriculation] = useState("");
@@ -76,16 +78,26 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
   const [confirmedStart, setConfirmedStart] = useState<string | null>(null);
 
   const modelesDisponibles = useMemo(() => modelesParMarque[vMarque] ?? [], [vMarque]);
+  // Les motorisations listées correspondent aux générations récentes (~2016+). Pour un véhicule plus
+  // ancien, on ne propose pas de motorisation au hasard : bascule en saisie libre.
+  const anneeAncienne = (() => {
+    const annee = parseInt(vAnnee, 10);
+    return !isNaN(annee) && annee < SEUIL_ANNEE_MOTORISATIONS_RECENTES;
+  })();
   const motorisationsDisponibles = useMemo(
-    () => modelesDisponibles.find((m) => m.modele === vModeleChoice)?.motorisations ?? [],
-    [modelesDisponibles, vModeleChoice]
+    () => (anneeAncienne ? [] : modelesDisponibles.find((m) => m.modele === vModeleChoice)?.motorisations ?? []),
+    [modelesDisponibles, vModeleChoice, anneeAncienne]
   );
-  const modeleFinal = vModeleChoice === AUTRE ? vModeleLibre : vModeleChoice;
-  const motorisationFinal = vMotorChoice === AUTRE ? vMotorLibre : vMotorChoice;
+  const modeleFinal =
+    modelesDisponibles.length === 0 || vModeleChoice === AUTRE ? vModeleLibre : vModeleChoice;
+  const motorisationFinal =
+    motorisationsDisponibles.length === 0 || vMotorChoice === AUTRE ? vMotorLibre : vMotorChoice;
 
   useEffect(() => {
-    setModele([vMarque, modeleFinal, motorisationFinal].filter(Boolean).join(" "));
-  }, [vMarque, modeleFinal, motorisationFinal]);
+    setModele(
+      [vMarque, modeleFinal, motorisationFinal, vAnnee && `(${vAnnee})`].filter(Boolean).join(" ")
+    );
+  }, [vMarque, modeleFinal, motorisationFinal, vAnnee]);
 
   const fetchSlotsForZone = async (zoneKey: string) => {
     const start = new Date();
@@ -396,6 +408,14 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
               />
             )}
 
+            <input
+              type="text"
+              placeholder="Année du véhicule (facultatif, ex: 2018)"
+              value={vAnnee}
+              onChange={(e) => setVAnnee(e.target.value)}
+              className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+            />
+
             {motorisationsDisponibles.length > 0 ? (
               <select
                 value={vMotorChoice}
@@ -446,6 +466,12 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
               className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
             />
           </div>
+          {anneeAncienne && modeleFinal && (
+            <p className="text-xs text-gray-400 mt-2">
+              💡 Les motorisations proposées concernent surtout les véhicules récents. Pour un véhicule de{" "}
+              {vAnnee}, précisez la motorisation vous-même si vous la connaissez.
+            </p>
+          )}
           {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
           <button
             onClick={handleSubmit}
