@@ -28,6 +28,15 @@ const formatDuree = (minutes: number | string | null) => {
 //! Limite d'une journée d'intervention (8h = 480 min)
 const LIMITE_JOURNEE = 480;
 
+//! Tarif selon la taille/motorisation du véhicule (multiplicateur appliqué au tarif standard)
+type VehicleTier = "citadine" | "standard" | "suv";
+
+const VEHICLE_TIERS: { key: VehicleTier; label: string; examples: string; multiplier: number }[] = [
+  { key: "citadine", label: "Citadine", examples: "Clio, 208, Twingo...", multiplier: 50 / 60 },
+  { key: "standard", label: "Berline / Standard", examples: "308, Golf, Mégane...", multiplier: 1 },
+  { key: "suv", label: "SUV / Utilitaire", examples: "Duster, Kangoo, Trafic...", multiplier: 65 / 60 },
+];
+
 export default function BookingPage() {
   // 🔹 HOOKS - Toujours en premier (règle React)
   const [categorie, setCategorie] = useState("");
@@ -48,6 +57,7 @@ export default function BookingPage() {
   const [vehicleAnnee, setVehicleAnnee] = useState("");
   // État pour gérer le contact préalable pour les interventions sur devis
   const [hasContactedMechanic, setHasContactedMechanic] = useState<boolean | null>(null);
+  const [vehicleTier, setVehicleTier] = useState<VehicleTier>("standard");
 
   //! Catégories uniques + tri avec cas spéciaux à la fin
   const categoriesList = [
@@ -139,7 +149,7 @@ export default function BookingPage() {
   );
 
   //! Calcul durée et prix totaux
-  const calculerDuree = () => {
+  const calculerDuree = (tierOverride?: VehicleTier) => {
     if (categorie === "Intervention sur devis") {
       setDureeTotale(dureePersonnalisee);
       // Prix sur devis pour "Intervention sur devis"
@@ -188,13 +198,17 @@ export default function BookingPage() {
       }
     }
 
+    // Applique le multiplicateur du tarif véhicule (citadine/standard/SUV-utilitaire)
+    const multiplier = VEHICLE_TIERS.find((t) => t.key === (tierOverride ?? vehicleTier))?.multiplier ?? 1;
+    const adjustedTotal = Math.round(fixedPricesTotal * multiplier);
+
     // Si au moins un prix est variable, afficher "à partir de" + total
     if (hasVariablePrices) {
-      setPrixTotal(`à partir de ${fixedPricesTotal}€`);
+      setPrixTotal(`à partir de ${adjustedTotal}€`);
     }
     // Sinon, afficher le total numérique
     else {
-      setPrixTotal(fixedPricesTotal);
+      setPrixTotal(adjustedTotal);
     }
   };
 
@@ -983,6 +997,31 @@ export default function BookingPage() {
             </div>
           </div>
         )}
+              {/* Sélecteur de gabarit véhicule - influence le tarif horaire affiché */}
+        {(selected.length > 0 || (categorie === "Intervention sur devis" && hasContactedMechanic === true)) && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <p className="text-center text-sm text-gray-300 mb-3">Quelle est la taille de votre véhicule ?</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {VEHICLE_TIERS.map((tier) => (
+                <button
+                  key={tier.key}
+                  onClick={() => {
+                    setVehicleTier(tier.key);
+                    if (dureeTotale !== null) calculerDuree(tier.key);
+                  }}
+                  className={`cursor-pointer rounded-xl border-2 px-3 py-2.5 text-center transition-all ${
+                    vehicleTier === tier.key
+                      ? "border-amber-500 bg-amber-500/10"
+                      : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+                  }`}
+                >
+                  <p className="font-semibold text-sm text-gray-100">{tier.label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{tier.examples}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
               {/* Bouton Calcul - Afficher si des interventions sont sélectionnées ou si c'est sur devis ET qu'il y a eu contact préalable */}
         {(selected.length > 0 || (categorie === "Intervention sur devis" && hasContactedMechanic === true)) && (
           <div className="text-center mb-10">
@@ -1147,7 +1186,11 @@ export default function BookingPage() {
                 </div>
               </div>
             ) : (
-              <ZoneBooking dureeTotale={dureeTotale} />
+              <ZoneBooking
+                dureeTotale={dureeTotale}
+                vehicleTierLabel={VEHICLE_TIERS.find((t) => t.key === vehicleTier)?.label}
+                estimatedPrice={typeof prixTotal === "number" ? prixTotal : undefined}
+              />
             )}
           </div>
         )}

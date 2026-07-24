@@ -16,6 +16,8 @@ export async function POST(req: Request) {
     immatriculation,
     description,
     distanceKm,
+    vehicleTierLabel,
+    estimatedPrice,
   } = body;
 
   const eventTypeId = getEventTypeId(duree);
@@ -25,6 +27,14 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+
+  const fullDescription = vehicleTierLabel
+    ? `${description} — Véhicule : ${vehicleTierLabel}`
+    : description;
+
+  const notesParts: string[] = [];
+  if (typeof distanceKm === "number") notesParts.push(`distanceKm=${distanceKm}`);
+  if (typeof estimatedPrice === "number") notesParts.push(`estimatedPrice=${estimatedPrice}`);
 
   const calRes = await fetch("https://api.cal.com/v2/bookings", {
     method: "POST",
@@ -47,10 +57,10 @@ export async function POST(req: Request) {
         address: commune,
         modele,
         immatriculation,
-        description,
+        description: fullDescription,
         devis: "Non",
         piece: "Oui",
-        ...(typeof distanceKm === "number" ? { notes: `distanceKm=${distanceKm}` } : {}),
+        ...(notesParts.length > 0 ? { notes: notesParts.join(";") } : {}),
       },
     }),
   });

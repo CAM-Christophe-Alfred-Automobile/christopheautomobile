@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 
 interface ZoneBookingProps {
   dureeTotale: number;
+  vehicleTierLabel?: string;
+  estimatedPrice?: number;
 }
 
 type Step = "address" | "slot" | "form" | "confirm";
@@ -37,7 +39,7 @@ function formatTimeLabel(iso: string) {
   return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function ZoneBooking({ dureeTotale }: ZoneBookingProps) {
+export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPrice }: ZoneBookingProps) {
   const [step, setStep] = useState<Step>("address");
   const [addressInput, setAddressInput] = useState("");
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
@@ -159,6 +161,8 @@ export default function ZoneBooking({ dureeTotale }: ZoneBookingProps) {
           immatriculation,
           description,
           distanceKm: resolvedZone?.distanceKm,
+          vehicleTierLabel,
+          estimatedPrice,
         }),
       });
       const json = await res.json();
@@ -277,8 +281,13 @@ export default function ZoneBooking({ dureeTotale }: ZoneBookingProps) {
             Créneau choisi : {formatDateLabel(selectedSlot.slice(0, 10))} à {formatTimeLabel(selectedSlot)}
           </p>
           {resolvedZone && (
-            <p className="text-center text-gray-400 text-xs mb-3">
+            <p className="text-center text-gray-400 text-xs mb-1">
               Frais de déplacement inclus : {computeTravelFee(resolvedZone.distanceKm)} € ({resolvedZone.distanceKm} km)
+            </p>
+          )}
+          {vehicleTierLabel && estimatedPrice !== undefined && (
+            <p className="text-center text-gray-400 text-xs mb-3">
+              Véhicule : {vehicleTierLabel} • Main d&apos;œuvre estimée : {estimatedPrice} €
             </p>
           )}
           <div className="grid gap-3 mt-4">
