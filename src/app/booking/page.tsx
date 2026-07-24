@@ -16,6 +16,7 @@ import { partsGuidance, defaultPartsGuidance } from "@/app/data/partsGuidance";
 import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
 
 const AUTRE_MODELE = "__autre__";
+const SEUIL_ANNEE_MOTORISATIONS_RECENTES = 2016;
 
 
 //! Convertir minutes → format h:mm
@@ -64,9 +65,15 @@ export default function BookingPage() {
     () => modelesParMarque[vehicleMarque] ?? [],
     [vehicleMarque]
   );
+  // Les motorisations listées correspondent aux générations récentes (~2016+ : PureTech, BlueHDi, TCe, TSI EVO...).
+  // Pour un véhicule plus ancien, on ne propose pas de motorisation au hasard : bascule en saisie libre.
+  const anneeAncienne = (() => {
+    const annee = parseInt(vehicleAnnee, 10);
+    return !isNaN(annee) && annee < SEUIL_ANNEE_MOTORISATIONS_RECENTES;
+  })();
   const motorisationsDisponibles = useMemo(
-    () => modelesDisponibles.find((m) => m.modele === vehicleModele)?.motorisations ?? [],
-    [modelesDisponibles, vehicleModele]
+    () => (anneeAncienne ? [] : modelesDisponibles.find((m) => m.modele === vehicleModele)?.motorisations ?? []),
+    [modelesDisponibles, vehicleModele, anneeAncienne]
   );
   // État pour gérer le contact préalable pour les interventions sur devis
   const [hasContactedMechanic, setHasContactedMechanic] = useState<boolean | null>(null);
@@ -604,6 +611,14 @@ export default function BookingPage() {
                       />
                     )}
 
+                    <input
+                      type="text"
+                      placeholder="Année (ex: 2015)"
+                      value={vehicleAnnee}
+                      onChange={(e) => setVehicleAnnee(e.target.value)}
+                      className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                    />
+
                     {motorisationsDisponibles.length > 0 ? (
                       <select
                         value={vehicleMotorisation}
@@ -639,15 +654,14 @@ export default function BookingPage() {
                         className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
                       />
                     )}
-
-                    <input
-                      type="text"
-                      placeholder="Année (ex: 2015)"
-                      value={vehicleAnnee}
-                      onChange={(e) => setVehicleAnnee(e.target.value)}
-                      className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
-                    />
                   </div>
+
+                  {anneeAncienne && (vehicleModele || vehicleModeleLibre) && (
+                    <p className="text-xs text-gray-400 -mt-3 mb-5">
+                      💡 Les motorisations proposées concernent surtout les véhicules récents. Pour un
+                      véhicule de {vehicleAnnee}, précisez la motorisation vous-même si vous la connaissez.
+                    </p>
+                  )}
 
                   <button
                     onClick={validerGuide}
