@@ -15,6 +15,7 @@ export async function POST(req: Request) {
     modele,
     immatriculation,
     description,
+    distanceKm,
   } = body;
 
   const eventTypeId = getEventTypeId(duree);
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
         description,
         devis: "Non",
         piece: "Oui",
+        ...(typeof distanceKm === "number" ? { notes: `distanceKm=${distanceKm}` } : {}),
       },
     }),
   });

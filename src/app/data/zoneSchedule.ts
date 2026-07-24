@@ -32,13 +32,14 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 
 export interface ResolvedZone {
   zone: Zone;
-  distanceKm: number;
+  distanceKm: number; // distance depuis Salon-de-Provence (point de départ), utilisée pour le tarif de déplacement
   outOfArea: boolean;
 }
 
-// Trouve le secteur le plus proche des coordonnées données (plus proche voisin parmi les 5 centres).
+// Trouve le secteur le plus proche des coordonnées données (plus proche voisin parmi les 5 centres),
+// mais la distance retournée est toujours depuis Salon-de-Provence (point de départ réel des trajets).
 export function resolveZone(lat: number, lon: number): ResolvedZone {
-  const centerDistance = haversineKm(43.6377, 5.062036, lat, lon);
+  const distanceFromSalon = haversineKm(43.6377, 5.062036, lat, lon);
   let closest = zones[0];
   let closestDistance = Infinity;
   for (const z of zones) {
@@ -48,7 +49,7 @@ export function resolveZone(lat: number, lon: number): ResolvedZone {
       closest = z;
     }
   }
-  return { zone: closest, distanceKm: closestDistance, outOfArea: centerDistance > SERVICE_RADIUS_KM };
+  return { zone: closest, distanceKm: distanceFromSalon, outOfArea: distanceFromSalon > SERVICE_RADIUS_KM };
 }
 
 // Mapping durée (minutes) -> ID de type d'événement Cal.com

@@ -21,6 +21,12 @@ interface ResolvedZoneInfo {
   outOfArea: boolean;
 }
 
+const TARIF_DEPLACEMENT_PAR_KM = 0.35; // aller simple depuis Salon-de-Provence
+
+function computeTravelFee(distanceKm: number) {
+  return Math.round(distanceKm * TARIF_DEPLACEMENT_PAR_KM * 100) / 100;
+}
+
 function formatDateLabel(dateStr: string) {
   const d = new Date(`${dateStr}T12:00:00`);
   return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
@@ -152,6 +158,7 @@ export default function ZoneBooking({ dureeTotale }: ZoneBookingProps) {
           modele,
           immatriculation,
           description,
+          distanceKm: resolvedZone?.distanceKm,
         }),
       });
       const json = await res.json();
@@ -216,6 +223,10 @@ export default function ZoneBooking({ dureeTotale }: ZoneBookingProps) {
           <p className="text-center text-gray-300 text-sm mb-1">
             Secteur : <span className="text-amber-400 font-medium">{resolvedZone.zoneLabel}</span>
           </p>
+          <p className="text-center text-gray-400 text-xs mb-1">
+            Distance estimée : {resolvedZone.distanceKm} km • Frais de déplacement :{" "}
+            <span className="text-gray-300 font-medium">{computeTravelFee(resolvedZone.distanceKm)} €</span>
+          </p>
           {resolvedZone.outOfArea && (
             <p className="text-center text-gray-400 text-xs mb-4">
               Votre adresse semble un peu en dehors de mon secteur habituel (~{resolvedZone.distanceKm} km) —
@@ -265,6 +276,11 @@ export default function ZoneBooking({ dureeTotale }: ZoneBookingProps) {
           <p className="text-center text-amber-400 font-semibold mb-1">
             Créneau choisi : {formatDateLabel(selectedSlot.slice(0, 10))} à {formatTimeLabel(selectedSlot)}
           </p>
+          {resolvedZone && (
+            <p className="text-center text-gray-400 text-xs mb-3">
+              Frais de déplacement inclus : {computeTravelFee(resolvedZone.distanceKm)} € ({resolvedZone.distanceKm} km)
+            </p>
+          )}
           <div className="grid gap-3 mt-4">
             <input
               type="text"
