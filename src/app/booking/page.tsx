@@ -13,7 +13,9 @@ import { siteConfig } from "@/config/site";
 import { symptoms, type SymptomKey } from "@/app/data/symptomGuide";
 import ZoneBooking from "@/components/booking/ZoneBooking";
 import { partsGuidance, defaultPartsGuidance } from "@/app/data/partsGuidance";
-import { marques, carburants } from "@/app/data/vehicleOptions";
+import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
+
+const AUTRE_MODELE = "__autre__";
 
 
 //! Convertir minutes → format h:mm
@@ -53,8 +55,19 @@ export default function BookingPage() {
   const [guideSubKey, setGuideSubKey] = useState<string | null>(null);
   const [vehicleMarque, setVehicleMarque] = useState("");
   const [vehicleModele, setVehicleModele] = useState("");
-  const [vehicleCarburant, setVehicleCarburant] = useState("");
+  const [vehicleModeleLibre, setVehicleModeleLibre] = useState(""); // saisie manuelle si "Autre / je ne trouve pas"
+  const [vehicleMotorisation, setVehicleMotorisation] = useState("");
+  const [vehicleMotorisationLibre, setVehicleMotorisationLibre] = useState("");
   const [vehicleAnnee, setVehicleAnnee] = useState("");
+
+  const modelesDisponibles = useMemo(
+    () => modelesParMarque[vehicleMarque] ?? [],
+    [vehicleMarque]
+  );
+  const motorisationsDisponibles = useMemo(
+    () => modelesDisponibles.find((m) => m.modele === vehicleModele)?.motorisations ?? [],
+    [modelesDisponibles, vehicleModele]
+  );
   // État pour gérer le contact préalable pour les interventions sur devis
   const [hasContactedMechanic, setHasContactedMechanic] = useState<boolean | null>(null);
   const [vehicleTier, setVehicleTier] = useState<VehicleTier>("standard");
@@ -536,7 +549,13 @@ export default function BookingPage() {
                   <div className="grid grid-cols-2 gap-3 mb-5">
                     <select
                       value={vehicleMarque}
-                      onChange={(e) => setVehicleMarque(e.target.value)}
+                      onChange={(e) => {
+                        setVehicleMarque(e.target.value);
+                        setVehicleModele("");
+                        setVehicleModeleLibre("");
+                        setVehicleMotorisation("");
+                        setVehicleMotorisationLibre("");
+                      }}
                       className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
                     >
                       <option value="">Marque</option>
@@ -546,25 +565,81 @@ export default function BookingPage() {
                         </option>
                       ))}
                     </select>
-                    <input
-                      type="text"
-                      placeholder="Modèle (ex: Partner)"
-                      value={vehicleModele}
-                      onChange={(e) => setVehicleModele(e.target.value)}
-                      className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
-                    />
-                    <select
-                      value={vehicleCarburant}
-                      onChange={(e) => setVehicleCarburant(e.target.value)}
-                      className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
-                    >
-                      <option value="">Carburant</option>
-                      {carburants.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+
+                    {modelesDisponibles.length > 0 ? (
+                      <select
+                        value={vehicleModele}
+                        onChange={(e) => {
+                          setVehicleModele(e.target.value);
+                          setVehicleMotorisation("");
+                          setVehicleMotorisationLibre("");
+                        }}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+                      >
+                        <option value="">Modèle</option>
+                        {modelesDisponibles.map((m) => (
+                          <option key={m.modele} value={m.modele}>
+                            {m.modele}
+                          </option>
+                        ))}
+                        <option value={AUTRE_MODELE}>Autre / je ne trouve pas</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Modèle (ex: Partner)"
+                        value={vehicleModeleLibre}
+                        onChange={(e) => setVehicleModeleLibre(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                      />
+                    )}
+
+                    {vehicleModele === AUTRE_MODELE && (
+                      <input
+                        type="text"
+                        placeholder="Précisez le modèle"
+                        value={vehicleModeleLibre}
+                        onChange={(e) => setVehicleModeleLibre(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                      />
+                    )}
+
+                    {motorisationsDisponibles.length > 0 ? (
+                      <select
+                        value={vehicleMotorisation}
+                        onChange={(e) => setVehicleMotorisation(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+                      >
+                        <option value="">Motorisation</option>
+                        {motorisationsDisponibles.map((mot) => (
+                          <option key={mot} value={mot}>
+                            {mot}
+                          </option>
+                        ))}
+                        <option value={AUTRE_MODELE}>Autre / je ne sais pas</option>
+                      </select>
+                    ) : (
+                      (vehicleModele || vehicleModeleLibre) && (
+                        <input
+                          type="text"
+                          placeholder="Motorisation (ex: 1.5 BlueHDi 130)"
+                          value={vehicleMotorisationLibre}
+                          onChange={(e) => setVehicleMotorisationLibre(e.target.value)}
+                          className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                        />
+                      )
+                    )}
+
+                    {vehicleMotorisation === AUTRE_MODELE && (
+                      <input
+                        type="text"
+                        placeholder="Précisez la motorisation"
+                        value={vehicleMotorisationLibre}
+                        onChange={(e) => setVehicleMotorisationLibre(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                      />
+                    )}
+
                     <input
                       type="text"
                       placeholder="Année (ex: 2015)"

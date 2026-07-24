@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
+
+const AUTRE = "__autre__";
 
 interface ZoneBookingProps {
   dureeTotale: number;
@@ -62,10 +65,27 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
   const [telephone, setTelephone] = useState("");
   const [commune, setCommune] = useState("");
   const [modele, setModele] = useState("");
+  const [vMarque, setVMarque] = useState("");
+  const [vModeleChoice, setVModeleChoice] = useState("");
+  const [vModeleLibre, setVModeleLibre] = useState("");
+  const [vMotorChoice, setVMotorChoice] = useState("");
+  const [vMotorLibre, setVMotorLibre] = useState("");
   const [immatriculation, setImmatriculation] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [confirmedStart, setConfirmedStart] = useState<string | null>(null);
+
+  const modelesDisponibles = useMemo(() => modelesParMarque[vMarque] ?? [], [vMarque]);
+  const motorisationsDisponibles = useMemo(
+    () => modelesDisponibles.find((m) => m.modele === vModeleChoice)?.motorisations ?? [],
+    [modelesDisponibles, vModeleChoice]
+  );
+  const modeleFinal = vModeleChoice === AUTRE ? vModeleLibre : vModeleChoice;
+  const motorisationFinal = vMotorChoice === AUTRE ? vMotorLibre : vMotorChoice;
+
+  useEffect(() => {
+    setModele([vMarque, modeleFinal, motorisationFinal].filter(Boolean).join(" "));
+  }, [vMarque, modeleFinal, motorisationFinal]);
 
   const fetchSlotsForZone = async (zoneKey: string) => {
     const start = new Date();
@@ -319,13 +339,98 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
               onChange={(e) => setCommune(e.target.value)}
               className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
             />
-            <input
-              type="text"
-              placeholder="Marque et modèle du véhicule *"
-              value={modele}
-              onChange={(e) => setModele(e.target.value)}
-              className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
-            />
+            <select
+              value={vMarque}
+              onChange={(e) => {
+                setVMarque(e.target.value);
+                setVModeleChoice("");
+                setVModeleLibre("");
+                setVMotorChoice("");
+                setVMotorLibre("");
+              }}
+              className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+            >
+              <option value="">Marque du véhicule *</option>
+              {marques.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+
+            {modelesDisponibles.length > 0 ? (
+              <select
+                value={vModeleChoice}
+                onChange={(e) => {
+                  setVModeleChoice(e.target.value);
+                  setVMotorChoice("");
+                  setVMotorLibre("");
+                }}
+                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+              >
+                <option value="">Modèle *</option>
+                {modelesDisponibles.map((m) => (
+                  <option key={m.modele} value={m.modele}>
+                    {m.modele}
+                  </option>
+                ))}
+                <option value={AUTRE}>Autre / je ne trouve pas mon modèle</option>
+              </select>
+            ) : (
+              <input
+                type="text"
+                placeholder="Modèle du véhicule *"
+                value={vModeleLibre}
+                onChange={(e) => setVModeleLibre(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+              />
+            )}
+
+            {vModeleChoice === AUTRE && (
+              <input
+                type="text"
+                placeholder="Précisez le modèle *"
+                value={vModeleLibre}
+                onChange={(e) => setVModeleLibre(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+              />
+            )}
+
+            {motorisationsDisponibles.length > 0 ? (
+              <select
+                value={vMotorChoice}
+                onChange={(e) => setVMotorChoice(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+              >
+                <option value="">Motorisation (facultatif)</option>
+                {motorisationsDisponibles.map((mot) => (
+                  <option key={mot} value={mot}>
+                    {mot}
+                  </option>
+                ))}
+                <option value={AUTRE}>Autre / je ne sais pas</option>
+              </select>
+            ) : (
+              modeleFinal && (
+                <input
+                  type="text"
+                  placeholder="Motorisation (facultatif, ex: 1.5 BlueHDi 130)"
+                  value={vMotorLibre}
+                  onChange={(e) => setVMotorLibre(e.target.value)}
+                  className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                />
+              )
+            )}
+
+            {vMotorChoice === AUTRE && (
+              <input
+                type="text"
+                placeholder="Précisez la motorisation (facultatif)"
+                value={vMotorLibre}
+                onChange={(e) => setVMotorLibre(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+              />
+            )}
             <input
               type="text"
               placeholder="Plaque d'immatriculation *"
@@ -344,7 +449,16 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
           {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
           <button
             onClick={handleSubmit}
-            disabled={submitting || !nom || !email || !commune || !modele || !immatriculation || !description}
+            disabled={
+              submitting ||
+              !nom ||
+              !email ||
+              !commune ||
+              !vMarque ||
+              !modeleFinal ||
+              !immatriculation ||
+              !description
+            }
             className="cursor-pointer w-full mt-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all py-3 rounded-lg font-bold text-white disabled:opacity-50"
           >
             {submitting ? "Réservation en cours..." : "Confirmer la réservation"}
