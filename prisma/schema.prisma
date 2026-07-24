@@ -72,6 +72,8 @@ model Intervention {
   depositDate       DateTime? // date de versement de l'acompte
   deliveryPrice     Decimal? @db.Decimal(10, 2) // frais de livraison des pièces
   dossierFee        Decimal? @db.Decimal(10, 2) // frais de dossier (montant total × taux URSSAF), figé au moment de la réservation
+  distanceKm        Decimal? @db.Decimal(6, 2) // distance domicile client <-> Salon-de-Provence, calculée à la réservation en ligne
+  travelFee         Decimal? @db.Decimal(10, 2) // frais de déplacement (distanceKm × tarif au km), figé au moment de la réservation
   photos      String[] @default([]) // photos de pièces endommagées / notes manuscrites
   photosBefore String[] @default([]) // état du véhicule avant intervention
   photosAfter  String[] @default([]) // état du véhicule après intervention
@@ -170,9 +172,10 @@ model MaintenanceType {
 
 model ShopSettings {
   id         String   @id @default(cuid())
-  hourlyRate Decimal  @default(60) @db.Decimal(6, 2)
-  urssafRate Decimal  @default(21.2) @db.Decimal(5, 2) // taux de cotisation URSSAF, pour calculer le frais de dossier des réservations
-  updatedAt  DateTime @updatedAt
+  hourlyRate      Decimal  @default(60) @db.Decimal(6, 2)
+  urssafRate      Decimal  @default(21.2) @db.Decimal(5, 2) // taux de cotisation URSSAF, pour calculer le frais de dossier des réservations
+  travelRatePerKm Decimal  @default(0.35) @db.Decimal(5, 2) // tarif au km facturé pour le déplacement (aller simple depuis Salon-de-Provence)
+  updatedAt       DateTime @updatedAt
 }
 
 model StockPart {

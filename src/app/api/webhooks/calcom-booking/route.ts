@@ -70,6 +70,8 @@ export async function POST(req: Request) {
   const modele = responses.modele?.value || undefined;
   const immatriculation = responses.immatriculation?.value || undefined;
   const description = responses.description?.value || payload.title || "Réservation en ligne";
+  const distanceMatch = responses.notes?.value?.match(/distanceKm=([\d.]+)/);
+  const distanceKm = distanceMatch ? parseFloat(distanceMatch[1]) : null;
 
   const startTime = new Date(payload.startTime);
   const endTime = payload.endTime ? new Date(payload.endTime) : null;
@@ -111,6 +113,7 @@ export async function POST(req: Request) {
   const hours = endTime ? (endTime.getTime() - startTime.getTime()) / 3_600_000 : null;
   const normalPrice = hours != null ? hours * Number(shopSettings.hourlyRate) : null;
   const dossierFee = normalPrice != null ? (normalPrice * Number(shopSettings.urssafRate)) / 100 : null;
+  const travelFee = distanceKm != null ? distanceKm * Number(shopSettings.travelRatePerKm) : null;
 
   await prisma.intervention.create({
     data: {
@@ -123,6 +126,8 @@ export async function POST(req: Request) {
       calcomBookingUid: uid,
       normalPrice,
       dossierFee,
+      distanceKm,
+      travelFee,
       hoursSpent: hours,
     },
   });
