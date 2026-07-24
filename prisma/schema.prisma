@@ -64,7 +64,14 @@ model Intervention {
   endDate     DateTime? // si l'intervention s'étale sur plusieurs jours
   description String
   normalPrice Decimal? @db.Decimal(10, 2) // prix normal / de référence, avant remise
-  price       Decimal? @db.Decimal(10, 2) // prix final facturé au client
+  price       Decimal? @db.Decimal(10, 2) // prix final facturé au client (ou main d'œuvre estimée si status = reserved)
+
+  bookedOnline      Boolean  @default(false) // réservée via le site public
+  calcomBookingUid  String?  @unique // identifiant unique de la réservation Cal.com, pour éviter les doublons si le webhook est renvoyé
+  depositAmount     Decimal? @db.Decimal(10, 2) // acompte versé
+  depositDate       DateTime? // date de versement de l'acompte
+  deliveryPrice     Decimal? @db.Decimal(10, 2) // frais de livraison des pièces
+  dossierFee        Decimal? @db.Decimal(10, 2) // frais de dossier (montant total × taux URSSAF), figé au moment de la réservation
   photos      String[] @default([]) // photos de pièces endommagées / notes manuscrites
   photosBefore String[] @default([]) // état du véhicule avant intervention
   photosAfter  String[] @default([]) // état du véhicule après intervention
@@ -75,7 +82,7 @@ model Intervention {
   mileage    Int? // kilométrage au moment de l'intervention
   hoursSpent Decimal? @db.Decimal(5, 2) // temps passé, en heures
 
-  status          String    @default("done") // draft (en cours sur place) | done (terminée)
+  status          String    @default("done") // draft (en cours sur place) | done (terminée) | reserved (réservation prévue, pas encore commencée)
   chronoStartedAt DateTime? // si non nul, le chrono tourne actuellement pour cette intervention
 
   abbyInvoiceNumber String? @unique
@@ -164,6 +171,7 @@ model MaintenanceType {
 model ShopSettings {
   id         String   @id @default(cuid())
   hourlyRate Decimal  @default(60) @db.Decimal(6, 2)
+  urssafRate Decimal  @default(21.2) @db.Decimal(5, 2) // taux de cotisation URSSAF, pour calculer le frais de dossier des réservations
   updatedAt  DateTime @updatedAt
 }
 
