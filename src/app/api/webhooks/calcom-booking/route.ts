@@ -72,6 +72,8 @@ export async function POST(req: Request) {
   const description = responses.description?.value || payload.title || "Réservation en ligne";
   const distanceMatch = responses.notes?.value?.match(/distanceKm=([\d.]+)/);
   const distanceKm = distanceMatch ? parseFloat(distanceMatch[1]) : null;
+  const quotedPriceMatch = responses.notes?.value?.match(/estimatedPrice=([\d.]+)/);
+  const quotedPrice = quotedPriceMatch ? parseFloat(quotedPriceMatch[1]) : null;
 
   const startTime = new Date(payload.startTime);
   const endTime = payload.endTime ? new Date(payload.endTime) : null;
@@ -111,7 +113,8 @@ export async function POST(req: Request) {
 
   const shopSettings = await getShopSettings();
   const hours = endTime ? (endTime.getTime() - startTime.getTime()) / 3_600_000 : null;
-  const normalPrice = hours != null ? hours * Number(shopSettings.hourlyRate) : null;
+  // Le prix réellement affiché au client (selon le gabarit véhicule choisi) prime sur le calcul générique.
+  const normalPrice = quotedPrice ?? (hours != null ? hours * Number(shopSettings.hourlyRate) : null);
   const dossierFee = normalPrice != null ? (normalPrice * Number(shopSettings.urssafRate)) / 100 : null;
   const travelFee = distanceKm != null ? distanceKm * Number(shopSettings.travelRatePerKm) : null;
 
