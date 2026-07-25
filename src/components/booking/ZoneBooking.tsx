@@ -8,7 +8,9 @@ const SEUIL_ANNEE_MOTORISATIONS_RECENTES = 2016;
 interface ZoneBookingProps {
   dureeTotale: number;
   vehicleTierLabel?: string;
+  vehicleTierKey?: string;
   estimatedPrice?: number;
+  selectedServiceNames?: string[];
 }
 
 type Step = "address" | "slot" | "form" | "confirm";
@@ -43,7 +45,13 @@ function formatTimeLabel(iso: string) {
   return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPrice }: ZoneBookingProps) {
+export default function ZoneBooking({
+  dureeTotale,
+  vehicleTierLabel,
+  vehicleTierKey,
+  estimatedPrice,
+  selectedServiceNames,
+}: ZoneBookingProps) {
   const [step, setStep] = useState<Step>("address");
   const [addressInput, setAddressInput] = useState("");
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
@@ -194,7 +202,9 @@ export default function ZoneBooking({ dureeTotale, vehicleTierLabel, estimatedPr
           description,
           distanceKm: resolvedZone?.distanceKm,
           vehicleTierLabel,
+          vehicleTierKey,
           estimatedPrice,
+          selectedServiceNames,
         }),
       });
       const json = await res.json();
