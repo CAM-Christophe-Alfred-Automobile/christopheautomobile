@@ -266,9 +266,17 @@ export default function BookingPage() {
             </p>
 
             {/* Informations importantes */}
-            <div className="grid sm:grid-cols-2 gap-4 mt-6" role="region" aria-label="Informations importantes">
-              {/* Acompte */}
-              <div className="bg-gray-800/40 rounded-xl p-5 border-l-4 border-blue-500">
+            <div
+              className="mt-6 bg-gray-800/50 border border-gray-700 rounded-2xl p-6 sm:p-8 shadow-lg"
+              role="region"
+              aria-label="Informations importantes"
+            >
+              <h2 className="text-lg sm:text-xl font-bold text-amber-400 mb-6 text-center">
+                ℹ️ Ce qu'il faut savoir avant de réserver
+              </h2>
+
+              <div className="space-y-6">
+                {/* Acompte */}
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center" aria-hidden="true">
                     <svg
@@ -285,9 +293,9 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">
                       Acompte requis
-                    </h2>
+                    </h3>
                     <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                       Un acompte vous sera demandé lors de la réservation pour
                       garantir votre créneau. Le montant varie selon la durée de
@@ -297,17 +305,14 @@ export default function BookingPage() {
                       </strong>
                       .
                     </p>
-
                     <p className="text-xs sm:text-sm text-gray-300 mt-2 flex items-center gap-1">
                       <span className="text-green-400">✓</span> Déduit du prix final
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Achat de pièces */}
-              <div className="bg-gray-800/40 rounded-xl p-5 border-l-4 border-amber-500">
-                <div className="flex items-start gap-3">
+                {/* Achat de pièces */}
+                <div className="flex items-start gap-3 pt-6 border-t border-gray-700/60">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
                     <svg
                       className="w-5 h-5 text-amber-400"
@@ -324,10 +329,9 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">
                       Achat de pièces
-                    </h2>
-
+                    </h3>
                     <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                       Si le mécanicien doit s&#39;occuper de commander les
                       pièces, merci de{" "}
@@ -339,6 +343,37 @@ export default function BookingPage() {
                       Un acompte de{" "}
                       <strong className="text-gray-200">40 %</strong> du total
                       des pièces sera demandé avant l'achat.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tarification selon le véhicule */}
+                <div className="flex items-start gap-3 pt-6 border-t border-gray-700/60">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-green-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">
+                      Un tarif adapté à votre véhicule
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                      Le prix de la main d&#39;œuvre varie selon le{" "}
+                      <strong className="text-gray-200">gabarit de votre véhicule</strong>{" "}
+                      (citadine, berline, SUV/utilitaire) et la{" "}
+                      <strong className="text-gray-200">complexité de l&#39;intervention</strong>,
+                      afin de refléter au plus juste le temps de travail réel.
                     </p>
                   </div>
                 </div>
