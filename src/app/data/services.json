@@ -1,11 +1,10 @@
-
 [
-   {
+  {
     "categorie": "Entretien",
     "service": "Revision engin/pl",
     "description": "Huile moteur,filtre a huile a gazoil,a air,habitacle,hydraulique,dessiccateur.",
     "duree": 360,
-    "prix":360
+    "prix": 360
   },
   {
     "categorie": "Entretien",
@@ -21,7 +20,6 @@
     "duree": null,
     "prix": "à partir de 60€"
   },
-
   {
     "categorie": "Entretien",
     "service": "Vidange + filtre à huile",
@@ -99,12 +97,7 @@
     "duree": 60,
     "prix": 60
   },
-
-
-
-
-
-{
+  {
     "categorie": "Freinage",
     "service": "Détection panne de freinage /bruit",
     "description": "Détection",
@@ -195,17 +188,6 @@
     "duree": 60,
     "prix": "à partir de 60€"
   },
-
-
-
-
-
-
-
-
-
-
-
   {
     "categorie": "Moteur",
     "service": "Arbre à came",
@@ -213,7 +195,6 @@
     "duree": 540,
     "prix": 500
   },
-
   {
     "categorie": "Moteur",
     "service": "Poussoir (culasse)",
@@ -221,11 +202,11 @@
     "duree": 600,
     "prix": 600
   },
-{
+  {
     "categorie": "Moteur",
     "service": "Carter haut moteur ",
     "description": "remplacement ",
-    "duree":100,
+    "duree": 100,
     "prix": 100
   },
   {
@@ -242,22 +223,19 @@
     "duree": 300,
     "prix": 300
   },
-{
+  {
     "categorie": "Moteur",
     "service": "Problème moteur / Bruit provenant du moteur",
     "description": "Inspection, détection",
     "duree": 60,
     "prix": 60
   },
-
-
-
   {
     "categorie": "Moteur",
     "service": "Courroie accessoire",
     "description": "Remplacement simple",
     "duree": 120,
-    "prix":120
+    "prix": 120
   },
   {
     "categorie": "Moteur",
@@ -301,7 +279,6 @@
     "duree": 60,
     "prix": 60
   },
-
   {
     "categorie": "Moteur",
     "service": "Pompe à injection",
@@ -369,7 +346,7 @@
     "categorie": "Moteur",
     "service": "EGR / FAP",
     "description": "Nettoyage ou remplacement",
-    "duree": null,
+    "duree": 100,
     "prix": "à partir de 60€"
   },
   {
@@ -384,13 +361,13 @@
     "service": "Ligne échappement",
     "description": "Remplacement partielle",
     "duree": 60,
-    "prix":60
+    "prix": 60
   },
   {
     "categorie": "Moteur",
     "service": "Catalyseur",
     "description": "Remplacement",
-    "duree":60 ,
+    "duree": 60,
     "prix": 60
   },
   {
@@ -435,11 +412,6 @@
     "duree": 60,
     "prix": 60
   },
-
-
-
-
-
   {
     "categorie": "Refroidissement",
     "service": "Boitier d’eau / thermostat",
@@ -475,7 +447,6 @@
     "duree": 60,
     "prix": 60
   },
-
   {
     "categorie": "Refroidissement",
     "service": "Pompe externe distribution",
@@ -490,12 +461,6 @@
     "duree": 60,
     "prix": 60
   },
-
-
-
-
-
-
   {
     "categorie": "Transmission",
     "service": "Embrayage complet",
@@ -545,34 +510,28 @@
     "duree": 60,
     "prix": 60
   },
-{
+  {
     "categorie": "Transmission",
     "service": "Renvoi de vitesse",
     "description": "Remplacement",
     "duree": 120,
     "prix": 120
   },
-{
+  {
     "categorie": "Transmission",
     "service": "Fector",
     "description": "Remplacement",
     "duree": 150,
     "prix": 150
   },
-{
+  {
     "categorie": "Transmission",
     "service": "Palier arbre de transmission",
     "description": "Remplacement",
     "duree": 190,
     "prix": "à partir de 90€"
   },
-
-
-
-
-
-
-   {
+  {
     "categorie": "Suspension / Direction",
     "service": "Détection bruit de suspension / direction",
     "description": "Inspection, détection",
@@ -670,7 +629,6 @@
     "duree": 60,
     "prix": 60
   },
-
   {
     "categorie": "Suspension / Direction",
     "service": "Barre de direction (paire)",
@@ -678,7 +636,6 @@
     "duree": 60,
     "prix": 60
   },
-
   {
     "categorie": "Suspension / Direction",
     "service": "Fusée (unité)",
@@ -686,10 +643,6 @@
     "duree": 150,
     "prix": "à partir de 130€"
   },
-
-
-
-
   {
     "categorie": "Électricité",
     "service": "Batterie",
@@ -708,7 +661,7 @@
     "categorie": "Électricité",
     "service": "Démarreur",
     "description": "Remplacement",
-    "duree": 60,
+    "duree": 100,
     "prix": "à partir de 60€"
   },
   {
@@ -788,15 +741,6 @@
     "duree": 60,
     "prix": 60
   },
-
-
-
-
-
-
-
-
-
   {
     "categorie": "Climatisation",
     "service": "Compresseur de climatisation",
@@ -804,14 +748,14 @@
     "duree": 120,
     "prix": 120
   },
-   {
+  {
     "categorie": "Climatisation",
     "service": "Radiateur chauffage",
     "description": "Remplacement",
     "duree": 400,
     "prix": 400
   },
-   {
+  {
     "categorie": "Climatisation",
     "service": "Tuyau de climatisation",
     "description": "Remplacement",
@@ -839,12 +783,6 @@
     "duree": 70,
     "prix": 70
   },
-
-
-
-
-
-
   {
     "categorie": "Diagnostic",
     "service": "Diagnostic valise complet",
@@ -901,7 +839,6 @@
     "duree": 90,
     "prix": 90
   },
-
   {
     "categorie": "Diagnostic",
     "service": "Test échappement",
@@ -930,14 +867,6 @@
     "duree": "Durée variable",
     "prix": 20
   },
-
-
-
-
-
-
-
-
   {
     "categorie": "Autre interventions",
     "service": "Diagnostic à distance",
@@ -966,7 +895,7 @@
     "duree": "Variable",
     "prix": "à partir de 60€"
   },
-    {
+  {
     "categorie": "Autre interventions",
     "service": "Pare choc",
     "description": "Remplacement",

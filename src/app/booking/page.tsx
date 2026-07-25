@@ -55,6 +55,7 @@ export default function BookingPage() {
   // État du questionnaire guidé ("Je ne sais pas ce qu'il me faut")
   const [guideSymptomKey, setGuideSymptomKey] = useState<SymptomKey | null>(null);
   const [guideSubKey, setGuideSubKey] = useState<string | null>(null);
+  const [guideSubKey2, setGuideSubKey2] = useState<string | null>(null);
   const [vehicleMarque, setVehicleMarque] = useState("");
   const [vehicleModele, setVehicleModele] = useState("");
   const [vehicleModeleLibre, setVehicleModeleLibre] = useState(""); // saisie manuelle si "Autre / je ne trouve pas"
@@ -98,25 +99,34 @@ export default function BookingPage() {
   });
 
   //! Questionnaire guidé : symptôme sélectionné + réponse résolue (catégorie + explication)
+  // Un SubAnswer peut soit être terminal (categorie/explication/services, ou nonPropose),
+  // soit avoir sa propre sous-question (un seul niveau de plus, ex: panne -> essence).
   const selectedSymptom = symptoms.find((s) => s.key === guideSymptomKey) ?? null;
-  const guideResult = selectedSymptom
-    ? selectedSymptom.categorie
-      ? {
-          categorie: selectedSymptom.categorie,
-          explication: selectedSymptom.explication!,
-          services: selectedSymptom.services,
-        }
-      : selectedSymptom.subAnswers?.find((a) => a.key === guideSubKey) ?? null
-    : null;
+  const level1Answer = selectedSymptom?.subAnswers?.find((a) => a.key === guideSubKey) ?? null;
+  const level2Answer = level1Answer?.subAnswers?.find((a) => a.key === guideSubKey2) ?? null;
+
+  const guideResult = selectedSymptom?.categorie
+    ? {
+        categorie: selectedSymptom.categorie,
+        explication: selectedSymptom.explication,
+        services: selectedSymptom.services,
+        nonPropose: undefined as string | undefined,
+      }
+    : level1Answer && !level1Answer.subQuestion
+      ? level1Answer
+      : level1Answer?.subQuestion
+        ? level2Answer
+        : null;
 
   const resetGuide = () => {
     setGuideSymptomKey(null);
     setGuideSubKey(null);
+    setGuideSubKey2(null);
     setGuideServicesFilter(null);
   };
 
   const validerGuide = () => {
-    if (!guideResult) return;
+    if (!guideResult || !guideResult.categorie) return;
     setCategorie(guideResult.categorie);
     setGuideServicesFilter(guideResult.services ?? null);
     setSearchMode("category");
@@ -552,6 +562,7 @@ export default function BookingPage() {
                         onClick={() => {
                           setGuideSymptomKey(s.key);
                           setGuideSubKey(null);
+                          setGuideSubKey2(null);
                         }}
                         className="cursor-pointer flex items-center gap-3 bg-gray-800/50 border-2 border-gray-700 hover:border-amber-500/60 rounded-xl p-4 text-left transition-all"
                       >
@@ -578,7 +589,10 @@ export default function BookingPage() {
                     {selectedSymptom.subAnswers.map((a) => (
                       <button
                         key={a.key}
-                        onClick={() => setGuideSubKey(a.key)}
+                        onClick={() => {
+                          setGuideSubKey(a.key);
+                          setGuideSubKey2(null);
+                        }}
                         className="cursor-pointer bg-gray-800/50 border-2 border-gray-700 hover:border-amber-500/60 rounded-xl p-4 text-left text-gray-200 font-medium transition-all"
                       >
                         {a.label}
@@ -588,7 +602,56 @@ export default function BookingPage() {
                 </div>
               )}
 
-              {guideResult && (
+              {level1Answer && level1Answer.subQuestion && !guideSubKey2 && (
+                <div>
+                  <button
+                    onClick={() => setGuideSubKey(null)}
+                    className="cursor-pointer text-sm text-gray-400 hover:text-gray-300 underline mb-4"
+                  >
+                    ← Revenir à l&#39;étape précédente
+                  </button>
+                  <p className="text-center text-amber-400 font-semibold mb-4">
+                    {level1Answer.subQuestion}
+                  </p>
+                  <div className="grid gap-3">
+                    {level1Answer.subAnswers?.map((a) => (
+                      <button
+                        key={a.key}
+                        onClick={() => setGuideSubKey2(a.key)}
+                        className="cursor-pointer bg-gray-800/50 border-2 border-gray-700 hover:border-amber-500/60 rounded-xl p-4 text-left text-gray-200 font-medium transition-all"
+                      >
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {guideResult && guideResult.nonPropose && (
+                <div className="bg-gray-800/50 border-2 border-gray-600 rounded-xl p-5 sm:p-6">
+                  <button
+                    onClick={resetGuide}
+                    className="cursor-pointer text-sm text-gray-400 hover:text-gray-300 underline mb-4"
+                  >
+                    ← Revenir à l&#39;étape précédente
+                  </button>
+                  <p className="text-gray-200 leading-relaxed">{guideResult.nonPropose}</p>
+                </div>
+              )}
+
+              {guideResult && !guideResult.categorie && !guideResult.nonPropose && guideResult.explication && (
+                <div className="bg-gray-800/50 border-2 border-gray-600 rounded-xl p-5 sm:p-6">
+                  <button
+                    onClick={resetGuide}
+                    className="cursor-pointer text-sm text-gray-400 hover:text-gray-300 underline mb-4"
+                  >
+                    ← Revenir à l&#39;étape précédente
+                  </button>
+                  <p className="text-gray-200 leading-relaxed">💡 {guideResult.explication}</p>
+                </div>
+              )}
+
+              {guideResult && guideResult.categorie && (
                 <div className="bg-gray-800/50 border-2 border-amber-500/40 rounded-xl p-5 sm:p-6">
                   <button
                     onClick={resetGuide}
