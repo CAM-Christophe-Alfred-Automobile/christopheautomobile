@@ -10,7 +10,13 @@ import ServiceCard, {
 import Image from "next/image";
 import SearchField from "@/components/search/SearchField";
 import { siteConfig } from "@/config/site";
-import Min60Modal from "@/components/modals/Min60Modal"; 
+import { symptoms, type SymptomKey } from "@/app/data/symptomGuide";
+import ZoneBooking from "@/components/booking/ZoneBooking";
+import { partsGuidance, defaultPartsGuidance } from "@/app/data/partsGuidance";
+import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
+
+const AUTRE_MODELE = "__autre__";
+const SEUIL_ANNEE_MOTORISATIONS_RECENTES = 2016;
 
 
 //! Convertir minutes → format h:mm
@@ -25,22 +31,14 @@ const formatDuree = (minutes: number | string | null) => {
 //! Limite d'une journée d'intervention (8h = 480 min)
 const LIMITE_JOURNEE = 480;
 
-//! URL Cal.com selon durée - Utilise le username depuis la config
-const getCalUrl = (duree: number) => {
-  const username = siteConfig.calcom.username;
-  if (duree <= 60) return `https://cal.com/${username}/1h`;
-  if (duree <= 90) return `https://cal.com/${username}/1h30`;
-  if (duree <= 120) return `https://cal.com/${username}/2h`;
-  if (duree <= 150) return `https://cal.com/${username}/2h30`;
-  if (duree <= 180) return `https://cal.com/${username}/3h`;
-  if (duree <= 210) return `https://cal.com/${username}/3h30`;
-  if (duree <= 240) return `https://cal.com/${username}/4h`;
-  if (duree <= 270) return `https://cal.com/${username}/4h30`;
-  if (duree <= 300) return `https://cal.com/${username}/5h`;
-  if (duree <= 330) return `https://cal.com/${username}/5h30`;
-  if (duree <= 360) return `https://cal.com/${username}/6h`;
-  return `https://cal.com/${username}/journee-complete`; // au-delà de 6h
-};
+//! Tarif selon la taille/motorisation du véhicule (multiplicateur appliqué au tarif standard)
+type VehicleTier = "citadine" | "standard" | "suv";
+
+const VEHICLE_TIERS: { key: VehicleTier; label: string; examples: string; multiplier: number }[] = [
+  { key: "citadine", label: "Citadine", examples: "Clio, 208, Twingo...", multiplier: 50 / 60 },
+  { key: "standard", label: "Berline / Standard", examples: "308, Golf, Mégane...", multiplier: 1 },
+  { key: "suv", label: "SUV / Utilitaire", examples: "Duster, Kangoo, Trafic...", multiplier: 65 / 60 },
+];
 
 export default function BookingPage() {
   // 🔹 HOOKS - Toujours en premier (règle React)
@@ -51,10 +49,35 @@ export default function BookingPage() {
   const [dureePersonnalisee, setDureePersonnalisee] = useState<number>(60);
   const [showReservationWarning, setShowReservationWarning] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchMode, setSearchMode] = useState<"search" | "category">("search"); // Mode par défaut : recherche
+  const [searchMode, setSearchMode] = useState<"search" | "category" | "guide">("search"); // Mode par défaut : recherche
   const [isCatOpen, setIsCatOpen] = useState(false);
+  // État du questionnaire guidé ("Je ne sais pas ce qu'il me faut")
+  const [guideSymptomKey, setGuideSymptomKey] = useState<SymptomKey | null>(null);
+  const [guideSubKey, setGuideSubKey] = useState<string | null>(null);
+  const [vehicleMarque, setVehicleMarque] = useState("");
+  const [vehicleModele, setVehicleModele] = useState("");
+  const [vehicleModeleLibre, setVehicleModeleLibre] = useState(""); // saisie manuelle si "Autre / je ne trouve pas"
+  const [vehicleMotorisation, setVehicleMotorisation] = useState("");
+  const [vehicleMotorisationLibre, setVehicleMotorisationLibre] = useState("");
+  const [vehicleAnnee, setVehicleAnnee] = useState("");
+
+  const modelesDisponibles = useMemo(
+    () => modelesParMarque[vehicleMarque] ?? [],
+    [vehicleMarque]
+  );
+  // Les motorisations listées correspondent aux générations récentes (~2016+ : PureTech, BlueHDi, TCe, TSI EVO...).
+  // Pour un véhicule plus ancien, on ne propose pas de motorisation au hasard : bascule en saisie libre.
+  const anneeAncienne = (() => {
+    const annee = parseInt(vehicleAnnee, 10);
+    return !isNaN(annee) && annee < SEUIL_ANNEE_MOTORISATIONS_RECENTES;
+  })();
+  const motorisationsDisponibles = useMemo(
+    () => (anneeAncienne ? [] : modelesDisponibles.find((m) => m.modele === vehicleModele)?.motorisations ?? []),
+    [modelesDisponibles, vehicleModele, anneeAncienne]
+  );
   // État pour gérer le contact préalable pour les interventions sur devis
   const [hasContactedMechanic, setHasContactedMechanic] = useState<boolean | null>(null);
+  const [vehicleTier, setVehicleTier] = useState<VehicleTier>("standard");
 
   //! Catégories uniques + tri avec cas spéciaux à la fin
   const categoriesList = [
@@ -72,6 +95,26 @@ export default function BookingPage() {
     // Sinon ordre alphabétique
     return a.localeCompare(b);
   });
+
+  //! Questionnaire guidé : symptôme sélectionné + réponse résolue (catégorie + explication)
+  const selectedSymptom = symptoms.find((s) => s.key === guideSymptomKey) ?? null;
+  const guideResult = selectedSymptom
+    ? selectedSymptom.categorie
+      ? { categorie: selectedSymptom.categorie, explication: selectedSymptom.explication! }
+      : selectedSymptom.subAnswers?.find((a) => a.key === guideSubKey) ?? null
+    : null;
+
+  const resetGuide = () => {
+    setGuideSymptomKey(null);
+    setGuideSubKey(null);
+  };
+
+  const validerGuide = () => {
+    if (!guideResult) return;
+    setCategorie(guideResult.categorie);
+    setSearchMode("category");
+    setIsCatOpen(false);
+  };
 
   // Fonction pour vérifier si une prestation est "Sur devis"
   const isSurDevis = (duree: number | string | null): boolean => {
@@ -126,7 +169,7 @@ export default function BookingPage() {
   );
 
   //! Calcul durée et prix totaux
-  const calculerDuree = () => {
+  const calculerDuree = (tierOverride?: VehicleTier) => {
     if (categorie === "Intervention sur devis") {
       setDureeTotale(dureePersonnalisee);
       // Prix sur devis pour "Intervention sur devis"
@@ -175,13 +218,17 @@ export default function BookingPage() {
       }
     }
 
+    // Applique le multiplicateur du tarif véhicule (citadine/standard/SUV-utilitaire)
+    const multiplier = VEHICLE_TIERS.find((t) => t.key === (tierOverride ?? vehicleTier))?.multiplier ?? 1;
+    const adjustedTotal = Math.round(fixedPricesTotal * multiplier);
+
     // Si au moins un prix est variable, afficher "à partir de" + total
     if (hasVariablePrices) {
-      setPrixTotal(`à partir de ${fixedPricesTotal}€`);
+      setPrixTotal(`à partir de ${adjustedTotal}€`);
     }
     // Sinon, afficher le total numérique
     else {
-      setPrixTotal(fixedPricesTotal);
+      setPrixTotal(adjustedTotal);
     }
   };
 
@@ -203,7 +250,6 @@ export default function BookingPage() {
       </div>
 
       <Header />
-      <Min60Modal />
 
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-12 max-w-7xl relative" role="main">
         <div className="sm:mb-12 mb-4 relative max-w-5xl mx-auto">
@@ -220,9 +266,17 @@ export default function BookingPage() {
             </p>
 
             {/* Informations importantes */}
-            <div className="grid sm:grid-cols-2 gap-4 mt-6" role="region" aria-label="Informations importantes">
-              {/* Acompte */}
-              <div className="bg-gray-800/40 rounded-xl p-5 border-l-4 border-blue-500">
+            <div
+              className="mt-6 bg-gray-800/50 border border-gray-700 rounded-2xl p-6 sm:p-8 shadow-lg"
+              role="region"
+              aria-label="Informations importantes"
+            >
+              <h2 className="text-lg sm:text-xl font-bold text-amber-400 mb-6 text-center">
+                ℹ️ Ce qu'il faut savoir avant de réserver
+              </h2>
+
+              <div className="space-y-6">
+                {/* Acompte */}
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center" aria-hidden="true">
                     <svg
@@ -239,9 +293,9 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">
                       Acompte requis
-                    </h2>
+                    </h3>
                     <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                       Un acompte vous sera demandé lors de la réservation pour
                       garantir votre créneau. Le montant varie selon la durée de
@@ -251,17 +305,14 @@ export default function BookingPage() {
                       </strong>
                       .
                     </p>
-
                     <p className="text-xs sm:text-sm text-gray-300 mt-2 flex items-center gap-1">
                       <span className="text-green-400">✓</span> Déduit du prix final
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Achat de pièces */}
-              <div className="bg-gray-800/40 rounded-xl p-5 border-l-4 border-amber-500">
-                <div className="flex items-start gap-3">
+                {/* Achat de pièces */}
+                <div className="flex items-start gap-3 pt-6 border-t border-gray-700/60">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
                     <svg
                       className="w-5 h-5 text-amber-400"
@@ -278,10 +329,9 @@ export default function BookingPage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">
                       Achat de pièces
-                    </h2>
-
+                    </h3>
                     <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                       Si le mécanicien doit s&#39;occuper de commander les
                       pièces, merci de{" "}
@@ -293,6 +343,37 @@ export default function BookingPage() {
                       Un acompte de{" "}
                       <strong className="text-gray-200">40 %</strong> du total
                       des pièces sera demandé avant l'achat.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tarification selon le véhicule */}
+                <div className="flex items-start gap-3 pt-6 border-t border-gray-700/60">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-green-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">
+                      Un tarif adapté à votre véhicule
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                      Le prix de la main d&#39;œuvre varie selon le{" "}
+                      <strong className="text-gray-200">gabarit de votre véhicule</strong>{" "}
+                      (citadine, berline, SUV/utilitaire) et la{" "}
+                      <strong className="text-gray-200">complexité de l&#39;intervention</strong>,
+                      afin de refléter au plus juste le temps de travail réel.
                     </p>
                   </div>
                 </div>
@@ -369,6 +450,36 @@ export default function BookingPage() {
               </svg>
               <span className="whitespace-nowrap">Parcourir par catégorie</span>
             </button>
+
+            <button
+              onClick={() => {
+                setSearchMode("guide");
+                setSearchQuery("");
+                setCategorie("");
+                setIsCatOpen(false);
+                resetGuide();
+              }}
+              className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
+                searchMode === "guide"
+                  ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg sm:scale-105"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              <svg
+                className="w-5 h-5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="whitespace-nowrap">Je ne sais pas ce qu&#39;il me faut</span>
+            </button>
           </div>
 
           {/* Mode recherche */}
@@ -410,6 +521,191 @@ export default function BookingPage() {
                 categories={categories}
                 onOpenChange={setIsCatOpen}
               />
+            </div>
+          )}
+
+          {/* Mode questionnaire guidé */}
+          {searchMode === "guide" && (
+            <div className="px-4 sm:px-0 max-w-2xl mx-auto">
+              {!guideSymptomKey && (
+                <>
+                  <p className="text-center text-gray-400 mb-4 text-sm">
+                    💡 Choisissez ce qui décrit le mieux votre situation, sans avoir besoin de vocabulaire technique
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {symptoms.map((s) => (
+                      <button
+                        key={s.key}
+                        onClick={() => {
+                          setGuideSymptomKey(s.key);
+                          setGuideSubKey(null);
+                        }}
+                        className="cursor-pointer flex items-center gap-3 bg-gray-800/50 border-2 border-gray-700 hover:border-amber-500/60 rounded-xl p-4 text-left transition-all"
+                      >
+                        <span className="text-2xl">{s.emoji}</span>
+                        <span className="text-gray-200 font-medium">{s.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {selectedSymptom && selectedSymptom.subAnswers && !guideSubKey && (
+                <div>
+                  <button
+                    onClick={resetGuide}
+                    className="cursor-pointer text-sm text-gray-400 hover:text-gray-300 underline mb-4"
+                  >
+                    ← Revenir à l&#39;étape précédente
+                  </button>
+                  <p className="text-center text-amber-400 font-semibold mb-4">
+                    {selectedSymptom.subQuestion}
+                  </p>
+                  <div className="grid gap-3">
+                    {selectedSymptom.subAnswers.map((a) => (
+                      <button
+                        key={a.key}
+                        onClick={() => setGuideSubKey(a.key)}
+                        className="cursor-pointer bg-gray-800/50 border-2 border-gray-700 hover:border-amber-500/60 rounded-xl p-4 text-left text-gray-200 font-medium transition-all"
+                      >
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {guideResult && (
+                <div className="bg-gray-800/50 border-2 border-amber-500/40 rounded-xl p-5 sm:p-6">
+                  <button
+                    onClick={resetGuide}
+                    className="cursor-pointer text-sm text-gray-400 hover:text-gray-300 underline mb-4"
+                  >
+                    ← Revenir à l&#39;étape précédente
+                  </button>
+                  <p className="text-gray-200 mb-5">{guideResult.explication}</p>
+
+                  <p className="font-semibold text-amber-400 mb-3 text-sm">
+                    🚗 Votre véhicule (facultatif, mais ça m&#39;aide à mieux vous conseiller)
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    <select
+                      value={vehicleMarque}
+                      onChange={(e) => {
+                        setVehicleMarque(e.target.value);
+                        setVehicleModele("");
+                        setVehicleModeleLibre("");
+                        setVehicleMotorisation("");
+                        setVehicleMotorisationLibre("");
+                      }}
+                      className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+                    >
+                      <option value="">Marque</option>
+                      {marques.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+
+                    {modelesDisponibles.length > 0 ? (
+                      <select
+                        value={vehicleModele}
+                        onChange={(e) => {
+                          setVehicleModele(e.target.value);
+                          setVehicleMotorisation("");
+                          setVehicleMotorisationLibre("");
+                        }}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+                      >
+                        <option value="">Modèle</option>
+                        {modelesDisponibles.map((m) => (
+                          <option key={m.modele} value={m.modele}>
+                            {m.modele}
+                          </option>
+                        ))}
+                        <option value={AUTRE_MODELE}>Autre / je ne trouve pas</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Modèle (ex: Partner)"
+                        value={vehicleModeleLibre}
+                        onChange={(e) => setVehicleModeleLibre(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                      />
+                    )}
+
+                    {vehicleModele === AUTRE_MODELE && (
+                      <input
+                        type="text"
+                        placeholder="Précisez le modèle"
+                        value={vehicleModeleLibre}
+                        onChange={(e) => setVehicleModeleLibre(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                      />
+                    )}
+
+                    <input
+                      type="text"
+                      placeholder="Année (ex: 2015)"
+                      value={vehicleAnnee}
+                      onChange={(e) => setVehicleAnnee(e.target.value)}
+                      className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                    />
+
+                    {motorisationsDisponibles.length > 0 ? (
+                      <select
+                        value={vehicleMotorisation}
+                        onChange={(e) => setVehicleMotorisation(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200"
+                      >
+                        <option value="">Motorisation</option>
+                        {motorisationsDisponibles.map((mot) => (
+                          <option key={mot} value={mot}>
+                            {mot}
+                          </option>
+                        ))}
+                        <option value={AUTRE_MODELE}>Autre / je ne sais pas</option>
+                      </select>
+                    ) : (
+                      (vehicleModele || vehicleModeleLibre) && (
+                        <input
+                          type="text"
+                          placeholder="Motorisation (ex: 1.5 BlueHDi 130)"
+                          value={vehicleMotorisationLibre}
+                          onChange={(e) => setVehicleMotorisationLibre(e.target.value)}
+                          className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                        />
+                      )
+                    )}
+
+                    {vehicleMotorisation === AUTRE_MODELE && (
+                      <input
+                        type="text"
+                        placeholder="Précisez la motorisation"
+                        value={vehicleMotorisationLibre}
+                        onChange={(e) => setVehicleMotorisationLibre(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"
+                      />
+                    )}
+                  </div>
+
+                  {anneeAncienne && (vehicleModele || vehicleModeleLibre) && (
+                    <p className="text-xs text-gray-400 -mt-3 mb-5">
+                      💡 Les motorisations proposées concernent surtout les véhicules récents. Pour un
+                      véhicule de {vehicleAnnee}, précisez la motorisation vous-même si vous la connaissez.
+                    </p>
+                  )}
+
+                  <button
+                    onClick={validerGuide}
+                    className="cursor-pointer w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all py-3 rounded-lg font-bold text-white"
+                  >
+                    Voir les prestations correspondantes
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -650,6 +946,13 @@ export default function BookingPage() {
               </div>
             </div>
 
+            {categorie && (
+              <div className="mb-5 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-sm text-gray-300">
+                💡 <strong className="text-blue-300">Conseil pièces :</strong>{" "}
+                {partsGuidance[categorie] ?? defaultPartsGuidance}
+              </div>
+            )}
+
             {prestations.length === 0 ? (
               <div className="text-center py-12 bg-gray-800/30 border border-gray-700 rounded-xl">
                 <p className="text-gray-400 text-lg mb-4">
@@ -818,6 +1121,31 @@ export default function BookingPage() {
             </div>
           </div>
         )}
+              {/* Sélecteur de gabarit véhicule - influence le tarif horaire affiché */}
+        {(selected.length > 0 || (categorie === "Intervention sur devis" && hasContactedMechanic === true)) && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <p className="text-center text-sm text-gray-300 mb-3">Quelle est la taille de votre véhicule ?</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {VEHICLE_TIERS.map((tier) => (
+                <button
+                  key={tier.key}
+                  onClick={() => {
+                    setVehicleTier(tier.key);
+                    if (dureeTotale !== null) calculerDuree(tier.key);
+                  }}
+                  className={`cursor-pointer rounded-xl border-2 px-3 py-2.5 text-center transition-all ${
+                    vehicleTier === tier.key
+                      ? "border-amber-500 bg-amber-500/10"
+                      : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+                  }`}
+                >
+                  <p className="font-semibold text-sm text-gray-100">{tier.label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{tier.examples}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
               {/* Bouton Calcul - Afficher si des interventions sont sélectionnées ou si c'est sur devis ET qu'il y a eu contact préalable */}
         {(selected.length > 0 || (categorie === "Intervention sur devis" && hasContactedMechanic === true)) && (
           <div className="text-center mb-10">
@@ -982,12 +1310,11 @@ export default function BookingPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex justify-center w-full">
-                <iframe
-                  src={getCalUrl(dureeTotale)!}
-                  className="w-[100%] md:w-[800px] xl:w-[1000px] h-[900px] rounded-xl border-none"
-                />
-              </div>
+              <ZoneBooking
+                dureeTotale={dureeTotale}
+                vehicleTierLabel={VEHICLE_TIERS.find((t) => t.key === vehicleTier)?.label}
+                estimatedPrice={typeof prixTotal === "number" ? prixTotal : undefined}
+              />
             )}
           </div>
         )}

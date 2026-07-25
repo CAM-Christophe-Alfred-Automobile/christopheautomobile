@@ -55,8 +55,8 @@ export default function HeroSection() {
           {/* Image en bannière large */}
           <div className="w-full">
             <Image
-              src="/images/accueil2.webp"
-              alt="Christophe AutoMobile"
+              src="/images/christophe-atelier.jpg"
+              alt="Christophe AutoMobile en intervention"
               width={1200}
               height={600}
               quality={85}
