@@ -23,7 +23,8 @@ export default function ConceptBanner() {
             Le concept : <span className="text-amber-400">Vos pièces, ma main d'œuvre</span>
           </h3>
           <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-            En tant que mécanicien à domicile, je vous facture <strong className="text-white">uniquement la main d'œuvre</strong>. 
+            En tant que mécanicien à domicile, je vous facture <strong className="text-white">la main d'œuvre</strong>{" "}
+            (selon le gabarit de votre véhicule) <strong className="text-white">et un forfait de déplacement clair</strong>, calculé selon votre distance.
             C'est simple : <strong className="text-white">vous achetez vous-même vos pièces détachées</strong> au meilleur prix sur internet ou en magasin (Oscaro, Autodoc, etc.), et je viens avec tout mon équipement professionnel pour réaliser le montage chez vous !
           </p>
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm font-medium text-amber-300/80">
@@ -37,7 +38,7 @@ export default function ConceptBanner() {
             </div>
             <div className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Zéro déplacement pour vous
+              Frais de déplacement connus avant de réserver
             </div>
           </div>
         </div>
