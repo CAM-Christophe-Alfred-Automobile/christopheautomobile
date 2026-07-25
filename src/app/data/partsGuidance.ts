@@ -101,8 +101,16 @@ export const partsGuidanceByService: Record<string, string> = {
     "Précisez le côté (gauche/droit) et la version du véhicule (avec ou sans LED/xénon) pour la bonne référence.",
   "Feu arrière (unité)":
     "Précisez le côté (gauche/droit) — la référence diffère souvent entre les deux.",
+  "Contacteur de stop / frein":
+    "Une pièce simple et peu chère — pas de référence particulière à vérifier au-delà du modèle exact.",
+
+  // Refroidissement
+  "Vase d'expansion":
+    "Vérifiez qu'il inclut le bouchon avec la bonne pression de tarage, souvent vendu avec sur les modèles récents.",
 
   // Entretien (spécifique)
   "Filtre gasoil":
     "Vérifiez la référence exacte à votre motorisation : certains modèles ont plusieurs filtres possibles selon l'année.",
+  "Contrôle et appoint des niveaux":
+    "Aucune pièce à acheter à l'avance, sauf si un niveau bas révèle un besoin de liquide spécifique (je vous le confirmerai sur place).",
 };

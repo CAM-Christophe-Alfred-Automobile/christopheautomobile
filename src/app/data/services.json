@@ -915,5 +915,26 @@
     "description": "Remplissage",
     "duree": 60,
     "prix": 60
+  },
+  {
+    "categorie": "Refroidissement",
+    "service": "Vase d'expansion",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 60
+  },
+  {
+    "categorie": "Électricité",
+    "service": "Contacteur de stop / frein",
+    "description": "Remplacement",
+    "duree": 60,
+    "prix": 60
+  },
+  {
+    "categorie": "Entretien",
+    "service": "Contrôle et appoint des niveaux",
+    "description": "Huile, liquide de refroidissement, liquide de frein, lave-glace",
+    "duree": 60,
+    "prix": 60
   }
 ]
