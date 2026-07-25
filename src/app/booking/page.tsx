@@ -12,7 +12,7 @@ import SearchField from "@/components/search/SearchField";
 import { siteConfig } from "@/config/site";
 import { symptoms, type SymptomKey } from "@/app/data/symptomGuide";
 import ZoneBooking from "@/components/booking/ZoneBooking";
-import { partsGuidance, defaultPartsGuidance } from "@/app/data/partsGuidance";
+import { partsGuidance, defaultPartsGuidance, partsGuidanceByService } from "@/app/data/partsGuidance";
 import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
 
 const AUTRE_MODELE = "__autre__";
@@ -187,6 +187,17 @@ export default function BookingPage() {
   const selectedServices = servicesData.filter((s) =>
     selected.includes(s.service)
   );
+
+  //! Conseil pièces : priorité à la prestation précise sélectionnée, sinon la catégorie
+  const conseilsPieces = selected.length > 0
+    ? Array.from(
+        new Set(
+          selected
+            .map((s) => partsGuidanceByService[s])
+            .filter((tip): tip is string => Boolean(tip))
+        )
+      )
+    : [];
 
   //! Calcul durée et prix totaux
   const calculerDuree = (tierOverride?: VehicleTier) => {
@@ -1023,9 +1034,19 @@ export default function BookingPage() {
             </div>
 
             {categorie && (
-              <div className="mb-5 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-sm text-gray-300">
-                💡 <strong className="text-blue-300">Conseil pièces :</strong>{" "}
-                {partsGuidance[categorie] ?? defaultPartsGuidance}
+              <div className="mb-5 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                {conseilsPieces.length > 0 ? (
+                  conseilsPieces.map((tip, i) => (
+                    <p key={i}>
+                      💡 <strong className="text-blue-300">Conseil pièces :</strong> {tip}
+                    </p>
+                  ))
+                ) : (
+                  <p>
+                    💡 <strong className="text-blue-300">Conseil pièces :</strong>{" "}
+                    {partsGuidance[categorie] ?? defaultPartsGuidance}
+                  </p>
+                )}
               </div>
             )}
 
