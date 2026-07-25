@@ -1,5 +1,8 @@
 // Questionnaire guidé pour les clients qui ne connaissent pas la mécanique.
 // Chaque symptôme mène soit directement à une catégorie, soit à une sous-question.
+// "services" (optionnel) restreint les prestations affichées à cette liste précise
+// (par nom exact, tous catégorie confondues) plutôt que toute la catégorie —
+// pour ne proposer que des choix vraiment pertinents au client novice.
 
 export type SymptomKey =
   | "voyant"
@@ -13,6 +16,7 @@ export type SubAnswer = {
   label: string;
   categorie: string;
   explication: string;
+  services?: string[];
 };
 
 export type Symptom = {
@@ -22,9 +26,13 @@ export type Symptom = {
   // Si categorie est défini, on saute la sous-question.
   categorie?: string;
   explication?: string;
+  services?: string[];
   subQuestion?: string;
   subAnswers?: SubAnswer[];
 };
+
+// Prestations "diagnostic" réutilisées comme option de secours ("venir voir le problème")
+const DIAGNOSTIC_GENERIQUE = ["Diagnostic valise complet", "Inspection / contrôle panne"];
 
 export const symptoms: Symptom[] = [
   {
@@ -34,6 +42,7 @@ export const symptoms: Symptom[] = [
     categorie: "Diagnostic",
     explication:
       "Un voyant allumé nécessite un diagnostic pour identifier précisément la cause avant toute réparation.",
+    services: DIAGNOSTIC_GENERIQUE,
   },
   {
     key: "bruit",
@@ -47,12 +56,18 @@ export const symptoms: Symptom[] = [
         categorie: "Freinage",
         explication:
           "Un bruit au freinage évoque souvent des plaquettes ou disques usés.",
+        services: ["Détection panne de freinage /bruit", "Plaquettes (essieu)", "Disques + plaquettes"],
       },
       {
         key: "moteur",
         label: "Sous le capot, au moteur",
         categorie: "Moteur",
         explication: "Un bruit moteur peut avoir plusieurs origines — un contrôle est recommandé.",
+        services: [
+          "Problème moteur / Bruit provenant du moteur",
+          "Courroie accessoire",
+          "Courroie distribution + pompe à eau",
+        ],
       },
       {
         key: "direction",
@@ -60,12 +75,18 @@ export const symptoms: Symptom[] = [
         categorie: "Suspension / Direction",
         explication:
           "Ce type de bruit est souvent lié à la suspension ou à la direction.",
+        services: [
+          "Détection bruit de suspension / direction",
+          "Amortisseurs (paire)",
+          "Biellettes de barre stabilisatrice (paire)",
+        ],
       },
       {
         key: "autre-bruit",
         label: "Je ne sais pas trop",
         categorie: "Diagnostic",
         explication: "Un contrôle général permettra d'identifier l'origine du bruit.",
+        services: DIAGNOSTIC_GENERIQUE,
       },
     ],
   },
@@ -88,12 +109,20 @@ export const symptoms: Symptom[] = [
         categorie: "Électricité",
         explication:
           "C'est souvent un problème de batterie ou de démarreur.",
+        services: [
+          "Batterie",
+          "Alternateur",
+          "Démarreur",
+          "Relais / fusible / faisceau",
+          "Inspection / contrôle panne",
+        ],
       },
       {
         key: "tourne",
         label: "Le moteur tourne mais ne démarre pas",
         categorie: "Diagnostic",
         explication: "Un diagnostic est nécessaire pour identifier la panne.",
+        services: DIAGNOSTIC_GENERIQUE,
       },
     ],
   },
@@ -104,5 +133,6 @@ export const symptoms: Symptom[] = [
     categorie: "Diagnostic",
     explication:
       "Un contrôle général permettra d'identifier précisément ce dont votre véhicule a besoin.",
+    services: DIAGNOSTIC_GENERIQUE,
   },
 ];

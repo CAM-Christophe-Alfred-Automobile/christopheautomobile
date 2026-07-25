@@ -43,6 +43,7 @@ const VEHICLE_TIERS: { key: VehicleTier; label: string; examples: string; multip
 export default function BookingPage() {
   // 🔹 HOOKS - Toujours en premier (règle React)
   const [categorie, setCategorie] = useState("");
+  const [guideServicesFilter, setGuideServicesFilter] = useState<string[] | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [dureeTotale, setDureeTotale] = useState<number | null>(null);
   const [prixTotal, setPrixTotal] = useState<number | string | null>(null);
@@ -100,18 +101,24 @@ export default function BookingPage() {
   const selectedSymptom = symptoms.find((s) => s.key === guideSymptomKey) ?? null;
   const guideResult = selectedSymptom
     ? selectedSymptom.categorie
-      ? { categorie: selectedSymptom.categorie, explication: selectedSymptom.explication! }
+      ? {
+          categorie: selectedSymptom.categorie,
+          explication: selectedSymptom.explication!,
+          services: selectedSymptom.services,
+        }
       : selectedSymptom.subAnswers?.find((a) => a.key === guideSubKey) ?? null
     : null;
 
   const resetGuide = () => {
     setGuideSymptomKey(null);
     setGuideSubKey(null);
+    setGuideServicesFilter(null);
   };
 
   const validerGuide = () => {
     if (!guideResult) return;
     setCategorie(guideResult.categorie);
+    setGuideServicesFilter(guideResult.services ?? null);
     setSearchMode("category");
     setIsCatOpen(false);
   };
@@ -125,8 +132,11 @@ export default function BookingPage() {
   const prestations = useMemo(() => {
     const filtered = servicesData.filter(
       (s) =>
-        // En mode recherche : pas besoin de catégorie, en mode catégorie : filtrer par catégorie
-        (searchMode === "search" || s.categorie === categorie) &&
+        // Issu du questionnaire guidé : ne montrer que la petite sélection pertinente
+        // (toutes catégories confondues), pas toute la catégorie.
+        (guideServicesFilter
+          ? guideServicesFilter.includes(s.service)
+          : searchMode === "search" || s.categorie === categorie) &&
         // Exclure UNIQUEMENT si durée est null ou non numérique
         // Le prix peut être null (ex: "À partir de X€"), seule la durée compte pour réserver
         s.duree !== null &&
@@ -143,7 +153,7 @@ export default function BookingPage() {
     return filtered.sort((a, b) => {
       return a.service.localeCompare(b.service, 'fr');
     });
-  }, [categorie, searchQuery, searchMode]);
+  }, [categorie, searchQuery, searchMode, guideServicesFilter]);
 
   //! Sélection / déselection
   const handleSelect = (service: string) => {
@@ -399,6 +409,7 @@ export default function BookingPage() {
               onClick={() => {
                 setSearchMode("search");
                 setCategorie("");
+                setGuideServicesFilter(null);
                 setIsCatOpen(false);
               }}
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
@@ -427,6 +438,7 @@ export default function BookingPage() {
               onClick={() => {
                 setSearchMode("category");
                 setSearchQuery("");
+                setGuideServicesFilter(null);
                 setIsCatOpen(false);
               }}
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
@@ -514,6 +526,7 @@ export default function BookingPage() {
                 categorie={categorie}
                 setCategorie={(value) => {
                   setCategorie(value);
+                  setGuideServicesFilter(null);
                   setDureeTotale(null);
                   setIsCatOpen(false);
                   setHasContactedMechanic(null);

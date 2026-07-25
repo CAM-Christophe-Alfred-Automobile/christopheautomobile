@@ -574,7 +574,7 @@
 
    {
     "categorie": "Suspension / Direction",
-    "service": "Détection bruit de suspension / direction ",
+    "service": "Détection bruit de suspension / direction",
     "description": "Inspection, détection",
     "duree": 60,
     "prix": 60
@@ -708,8 +708,8 @@
     "categorie": "Électricité",
     "service": "Démarreur",
     "description": "Remplacement",
-    "duree": null,
-    "prix": " à partir de 60€"
+    "duree": 60,
+    "prix": "à partir de 60€"
   },
   {
     "categorie": "Électricité",
