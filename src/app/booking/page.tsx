@@ -265,20 +265,18 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-[#0F0F0F] to-gray-900 text-white relative">
-      {/* //! Logo filigrane géant (pas prioritaire) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
-        <Image
-          src="/images/CAM-blanc-complet.webp"
-          alt="Logo Christophe AutoMobile en filigrane"
-          width={600}
-          height={600}
-          className="w-[600px] h-auto"
-          style={{ width: "auto", height: "auto" }}
-          loading="lazy" //! charge après le contenu important
-          //! Mobile n’a pas besoin d’une image géante
-          sizes="(max-width: 768px) 200px, 600px"
-        />
-      </div>
+      {/* //! Logo filigrane géant (pas prioritaire) — en CSS background pour ne jamais être
+          candidat au LCP (contrairement à un <Image>, un background-image n'est jamais
+          considéré comme le "Largest Contentful Paint" par le navigateur). */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-5 bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url(/images/CAM-blanc-complet.webp)",
+          backgroundSize: "min(600px, 90vw) auto",
+        }}
+        role="presentation"
+        aria-hidden="true"
+      />
 
       <Header />
 
