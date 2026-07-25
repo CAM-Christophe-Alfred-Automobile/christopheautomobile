@@ -17,7 +17,7 @@
     "categorie": "Entretien",
     "service": "Nettoyage EGR ou FAP ou ADBLUE",
     "description": "",
-    "duree": null,
+    "duree": 60,
     "prix": "à partir de 60€"
   },
   {
@@ -80,7 +80,7 @@
     "categorie": "Entretien",
     "service": "Vidange boîte auto",
     "description": "Huile + crépine sans rinçage",
-    "duree": null,
+    "duree": 70,
     "prix": "à partir de 70€"
   },
   {
@@ -204,15 +204,15 @@
   },
   {
     "categorie": "Moteur",
-    "service": "Carter haut moteur ",
-    "description": "remplacement ",
+    "service": "Carter haut moteur",
+    "description": "remplacement",
     "duree": 100,
     "prix": 100
   },
   {
     "categorie": "Moteur",
-    "service": "Pompe à huile  ",
-    "description": "remplacement + controle étancheité carter huile et huile moteur + filtre neuf ",
+    "service": "Pompe à huile",
+    "description": "remplacement + controle étancheité carter huile et huile moteur + filtre neuf",
     "duree": 150,
     "prix": 150
   },
@@ -282,7 +282,7 @@
   {
     "categorie": "Moteur",
     "service": "Pompe à injection",
-    "description": "Remplacement + purge ",
+    "description": "Remplacement + purge",
     "duree": 240,
     "prix": "à partir de 200€"
   },
@@ -290,7 +290,7 @@
     "categorie": "Moteur",
     "service": "Capteur PMH / vilebrequin",
     "description": "Remplacement",
-    "duree": null,
+    "duree": 60,
     "prix": "à partir de 60€"
   },
   {
@@ -407,7 +407,7 @@
   },
   {
     "categorie": "Moteur",
-    "service": "Poulie damper ",
+    "service": "Poulie damper",
     "description": "alternateur autre",
     "duree": 60,
     "prix": 60
@@ -451,7 +451,7 @@
     "categorie": "Refroidissement",
     "service": "Pompe externe distribution",
     "description": "Remplacement",
-    "duree": null,
+    "duree": 80,
     "prix": "à partir de 80€"
   },
   {
@@ -605,7 +605,7 @@
     "categorie": "Suspension / Direction",
     "service": "Ressorts arrière",
     "description": "Remplacement",
-    "duree": null,
+    "duree": 60,
     "prix": "à partir de 60€"
   },
   {
@@ -625,21 +625,21 @@
   {
     "categorie": "Suspension / Direction",
     "service": "Silent bloc barre stabilisatrice (paire)",
-    "description": "Remplacement ",
+    "description": "Remplacement",
     "duree": 60,
     "prix": 60
   },
   {
     "categorie": "Suspension / Direction",
     "service": "Barre de direction (paire)",
-    "description": "Remplacement ",
+    "description": "Remplacement",
     "duree": 60,
     "prix": 60
   },
   {
     "categorie": "Suspension / Direction",
     "service": "Fusée (unité)",
-    "description": "Remplacement ",
+    "description": "Remplacement",
     "duree": 150,
     "prix": "à partir de 130€"
   },
@@ -828,7 +828,7 @@
   {
     "categorie": "Diagnostic",
     "service": "Contrôle pré-achat ou départ avant long trajet",
-    "description": "Contrôle complet ",
+    "description": "Contrôle complet",
     "duree": 90,
     "prix": 90
   },
