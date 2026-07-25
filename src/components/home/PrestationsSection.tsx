@@ -41,6 +41,11 @@ export default function PrestationsSection() {
             classées par type et durée, de l&#39;entretien courant aux
             réparations plus complexes.
           </p>
+          <p className="text-sm text-gray-400 mt-2">
+            Le tarif final dépend aussi du{" "}
+            <span className="text-amber-500 font-medium">gabarit de votre véhicule</span>{" "}
+            (citadine, berline, SUV/utilitaire) — détail complet lors de la réservation.
+          </p>
         </div>
 
         {/* Grille de prestations - Code couleur progressif */}

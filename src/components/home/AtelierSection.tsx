@@ -49,22 +49,30 @@ export default function AtelierSection() {
 
         {/* Layout principal en grille */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Colonne 1 : Image du camion (réduite) */}
-          <div className="lg:col-span-1 flex justify-center">
-            <div className="relative group w-full max-w-[250px] sm:max-w-xs">
+          {/* Colonne 1 : Photos d'intervention réelles */}
+          <div className="lg:col-span-1 flex flex-row lg:flex-col gap-3 justify-center w-full max-w-[250px] sm:max-w-xs mx-auto">
+            <div className="relative group flex-1 lg:flex-none">
               <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
-              <div className="relative">
-                <Image
-                  src="/images/camion2.webp"
-                  alt="Camion atelier mobile équipé"
-                  width={350}
-                  height={220}
-                  className="rounded-xl shadow-xl w-full h-auto object-cover"
-                  priority
-                  sizes="(max-width: 768px) 250px, 350px"
-
-                />
-              </div>
+              <Image
+                src="/images/intervention-honda.jpg"
+                alt="Intervention mécanique à domicile"
+                width={350}
+                height={220}
+                className="relative rounded-xl shadow-xl w-full h-auto object-cover"
+                priority
+                sizes="(max-width: 768px) 250px, 350px"
+              />
+            </div>
+            <div className="relative group flex-1 lg:flex-none">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
+              <Image
+                src="/images/detail-moteur.jpg"
+                alt="Travail mécanique de précision"
+                width={350}
+                height={220}
+                className="relative rounded-xl shadow-xl w-full h-auto object-cover"
+                sizes="(max-width: 768px) 250px, 350px"
+              />
             </div>
           </div>
 
