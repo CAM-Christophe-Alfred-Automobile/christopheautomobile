@@ -38,7 +38,7 @@ export default function ConceptBanner() {
             </div>
             <div className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Frais de déplacement connus avant de réserver
+              Zéro déplacement pour vous
             </div>
           </div>
         </div>
