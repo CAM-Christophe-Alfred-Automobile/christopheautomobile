@@ -52,17 +52,17 @@ export default function HeroSection() {
 
         {/* Design moderne : Image en bannière + Carte texte en overlap */}
         <div className="flex flex-col items-center mb-12 max-w-5xl mx-auto w-full">
-          {/* Image en bannière large */}
-          <div className="w-full">
+          {/* Photo (portrait, 1500x2000 réels) affichée en entier, sans rognage */}
+          <div className="w-full max-w-md mx-auto">
             <Image
               src="/images/christophe-atelier.jpg"
               alt="Christophe AutoMobile en intervention"
-              width={1200}
-              height={600}
+              width={900}
+              height={1200}
               quality={85}
               priority
-              className="w-full h-[250px] sm:h-[400px] object-cover rounded-2xl shadow-2xl"
-              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="w-full h-auto rounded-2xl shadow-2xl"
+              sizes="(max-width: 768px) 90vw, 448px"
             />
           </div>
 
