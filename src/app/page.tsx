@@ -17,15 +17,19 @@
 "use client";
 
 import { Header, Footer } from "@/components";
-import { 
-  HeroSection, 
-  PrestationsSection, 
-  AtelierSection 
+import {
+  HeroSection,
+  PrestationsSection,
+  AtelierSection,
+  AudienceGate
 } from "@/components/home";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
+      {/* Écran particulier / professionnel, affiché une seule fois par visiteur */}
+      <AudienceGate />
+
       {/* Header */}
       <Header />
 

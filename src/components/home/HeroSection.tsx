@@ -72,7 +72,8 @@ export default function HeroSection() {
             <p
               className={`${lato.className} text-base sm:text-lg text-gray-200 leading-relaxed mb-8`}
             >
-              Ancien militaire et passionné de mécanique depuis toujours,
+              Ancien militaire, titulaire d&apos;un Bac Pro en mécanique
+              automobile et passionné de mécanique depuis toujours,
               j&apos;ai choisi de mettre ma{" "}
               <span className="text-amber-500 font-semibold">rigueur</span> et
               mon{" "}

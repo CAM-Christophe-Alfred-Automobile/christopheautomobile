@@ -15,9 +15,9 @@ import ProBooking from "@/components/booking/ProBooking";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "Mécanicien indépendant en renfort pour garages | CAM",
+  title: "Mécanicien indépendant en renfort pour garages, concessions et centres auto | CAM",
   description:
-    "Mécanicien indépendant, 10+ ans d'expérience, polyvalent et autonome : renfort ponctuel pour garages et professionnels. Réservation directe ou devis rapide par WhatsApp.",
+    "Mécanicien indépendant, Bac Pro et 10+ ans d'expérience : renfort ponctuel pour concessions, garages, vendeurs de véhicules d'occasion et centres auto. Réservation directe ou devis rapide par WhatsApp.",
 };
 
 export default function ProfessionnelsPage() {
@@ -32,7 +32,8 @@ export default function ProfessionnelsPage() {
             </h1>
             <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Mécanicien indépendant, je propose mes services en sous-traitance
-              aux garages et entreprises qui ont besoin d&apos;un renfort
+              aux concessions automobiles, garages, vendeurs de véhicules
+              d&apos;occasion et centres auto qui ont besoin d&apos;un renfort
               ponctuel : pic d&apos;activité, remplacement, dépannage.
             </p>
           </div>
@@ -41,11 +42,12 @@ export default function ProfessionnelsPage() {
           <section className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
             <h2 className="text-2xl font-bold text-amber-400 mb-3">Qui je suis</h2>
             <p className="text-gray-300 leading-relaxed mb-5">
-              Ancien militaire, mécanicien passionné depuis toujours, j&apos;interviens
-              en toute autonomie depuis plus de 10 ans, avec la rigueur acquise
-              sous l&apos;uniforme. Mon camion-atelier est équipé comme un garage —
-              outillage complet et valise de diagnostic — opérationnel dès mon
-              arrivée.
+              Ancien militaire, titulaire d&apos;un Bac Pro en mécanique
+              automobile et mécanicien passionné depuis toujours,
+              j&apos;interviens en toute autonomie depuis plus de 10 ans, avec
+              la rigueur acquise sous l&apos;uniforme. Mon camion-atelier est
+              équipé comme un garage — outillage complet et valise de
+              diagnostic — opérationnel dès mon arrivée.
             </p>
 
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
