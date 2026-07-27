@@ -31,10 +31,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { AUDIENCE_CHOICE_KEY } from "@/lib/audienceChoice";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname(); //! Récupère le chemin actuel (ex: "/contact", "/booking")
+
+  // Réinitialise le choix particulier/professionnel et revient à l'accueil
+  // pour que l'écran de choix se réaffiche (rechargement complet nécessaire
+  // pour que AudienceGate remonte proprement, même si on est déjà sur "/").
+  const resetAudienceChoice = () => {
+    window.localStorage.removeItem(AUDIENCE_CHOICE_KEY);
+    window.location.href = "/";
+  };
 
   /**
    * Fonction helper pour vérifier si un lien est actif
@@ -164,6 +173,13 @@ export default function Header() {
                 }`}
               ></span>
             </Link>
+            <button
+              onClick={resetAudienceChoice}
+              className="cursor-pointer font-medium text-gray-400 hover:text-white transition-colors text-sm border border-gray-600 rounded-full px-3 py-1"
+              title="Revoir le choix particulier / professionnel"
+            >
+              Particulier / Pro ?
+            </button>
           </nav>
         </div>
 
@@ -198,6 +214,12 @@ export default function Header() {
               >
                 Contact
               </Link>
+              <button
+                onClick={resetAudienceChoice}
+                className="cursor-pointer block w-full px-3 py-2 rounded-md text-base font-medium text-center text-gray-400 hover:text-white hover:bg-gray-700"
+              >
+                Particulier / Pro ?
+              </button>
             </div>
           </div>
         )}
