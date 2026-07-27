@@ -63,6 +63,19 @@ export default function Footer() {
           {/* Liens légaux */}
           <div className="flex space-x-4 mb-2 sm:mb-0">
             <Link
+              href="/professionnels"
+              className="relative text-gray-200 hover:text-white transition-colors text-sm group"
+            >
+              Professionnels
+              <span
+                className={`absolute left-0 bottom-0 h-px bg-amber-500 transition-all duration-300 ${
+                  isActive("/professionnels")
+                    ? "w-full"
+                    : "w-0 group-hover:w-full"
+                }`}
+              ></span>
+            </Link>
+            <Link
               href="/mentions-legales"
               className="relative text-gray-200 hover:text-white transition-colors text-sm group"
             >
