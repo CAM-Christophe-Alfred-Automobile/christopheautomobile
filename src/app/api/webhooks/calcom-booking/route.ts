@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getShopSettings } from "@/services/admin/shopSettings";
+import { findProBookingTypeByEventTypeId, proEventTypes } from "@/app/data/proSchedule";
 
 function verifySignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.CALCOM_WEBHOOK_SECRET;
@@ -45,6 +46,8 @@ export async function POST(req: Request) {
     startTime: string;
     endTime?: string;
     title?: string;
+    eventTypeId?: number;
+    eventType?: { id?: number };
     attendees?: { name?: string; email?: string }[];
     responses?: Record<string, CalResponseField>;
   };
@@ -62,21 +65,17 @@ export async function POST(req: Request) {
 
   const attendee = payload.attendees?.[0];
   const responses = payload.responses ?? {};
+  const eventTypeId = payload.eventTypeId ?? payload.eventType?.id;
+  const proType = findProBookingTypeByEventTypeId(eventTypeId);
+
+  const startTime = new Date(payload.startTime);
+  const endTime = payload.endTime ? new Date(payload.endTime) : null;
+  const hours = endTime ? (endTime.getTime() - startTime.getTime()) / 3_600_000 : null;
+  const shopSettings = await getShopSettings();
 
   const name = responses.name?.value || attendee?.name || "Client site";
   const email = responses.email?.value || attendee?.email || undefined;
   const phone = responses.attendeePhoneNumber?.value || undefined;
-  const commune = responses.address?.value || undefined;
-  const modele = responses.modele?.value || undefined;
-  const immatriculation = responses.immatriculation?.value || undefined;
-  const description = responses.description?.value || payload.title || "Réservation en ligne";
-  const distanceMatch = responses.notes?.value?.match(/distanceKm=([\d.]+)/);
-  const distanceKm = distanceMatch ? parseFloat(distanceMatch[1]) : null;
-  const quotedPriceMatch = responses.notes?.value?.match(/estimatedPrice=([\d.]+)/);
-  const quotedPrice = quotedPriceMatch ? parseFloat(quotedPriceMatch[1]) : null;
-
-  const startTime = new Date(payload.startTime);
-  const endTime = payload.endTime ? new Date(payload.endTime) : null;
   const { firstName, lastName } = splitName(name);
 
   let client = phone || email
@@ -86,6 +85,72 @@ export async function POST(req: Request) {
         },
       })
     : null;
+
+  // Réservation professionnelle (renfort garages/entreprises) : pas de véhicule/immatriculation,
+  // mais une entreprise, une adresse de mission et un besoin décrit à la place.
+  if (proType) {
+    const entreprise = responses.entreprise?.value || "Entreprise non précisée";
+    const adresse = responses.adresse?.value || undefined;
+    const besoin = responses.besoin?.value || payload.title || "Renfort professionnel";
+    const proNote = `Entreprise : ${entreprise}`;
+
+    if (!client) {
+      client = await prisma.client.create({
+        data: { firstName, lastName, phone, email, address: adresse, notes: proNote },
+      });
+    } else {
+      const updates: { phone?: string; email?: string; address?: string; notes?: string } = {};
+      if (!client.phone && phone) updates.phone = phone;
+      if (!client.email && email) updates.email = email;
+      if (!client.address && adresse) updates.address = adresse;
+      if (!client.notes?.includes(proNote)) {
+        updates.notes = client.notes ? `${client.notes}\n${proNote}` : proNote;
+      }
+      if (Object.keys(updates).length > 0) {
+        client = await prisma.client.update({ where: { id: client.id }, data: updates });
+      }
+    }
+
+    const vehicleLabel = `Renfort professionnel — ${entreprise}`;
+    let vehicle = await prisma.vehicle.findFirst({
+      where: { clientId: client.id, model: vehicleLabel },
+    });
+    if (!vehicle) {
+      vehicle = await prisma.vehicle.create({
+        data: { clientId: client.id, model: vehicleLabel },
+      });
+    }
+
+    const rate = proEventTypes[proType].hourlyRate;
+    const normalPrice = hours != null ? hours * rate : null;
+    const dossierFee = normalPrice != null ? (normalPrice * Number(shopSettings.urssafRate)) / 100 : null;
+
+    await prisma.intervention.create({
+      data: {
+        vehicleId: vehicle.id,
+        date: startTime,
+        endDate: endTime,
+        description: besoin,
+        status: "reserved",
+        bookedOnline: true,
+        calcomBookingUid: uid,
+        normalPrice,
+        dossierFee,
+        hoursSpent: hours,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  }
+
+  const commune = responses.address?.value || undefined;
+  const modele = responses.modele?.value || undefined;
+  const immatriculation = responses.immatriculation?.value || undefined;
+  const description = responses.description?.value || payload.title || "Réservation en ligne";
+  const distanceMatch = responses.notes?.value?.match(/distanceKm=([\d.]+)/);
+  const distanceKm = distanceMatch ? parseFloat(distanceMatch[1]) : null;
+  const quotedPriceMatch = responses.notes?.value?.match(/estimatedPrice=([\d.]+)/);
+  const quotedPrice = quotedPriceMatch ? parseFloat(quotedPriceMatch[1]) : null;
 
   if (!client) {
     client = await prisma.client.create({
@@ -111,8 +176,6 @@ export async function POST(req: Request) {
     });
   }
 
-  const shopSettings = await getShopSettings();
-  const hours = endTime ? (endTime.getTime() - startTime.getTime()) / 3_600_000 : null;
   // Le prix réellement affiché au client (selon le gabarit véhicule choisi) prime sur le calcul générique.
   const normalPrice = quotedPrice ?? (hours != null ? hours * Number(shopSettings.hourlyRate) : null);
   const dossierFee = normalPrice != null ? (normalPrice * Number(shopSettings.urssafRate)) / 100 : null;

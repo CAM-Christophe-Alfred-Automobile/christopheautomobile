@@ -72,6 +72,11 @@ export default function ProfessionnelsPage() {
                 </span>
               ))}
             </div>
+            <p className="text-xs text-gray-500 mb-5">
+              Hors véhicules électriques. Climatisation : diagnostic et
+              remplacement de composants — hors manipulation de gaz
+              réfrigérant (non habilité).
+            </p>
 
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
               Pourquoi me choisir
@@ -130,7 +135,7 @@ export default function ProfessionnelsPage() {
           </section>
 
           {/* Réservation directe dans l'agenda */}
-          <section className="mb-8">
+          <section id="reservation" className="mb-8 scroll-mt-24">
             <h2 className="text-2xl font-bold text-amber-400 mb-4 text-center">
               Voir mes disponibilités et réserver
             </h2>

@@ -4,9 +4,9 @@ import type { ProBookingType } from "@/app/data/proSchedule";
 
 type Step = "slot" | "form" | "confirm";
 
-const TABS: { key: ProBookingType; label: string; tarif: string }[] = [
-  { key: "urgence", label: "Urgence", tarif: "35 €/h" },
-  { key: "journee", label: "Journée complète", tarif: "28 €/h" },
+const TABS: { key: ProBookingType; label: string }[] = [
+  { key: "urgence", label: "Urgence" },
+  { key: "journee", label: "Journée complète (9h-17h30)" },
 ];
 
 function formatDateLabel(dateStr: string) {
@@ -111,7 +111,7 @@ export default function ProBooking() {
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                {tab.label} <span className="opacity-80">({tab.tarif})</span>
+                {tab.label}
               </button>
             ))}
           </div>

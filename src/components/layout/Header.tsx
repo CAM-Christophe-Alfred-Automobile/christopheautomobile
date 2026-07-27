@@ -29,13 +29,22 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AUDIENCE_CHOICE_KEY } from "@/lib/audienceChoice";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname(); //! Récupère le chemin actuel (ex: "/contact", "/booking")
+
+  // Un professionnel doit être renvoyé vers la réservation dédiée (/professionnels),
+  // pas vers le tunnel de réservation grand public (/booking).
+  const [reserveHref, setReserveHref] = useState("/booking");
+  useEffect(() => {
+    if (window.localStorage.getItem(AUDIENCE_CHOICE_KEY) === "professionnel") {
+      setReserveHref("/professionnels#reservation");
+    }
+  }, []);
 
   // Réinitialise le choix particulier/professionnel et revient à l'accueil
   // pour que l'écran de choix se réaffiche (rechargement complet nécessaire
@@ -76,7 +85,7 @@ export default function Header() {
 
           {/* BOUTON RÉSERVER MOBILE - Centré */}
           <Link
-            href="/booking"
+            href={reserveHref}
             className="md:hidden relative group bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-gray-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-amber-500/25 transform hover:scale-105 active:scale-95 z-20"
           >
             {/* Icône calendrier */}
@@ -150,7 +159,7 @@ export default function Header() {
               ></span>
             </Link>
             <Link
-              href="/booking"
+              href={reserveHref}
               className="relative font-medium text-gray-100 py-2 transition-colors group"
             >
               Réserver
