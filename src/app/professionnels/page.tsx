@@ -4,13 +4,14 @@
  * Cible les garages et entreprises qui ont besoin d'un mécanicien
  * indépendant en renfort (surcroît d'activité, remplacement temporaire).
  *
- * Contact uniquement par WhatsApp/téléphone : chaque mission se discute
- * au cas par cas (durée, tarif, dispo), pas de réservation en ligne via Cal.com.
+ * Réservation directe dans l'agenda (via des types d'événements Cal.com dédiés,
+ * sans secteur géographique ni catégorie de prestation) ou contact WhatsApp/téléphone.
  */
 
 import type { Metadata } from "next";
 import { Header, Footer } from "@/components";
 import Whatsapp from "@/components/whatsapp/Whatsapp";
+import ProBooking from "@/components/booking/ProBooking";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -82,11 +83,18 @@ export default function ProfessionnelsPage() {
             </p>
           </section>
 
+          {/* Réservation directe dans l'agenda */}
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-amber-400 mb-4 text-center">
+              Voir mes disponibilités et réserver
+            </h2>
+            <ProBooking />
+          </section>
+
           {/* Contact */}
           <section className="text-center">
             <p className="text-gray-300 mb-4">
-              Chaque mission se discute au cas par cas (durée, planning,
-              tarif). Contactez-moi directement pour en parler.
+              Vous préférez en discuter d&apos;abord ? Contactez-moi directement.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
               <Whatsapp
