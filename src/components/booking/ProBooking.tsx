@@ -107,7 +107,7 @@ export default function ProBooking() {
                 }}
                 className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
                   type === tab.key
-                    ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white"
+                    ? "bg-gradient-to-r from-red-600 to-red-700 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >

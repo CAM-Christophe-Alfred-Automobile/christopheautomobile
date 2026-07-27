@@ -37,14 +37,15 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname(); //! Récupère le chemin actuel (ex: "/contact", "/booking")
 
-  // Un professionnel doit être renvoyé vers la réservation dédiée (/professionnels),
-  // pas vers le tunnel de réservation grand public (/booking).
-  const [reserveHref, setReserveHref] = useState("/booking");
+  // Un professionnel doit rester dans son parcours pro : "Accueil" ramène à
+  // /professionnels (pas à la page grand public), "Réserver" vers la
+  // réservation dédiée, et "Tarifs" (grand public) est masqué.
+  const [isPro, setIsPro] = useState(false);
   useEffect(() => {
-    if (window.localStorage.getItem(AUDIENCE_CHOICE_KEY) === "professionnel") {
-      setReserveHref("/professionnels#reservation");
-    }
+    setIsPro(window.localStorage.getItem(AUDIENCE_CHOICE_KEY) === "professionnel");
   }, []);
+  const accueilHref = isPro ? "/professionnels" : "/";
+  const reserveHref = isPro ? "/professionnels#reservation" : "/booking";
 
   // Réinitialise le choix particulier/professionnel et revient à l'accueil
   // pour que l'écran de choix se réaffiche (rechargement complet nécessaire
@@ -67,8 +68,8 @@ export default function Header() {
     <header className="bg-gray-800 shadow-lg border-b border-gray-400">
       <div className="max-w mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-2">
-          {/* LOGO - Cliquable, ramène à l'accueil */}
-          <Link href="/" className="flex items-center z-10">
+          {/* LOGO - Cliquable, ramène à l'accueil (pro ou grand public selon le profil) */}
+          <Link href={accueilHref} className="flex items-center z-10">
             {/* //! Logo Header — optimisé */}
             <Image
               src="/images/CAM-blanc-complet.webp"
@@ -135,29 +136,31 @@ export default function Header() {
           {/* NAVIGATION DESKTOP */}
           <nav className="hidden md:flex space-x-8">
             <Link
-              href="/"
+              href={accueilHref}
               className="relative font-medium text-gray-100 py-2 transition-colors group"
             >
               Accueil
               {/* Ligne de soulignement animée */}
               <span
                 className={`absolute left-0 bottom-2 h-px bg-amber-500 transition-all duration-300 ${
-                  isActive("/") ? "w-full" : "w-0 group-hover:w-full"
+                  pathname === accueilHref ? "w-full" : "w-0 group-hover:w-full"
                 }`}
               ></span>
             </Link>
-            <Link
-              href="/tarifs"
-              className="relative font-medium text-gray-100 py-2 transition-colors group"
-            >
-              Tarifs
-              {/* Ligne de soulignement animée */}
-              <span
-                className={`absolute left-0 bottom-2 h-px bg-amber-500 transition-all duration-300 ${
-                  isActive("/tarifs") ? "w-full" : "w-0 group-hover:w-full"
-                }`}
-              ></span>
-            </Link>
+            {!isPro && (
+              <Link
+                href="/tarifs"
+                className="relative font-medium text-gray-100 py-2 transition-colors group"
+              >
+                Tarifs
+                {/* Ligne de soulignement animée */}
+                <span
+                  className={`absolute left-0 bottom-2 h-px bg-amber-500 transition-all duration-300 ${
+                    isActive("/tarifs") ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                ></span>
+              </Link>
+            )}
             <Link
               href={reserveHref}
               className="relative font-medium text-gray-100 py-2 transition-colors group"
@@ -197,23 +200,25 @@ export default function Header() {
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800">
               <Link
-                href="/"
+                href={accueilHref}
                 onClick={() => setIsMenuOpen(false)}
                 className={`block px-3 py-2 rounded-md text-base font-medium text-center text-gray-100 hover:text-white hover:bg-gray-700 ${
-                  isActive("/") ? "bg-gray-700 text-white" : ""
+                  pathname === accueilHref ? "bg-gray-700 text-white" : ""
                 }`}
               >
                 Accueil
               </Link>
-              <Link
-                href="/tarifs"
-                onClick={() => setIsMenuOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium text-center text-gray-100 hover:text-white hover:bg-gray-700 ${
-                  isActive("/tarifs") ? "bg-gray-700 text-white" : ""
-                }`}
-              >
-                Tarifs
-              </Link>
+              {!isPro && (
+                <Link
+                  href="/tarifs"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-md text-base font-medium text-center text-gray-100 hover:text-white hover:bg-gray-700 ${
+                    isActive("/tarifs") ? "bg-gray-700 text-white" : ""
+                  }`}
+                >
+                  Tarifs
+                </Link>
+              )}
               <Link
                 href="/contact"
                 onClick={() => setIsMenuOpen(false)}
