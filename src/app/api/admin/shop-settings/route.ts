@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getShopSettings, updateHourlyRate } from "@/services/admin/shopSettings";
+import { getShopSettings, updateShopSettings } from "@/services/admin/shopSettings";
 
 export async function GET() {
   try {
@@ -15,14 +15,23 @@ export async function PATCH(req: Request) {
   try {
     const body = await req.json();
 
-    if (typeof body.hourlyRate !== "number") {
+    if (body.hourlyRate !== undefined && typeof body.hourlyRate !== "number") {
       return NextResponse.json(
         { success: false, error: "hourlyRate doit être un nombre." },
         { status: 400 }
       );
     }
+    if (body.urssafRate !== undefined && typeof body.urssafRate !== "number") {
+      return NextResponse.json(
+        { success: false, error: "urssafRate doit être un nombre." },
+        { status: 400 }
+      );
+    }
 
-    const settings = await updateHourlyRate(body.hourlyRate);
+    const settings = await updateShopSettings({
+      ...(body.hourlyRate !== undefined ? { hourlyRate: body.hourlyRate } : {}),
+      ...(body.urssafRate !== undefined ? { urssafRate: body.urssafRate } : {}),
+    });
     return NextResponse.json({ success: true, settings });
   } catch (error) {
     console.error("Erreur API Admin Shop Settings (PATCH):", error);

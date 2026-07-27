@@ -1,6 +1,6 @@
 {
-  "name": "Espace admin CAM",
-  "short_name": "CAM Admin",
+  "name": "CAMadmin",
+  "short_name": "CAMadmin",
   "description": "Outil privé de suivi clients pour Christophe Auto-Mobile.",
   "start_url": "/admin",
   "scope": "/admin",

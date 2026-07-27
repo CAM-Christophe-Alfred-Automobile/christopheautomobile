@@ -21,6 +21,7 @@ export async function POST(req: Request, { params }: Context) {
       ...body,
       date: new Date(body.date),
       endDate: body.endDate ? new Date(body.endDate) : null,
+      depositDate: body.depositDate ? new Date(body.depositDate) : null,
     });
     return NextResponse.json({ success: true, intervention });
   } catch (error) {

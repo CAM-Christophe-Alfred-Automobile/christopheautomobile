@@ -12,8 +12,13 @@ export interface InterventionInput {
   mileage?: number | null;
   hoursSpent?: number | null;
   vehicleCondition?: string | null;
-  status?: "draft" | "done";
+  status?: "draft" | "done" | "reserved";
   chronoStartedAt?: Date | null;
+  bookedOnline?: boolean;
+  depositAmount?: number | null;
+  depositDate?: Date | null;
+  deliveryPrice?: number | null;
+  dossierFee?: number | null;
 }
 
 export async function startDraftIntervention(vehicleId: string) {
@@ -41,7 +46,7 @@ export async function getInterventionWithContext(id: string) {
 
 export async function listInProgressInterventions() {
   return prisma.intervention.findMany({
-    where: { status: "draft" },
+    where: { status: { in: ["draft", "reserved"] } },
     include: { vehicle: { include: { client: true } } },
     orderBy: { date: "asc" },
   });

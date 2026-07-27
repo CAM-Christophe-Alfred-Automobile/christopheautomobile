@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SearchField from "@/components/search/SearchField";
 import AlertBadge from "@/components/admin/AlertBadge";
@@ -21,6 +22,8 @@ interface ClientRow {
 interface InProgressIntervention {
   id: string;
   date: string;
+  status: string;
+  chronoStartedAt: string | null;
   vehicle: {
     make: string | null;
     model: string | null;
@@ -30,6 +33,7 @@ interface InProgressIntervention {
 }
 
 export default function AdminClientsPage() {
+  const router = useRouter();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [inProgress, setInProgress] = useState<InProgressIntervention[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +79,23 @@ export default function AdminClientsPage() {
 
   useScrollRestoration(!loading);
 
+  async function resume(i: InProgressIntervention) {
+    try {
+      if (i.status === "reserved") {
+        const res = await fetch(`/api/admin/interventions/${i.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "draft" }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) throw new Error("resume-failed");
+      }
+      router.push(`/admin/interventions/${i.id}/live`);
+    } catch {
+      alert("⚠️ Impossible de reprendre cette intervention (connexion internet ?). Réessaie.");
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 gap-2 flex-wrap">
@@ -98,24 +119,38 @@ export default function AdminClientsPage() {
       {inProgress.length > 0 && (
         <div className="mb-6 bg-blue-950/30 border border-dashed border-blue-700/50 rounded-lg p-3">
           <p className="text-sm font-medium text-blue-300 mb-2">
-            🔧 Intervention{inProgress.length > 1 ? "s" : ""} en cours ({inProgress.length})
+            🔧 Intervention{inProgress.length > 1 ? "s" : ""} programmée{inProgress.length > 1 ? "s" : ""} / en cours (
+            {inProgress.length})
           </p>
           <ul className="space-y-1.5">
-            {inProgress.map((i) => (
-              <li key={i.id} className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-gray-300">
-                  {i.vehicle.client.firstName} {i.vehicle.client.lastName !== "." ? i.vehicle.client.lastName : ""} —{" "}
-                  {[i.vehicle.make, i.vehicle.model, i.vehicle.plate].filter(Boolean).join(" ") || "véhicule"}
-                  <span className="text-gray-500"> · depuis le {new Date(i.date).toLocaleDateString("fr-FR")}</span>
-                </span>
-                <Link
-                  href={`/admin/interventions/${i.id}/live`}
-                  className="text-xs text-amber-400 hover:text-amber-300 flex-shrink-0"
-                >
-                  Reprendre
-                </Link>
-              </li>
-            ))}
+            {inProgress.map((i) => {
+              const label =
+                i.status === "reserved"
+                  ? "📅 Programmée"
+                  : i.chronoStartedAt
+                    ? "🔧 En cours"
+                    : "⏸ En pause";
+              return (
+                <li key={i.id} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="text-gray-300">
+                    <span className="text-blue-300">{label}</span> — {i.vehicle.client.firstName}{" "}
+                    {i.vehicle.client.lastName !== "." ? i.vehicle.client.lastName : ""} —{" "}
+                    {[i.vehicle.make, i.vehicle.model, i.vehicle.plate].filter(Boolean).join(" ") || "véhicule"}
+                    <span className="text-gray-500">
+                      {" "}
+                      · {i.status === "reserved" ? "prévue" : "depuis"} le{" "}
+                      {new Date(i.date).toLocaleDateString("fr-FR")}
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => resume(i)}
+                    className="text-xs text-amber-400 hover:text-amber-300 flex-shrink-0 cursor-pointer"
+                  >
+                    Reprendre
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

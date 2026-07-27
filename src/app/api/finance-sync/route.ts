@@ -34,5 +34,24 @@ export async function GET(req: Request) {
       .join(" — "),
   }));
 
-  return NextResponse.json({ success: true, payments });
+  const fuelRows = await prisma.fuelLog.findMany({
+    where: { trackedByBank: false, date: { gte: since } },
+    include: { vehicle: true },
+    orderBy: { date: "asc" },
+  });
+
+  const fuelExpenses = fuelRows.map((f) => ({
+    id: f.id,
+    date: f.date.toISOString(),
+    amount: Number(f.price),
+    description: [
+      `${f.vehicle.make ?? ""} ${f.vehicle.model ?? ""}`.trim(),
+      f.vehicle.plate,
+      `plein ${Number(f.quantity).toFixed(1)}L`,
+    ]
+      .filter(Boolean)
+      .join(" — "),
+  }));
+
+  return NextResponse.json({ success: true, payments, fuelExpenses });
 }

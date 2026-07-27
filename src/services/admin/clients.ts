@@ -82,6 +82,7 @@ export async function getClientById(id: string) {
           },
           plannedRepairs: { orderBy: { createdAt: "desc" } },
           maintenanceRecords: { include: { maintenanceType: true } },
+          fuelLogs: { orderBy: { date: "desc" } },
         },
       },
     },

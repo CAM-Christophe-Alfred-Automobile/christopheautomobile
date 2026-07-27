@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import BackButton from "@/components/admin/BackButton";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -55,11 +56,13 @@ export default function QuickStartPage() {
   async function startExisting() {
     if (!matchedVehicle) return;
     setStartingExisting(true);
-    const res = await fetch(`/api/admin/vehicles/${matchedVehicle.id}/start-live`, { method: "POST" });
-    const data = await res.json();
-    if (data.success) {
+    try {
+      const res = await fetch(`/api/admin/vehicles/${matchedVehicle.id}/start-live`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error("start-failed");
       router.push(`/admin/interventions/${data.interventionId}/live`);
-    } else {
+    } catch {
+      alert("⚠️ Impossible de démarrer l'intervention (connexion internet ?). Réessaie.");
       setStartingExisting(false);
     }
   }
@@ -73,13 +76,11 @@ export default function QuickStartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (data.success) {
-        router.push(`/admin/interventions/${data.interventionId}/live`);
-      } else {
-        setSubmitting(false);
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error("quick-start-failed");
+      router.push(`/admin/interventions/${data.interventionId}/live`);
     } catch {
+      alert("⚠️ Impossible de démarrer l'intervention (connexion internet ?). Réessaie.");
       setSubmitting(false);
     }
   }
@@ -87,6 +88,7 @@ export default function QuickStartPage() {
   return (
     <main className="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
+        <BackButton className="text-sm text-gray-400 hover:text-amber-400 transition-colors cursor-pointer mb-4 inline-block" />
         <div className="flex justify-center mb-6">
           <Image
             src="/images/CAM-blanc-complet.webp"

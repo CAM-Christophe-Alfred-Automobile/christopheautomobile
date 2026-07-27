@@ -71,6 +71,11 @@ interface Intervention {
   maintenanceTypeId: string | null;
   maintenanceType: MaintenanceType | null;
   status: string;
+  bookedOnline: boolean;
+  depositAmount: string | number | null;
+  depositDate: string | null;
+  deliveryPrice: string | number | null;
+  dossierFee: string | number | null;
 }
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -97,6 +102,15 @@ interface PlannedRepair {
   estimatedPrice: string | number | null;
 }
 
+interface FuelLog {
+  id: string;
+  date: string;
+  price: string | number;
+  quantity: string | number;
+  mileage: number | null;
+  trackedByBank: boolean;
+}
+
 interface Vehicle {
   id: string;
   plate: string | null;
@@ -110,6 +124,7 @@ interface Vehicle {
   interventions: Intervention[];
   plannedRepairs: PlannedRepair[];
   maintenanceRecords: MaintenanceRecord[];
+  fuelLogs: FuelLog[];
 }
 
 interface ClientDetail {
@@ -130,6 +145,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   const [client, setClient] = useState<ClientDetail | null>(null);
   const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>([]);
   const [hourlyRate, setHourlyRate] = useState(60);
+  const [urssafRate, setUrssafRate] = useState(21.2);
   const [loading, setLoading] = useState(true);
   const [editingClient, setEditingClient] = useState(false);
   const [clientDraft, setClientDraft] = useState({
@@ -189,7 +205,10 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
     ]);
     if (clientRes.success) setClient(clientRes.client);
     if (typesRes.success) setMaintenanceTypes(typesRes.types);
-    if (settingsRes.success) setHourlyRate(Number(settingsRes.settings.hourlyRate));
+    if (settingsRes.success) {
+      setHourlyRate(Number(settingsRes.settings.hourlyRate));
+      setUrssafRate(Number(settingsRes.settings.urssafRate));
+    }
     setLoading(false);
   }, [id]);
 
@@ -300,6 +319,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           clientPhone={client.phone}
           clientEmail={client.email}
           hourlyRate={hourlyRate}
+          urssafRate={urssafRate}
           isPersonal={client.isPersonal}
           onChanged={load}
         />
@@ -459,6 +479,7 @@ function VehiclePanel({
   clientPhone,
   clientEmail,
   hourlyRate,
+  urssafRate,
   isPersonal,
   onChanged,
 }: {
@@ -468,6 +489,7 @@ function VehiclePanel({
   clientPhone: string | null;
   clientEmail: string | null;
   hourlyRate: number;
+  urssafRate: number;
   isPersonal: boolean;
   onChanged: () => void;
 }) {
@@ -590,7 +612,7 @@ function VehiclePanel({
             <h2 className="text-lg font-semibold">{title}</h2>
             {vehicle.sold && <AlertBadge status="sold" />}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {vehicle.mileage != null && (
               <span className="text-sm text-gray-400">{vehicle.mileage.toLocaleString("fr-FR")} km</span>
             )}
@@ -646,6 +668,7 @@ function VehiclePanel({
         vehicle={vehicle}
         maintenanceTypes={maintenanceTypes}
         hourlyRate={hourlyRate}
+        urssafRate={urssafRate}
         isPersonal={isPersonal}
         clientFirstName={clientFirstName}
         clientPhone={clientPhone}
@@ -659,7 +682,164 @@ function VehiclePanel({
         isPersonal={isPersonal}
         onChanged={onChanged}
       />
+      {isPersonal && <FuelLogPanel vehicle={vehicle} onChanged={onChanged} />}
     </section>
+  );
+}
+
+function FuelLogPanel({ vehicle, onChanged }: { vehicle: Vehicle; onChanged: () => void }) {
+  const [showForm, setShowForm] = useState(false);
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [mileage, setMileage] = useState("");
+  const [trackedByBank, setTrackedByBank] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await fetch(`/api/admin/vehicles/${vehicle.id}/fuel-logs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date,
+          price: Number(price),
+          quantity: Number(quantity),
+          mileage: mileage ? Number(mileage) : null,
+          trackedByBank,
+        }),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+    setDate(new Date().toISOString().slice(0, 10));
+    setPrice("");
+    setQuantity("");
+    setMileage("");
+    setTrackedByBank(false);
+    setShowForm(false);
+    onChanged();
+  }
+
+  async function deleteLog(id: string) {
+    if (!confirm("Supprimer ce plein ?")) return;
+    await fetch(`/api/admin/fuel-logs/${id}`, { method: "DELETE" });
+    onChanged();
+  }
+
+  const currentYear = new Date().getFullYear();
+  const logsThisYear = vehicle.fuelLogs.filter((l) => new Date(l.date).getFullYear() === currentYear);
+  const totalThisYear = logsThisYear.reduce((sum, l) => sum + Number(l.price), 0);
+  const litersThisYear = logsThisYear.reduce((sum, l) => sum + Number(l.quantity), 0);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2 gap-2">
+        <h3 className="text-sm font-medium text-gray-300">⛽ Carburant</h3>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="text-xs text-amber-400 hover:text-amber-300 cursor-pointer"
+        >
+          {showForm ? "Annuler" : "+ Ajouter un plein"}
+        </button>
+      </div>
+
+      {vehicle.fuelLogs.length > 0 && (
+        <p className="text-xs text-gray-500 mb-2">
+          Total {currentYear} : {totalThisYear.toFixed(2)}€ ({litersThisYear.toFixed(1)} L)
+        </p>
+      )}
+
+      {showForm && (
+        <form onSubmit={handleAdd} className="space-y-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <input
+              type="date"
+              required
+              className={inputClass}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Prix €"
+              required
+              className={inputClass}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Litres"
+              required
+              className={inputClass}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+            <input
+              type="number"
+              placeholder="Kilométrage"
+              className={inputClass}
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value)}
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-3 py-2 rounded-lg bg-amber-500 text-gray-900 text-sm font-semibold cursor-pointer disabled:opacity-50"
+            >
+              {submitting ? "..." : "Ajouter"}
+            </button>
+          </div>
+          <label className="flex items-center gap-2 text-xs text-gray-400">
+            <input
+              type="checkbox"
+              checked={trackedByBank}
+              onChange={(e) => setTrackedByBank(e.target.checked)}
+            />
+            Déjà dans mon compte bancaire (payé par carte, suivi par CAMfinance)
+          </label>
+        </form>
+      )}
+
+      {vehicle.fuelLogs.length === 0 ? (
+        <p className="text-gray-500 text-sm">Aucun plein enregistré.</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {vehicle.fuelLogs.map((log) => (
+            <li
+              key={log.id}
+              className="flex items-center justify-between gap-2 text-sm bg-orange-950/20 border border-orange-800/40 rounded-lg px-3 py-1.5"
+            >
+              <span className="text-orange-200">
+                {new Date(log.date).toLocaleDateString("fr-FR")} — {Number(log.price).toFixed(2)}€ ·{" "}
+                {Number(log.quantity).toFixed(1)} L
+                {log.mileage != null && (
+                  <span className="text-gray-500"> · {log.mileage.toLocaleString("fr-FR")} km</span>
+                )}
+                {log.trackedByBank && (
+                  <span className="text-gray-500" title="Déjà suivi par CAMfinance via la banque, exclu de la synchro">
+                    {" "}
+                    · 🏦
+                  </span>
+                )}
+              </span>
+              <button
+                onClick={() => deleteLog(log.id)}
+                className="text-gray-600 hover:text-red-400 cursor-pointer flex-shrink-0"
+                title="Supprimer"
+              >
+                🗑
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -908,6 +1088,7 @@ function InterventionHistory({
   vehicle,
   maintenanceTypes,
   hourlyRate,
+  urssafRate,
   isPersonal,
   clientFirstName,
   clientPhone,
@@ -916,6 +1097,7 @@ function InterventionHistory({
   vehicle: Vehicle;
   maintenanceTypes: MaintenanceType[];
   hourlyRate: number;
+  urssafRate: number;
   isPersonal: boolean;
   clientFirstName: string;
   clientPhone: string | null;
@@ -924,6 +1106,7 @@ function InterventionHistory({
   const router = useRouter();
   const [startingLive, setStartingLive] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [entryStatus, setEntryStatus] = useState<"done" | "reserved">("done");
   const [date, setDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
@@ -935,6 +1118,10 @@ function InterventionHistory({
   const [vehicleCondition, setVehicleCondition] = useState("");
   const [todoText, setTodoText] = useState("");
   const [todoPriority, setTodoPriority] = useState<"normal" | "urgent">("normal");
+  const [bookedOnline, setBookedOnline] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositDate, setDepositDate] = useState("");
+  const [deliveryPrice, setDeliveryPrice] = useState("");
   const [queuedParts, setQueuedParts] = useState<
     {
       designation: string;
@@ -961,11 +1148,13 @@ function InterventionHistory({
 
   async function startLiveIntervention() {
     setStartingLive(true);
-    const res = await fetch(`/api/admin/vehicles/${vehicle.id}/start-live`, { method: "POST" });
-    const data = await res.json();
-    if (data.success) {
+    try {
+      const res = await fetch(`/api/admin/vehicles/${vehicle.id}/start-live`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error("start-failed");
       router.push(`/admin/interventions/${data.interventionId}/live`);
-    } else {
+    } catch {
+      alert("⚠️ Impossible de démarrer l'intervention (connexion internet ?). Réessaie.");
       setStartingLive(false);
     }
   }
@@ -1026,6 +1215,10 @@ function InterventionHistory({
     if (hours > 0) setPrice((hours * hourlyRate).toFixed(2));
   }
 
+  const queuedPartsTotal = queuedParts.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+  const dossierBase = (Number(price) || 0) + queuedPartsTotal + (Number(deliveryPrice) || 0);
+  const dossierFeeComputed = dossierBase * (urssafRate / 100);
+
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -1037,12 +1230,22 @@ function InterventionHistory({
           date,
           endDate: endDate || null,
           description,
+          status: entryStatus,
           price: price ? Number(price) : null,
           mileage: mileage ? Number(mileage) : null,
           hoursSpent: hoursSpent ? Number(hoursSpent) : null,
           maintenanceTypeId: maintenanceTypeId || null,
           notes: notes || null,
           vehicleCondition: vehicleCondition || null,
+          ...(entryStatus === "reserved"
+            ? {
+                bookedOnline,
+                depositAmount: depositAmount ? Number(depositAmount) : null,
+                depositDate: depositDate || null,
+                deliveryPrice: deliveryPrice ? Number(deliveryPrice) : null,
+                dossierFee: dossierBase > 0 ? Number(dossierFeeComputed.toFixed(2)) : null,
+              }
+            : {}),
         }),
       });
       const data = await res.json();
@@ -1101,7 +1304,33 @@ function InterventionHistory({
     setQueuedParts([]);
     setBeforePhotos([]);
     setAfterPhotos([]);
+    setBookedOnline(false);
+    setDepositAmount("");
+    setDepositDate("");
+    setDeliveryPrice("");
+    setEntryStatus("done");
     setShowForm(false);
+    onChanged();
+  }
+
+  async function startReserved(id: string) {
+    try {
+      const res = await fetch(`/api/admin/interventions/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "draft" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error("start-reserved-failed");
+      router.push(`/admin/interventions/${id}/live`);
+    } catch {
+      alert("⚠️ Impossible de démarrer cette réservation (connexion internet ?). Réessaie.");
+    }
+  }
+
+  async function deleteReserved(id: string) {
+    if (!confirm("Supprimer cette réservation ?")) return;
+    await fetch(`/api/admin/interventions/${id}`, { method: "DELETE" });
     onChanged();
   }
 
@@ -1152,10 +1381,38 @@ function InterventionHistory({
 
       {showForm && (
         <form onSubmit={handleAdd} className="space-y-4 mb-3 bg-gray-800/30 border border-gray-700 rounded-lg p-3">
+          {/* 0. Mode : terminée ou réservation à prévoir */}
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => setEntryStatus("done")}
+              className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
+                entryStatus === "done"
+                  ? "bg-amber-500 text-gray-900"
+                  : "border border-gray-700 text-gray-400 hover:border-amber-500 hover:text-amber-400"
+              }`}
+            >
+              ✅ Intervention terminée
+            </button>
+            <button
+              type="button"
+              onClick={() => setEntryStatus("reserved")}
+              className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer ${
+                entryStatus === "reserved"
+                  ? "bg-blue-500 text-gray-900"
+                  : "border border-gray-700 text-gray-400 hover:border-blue-500 hover:text-blue-400"
+              }`}
+            >
+              📅 Réservation à prévoir
+            </button>
+          </div>
+
           {/* 1. Quand / kilométrage */}
           <div className="grid sm:grid-cols-4 gap-2">
             <div>
-              <label className="block text-[11px] text-gray-500 mb-0.5">Date</label>
+              <label className="block text-[11px] text-gray-500 mb-0.5">
+                {entryStatus === "reserved" ? "Date prévue" : "Date"}
+              </label>
               <input
                 type="date"
                 required
@@ -1378,7 +1635,9 @@ function InterventionHistory({
             </div>
             {!isPersonal && (
               <div>
-                <label className="block text-[11px] text-gray-500 mb-0.5">Prix €</label>
+                <label className="block text-[11px] text-gray-500 mb-0.5">
+                  {entryStatus === "reserved" ? "Prix main d'œuvre estimé €" : "Prix €"}
+                </label>
                 <div className="flex gap-1">
                   <input
                     type="number"
@@ -1401,7 +1660,59 @@ function InterventionHistory({
             )}
           </div>
 
+          {/* 7b. Réservation : acompte, livraison, frais de dossier */}
+          {entryStatus === "reserved" && !isPersonal && (
+            <div className="space-y-2 border-t border-gray-800 pt-3">
+              <label className="flex items-center gap-2 text-xs text-gray-400">
+                <input
+                  type="checkbox"
+                  checked={bookedOnline}
+                  onChange={(e) => setBookedOnline(e.target.checked)}
+                />
+                Réservé sur mon site
+              </label>
+              <div className="grid sm:grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[11px] text-gray-500 mb-0.5">Acompte €</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Acompte €"
+                    className={inputClass}
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-gray-500 mb-0.5">Date de l&apos;acompte</label>
+                  <input
+                    type="date"
+                    className={inputClass}
+                    value={depositDate}
+                    onChange={(e) => setDepositDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-gray-500 mb-0.5">Livraison des pièces €</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Livraison €"
+                    className={inputClass}
+                    value={deliveryPrice}
+                    onChange={(e) => setDeliveryPrice(e.target.value)}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Frais de dossier ({urssafRate}% URSSAF sur {dossierBase.toFixed(2)}€) :{" "}
+                <span className="text-amber-400 font-medium">{dossierFeeComputed.toFixed(2)}€</span>
+              </p>
+            </div>
+          )}
+
           {/* 8. Photos avant / après */}
+          {entryStatus === "done" && (
           <div className="grid sm:grid-cols-2 gap-2">
             <div>
               <label className="block text-[11px] text-gray-500 mb-0.5">Photos avant (sécurité)</label>
@@ -1442,13 +1753,18 @@ function InterventionHistory({
               />
             </div>
           </div>
+          )}
 
           <button
             type="submit"
             disabled={submitting}
             className="w-full px-3 py-2 rounded-lg bg-amber-500 text-gray-900 text-sm font-semibold cursor-pointer disabled:opacity-50"
           >
-            {submitting ? "Enregistrement..." : "Ajouter l'intervention"}
+            {submitting
+              ? "Enregistrement..."
+              : entryStatus === "reserved"
+                ? "Réserver"
+                : "Ajouter l'intervention"}
           </button>
         </form>
       )}
@@ -1458,7 +1774,56 @@ function InterventionHistory({
       ) : (
         <ul className="space-y-3">
           {vehicle.interventions.map((i) =>
-            i.status === "draft" ? (
+            i.status === "reserved" ? (
+              <li
+                key={i.id}
+                className="bg-purple-950/20 border border-dashed border-purple-700/50 rounded-lg px-3 py-2 text-sm space-y-1.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-purple-300">
+                    📅 Réservation prévue le {new Date(i.date).toLocaleDateString("fr-FR")}
+                    {i.bookedOnline && <span className="text-gray-500"> · 🌐 réservée sur le site</span>}
+                  </span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => startReserved(i.id)}
+                      className="text-xs text-green-400 hover:text-green-300 cursor-pointer"
+                    >
+                      ▶ Démarrer
+                    </button>
+                    <button
+                      onClick={() => deleteReserved(i.id)}
+                      className="text-gray-600 hover:text-red-400 cursor-pointer"
+                      title="Supprimer"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
+                <p className="text-gray-300">{i.description}</p>
+                {i.partsUsed.length > 0 && (
+                  <p className="text-xs text-gray-500">
+                    🔧{" "}
+                    {i.partsUsed
+                      .map((p) => `${p.designation}${p.reference ? ` (${p.reference})` : ""}${p.price ? ` — ${p.price}€` : ""}`)
+                      .join(", ")}
+                  </p>
+                )}
+                {!isPersonal && (
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500">
+                    {i.price != null && <span>Main d&apos;œuvre estimée : {i.price}€</span>}
+                    {i.deliveryPrice != null && <span>Livraison : {i.deliveryPrice}€</span>}
+                    {i.dossierFee != null && <span>Frais de dossier : {i.dossierFee}€</span>}
+                    {i.depositAmount != null && (
+                      <span>
+                        Acompte : {i.depositAmount}€
+                        {i.depositDate && ` le ${new Date(i.depositDate).toLocaleDateString("fr-FR")}`}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </li>
+            ) : i.status === "draft" ? (
               <li
                 key={i.id}
                 className="bg-blue-950/30 border border-dashed border-blue-700/50 rounded-lg px-3 py-2 text-sm"
@@ -1474,7 +1839,7 @@ function InterventionHistory({
                     Reprendre
                   </a>
                 </div>
-                {!isPersonal && <PaymentsSection intervention={i} onChanged={onChanged} />}
+                {!isPersonal && <PaymentsSection intervention={i} urssafRate={urssafRate} onChanged={onChanged} />}
               </li>
             ) : (
               <InterventionRow
@@ -1484,6 +1849,7 @@ function InterventionHistory({
                 clientFirstName={clientFirstName}
                 clientPhone={clientPhone}
                 vehicleLabel={[vehicle.make, vehicle.model, vehicle.plate].filter(Boolean).join(" ") || "votre véhicule"}
+                urssafRate={urssafRate}
                 onChanged={onChanged}
               />
             )
@@ -1500,6 +1866,7 @@ function InterventionRow({
   clientFirstName,
   clientPhone,
   vehicleLabel,
+  urssafRate,
   onChanged,
 }: {
   intervention: Intervention;
@@ -1507,6 +1874,7 @@ function InterventionRow({
   clientFirstName: string;
   clientPhone: string | null;
   vehicleLabel: string;
+  urssafRate: number;
   onChanged: () => void;
 }) {
   const [uploadingCategory, setUploadingCategory] = useState<"before" | "after" | "damage" | null>(null);
@@ -1764,7 +2132,7 @@ function InterventionRow({
         <div className="text-xs text-gray-500 mt-1 whitespace-pre-wrap">📋 {intervention.vehicleCondition}</div>
       )}
 
-      {!isPersonal && <PaymentsSection intervention={intervention} onChanged={onChanged} />}
+      {!isPersonal && <PaymentsSection intervention={intervention} urssafRate={urssafRate} onChanged={onChanged} />}
 
       {(
         [
@@ -2112,7 +2480,15 @@ function InterventionRow({
   );
 }
 
-function PaymentForm({ interventionId, onAdded }: { interventionId: string; onAdded: () => void }) {
+function PaymentForm({
+  interventionId,
+  urssafRate,
+  onAdded,
+}: {
+  interventionId: string;
+  urssafRate: number;
+  onAdded: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("");
@@ -2152,6 +2528,11 @@ function PaymentForm({ interventionId, onAdded }: { interventionId: string; onAd
         onChange={(e) => setAmount(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && submit()}
       />
+      {Number(amount) > 0 && (
+        <span className="text-gray-500" title={`${urssafRate}% URSSAF`}>
+          → {(Number(amount) * (urssafRate / 100)).toFixed(2)}€ URSSAF
+        </span>
+      )}
       <select
         className="px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
         value={method}
@@ -2183,7 +2564,15 @@ function PaymentForm({ interventionId, onAdded }: { interventionId: string; onAd
   );
 }
 
-function PaymentsSection({ intervention, onChanged }: { intervention: Intervention; onChanged: () => void }) {
+function PaymentsSection({
+  intervention,
+  urssafRate,
+  onChanged,
+}: {
+  intervention: Intervention;
+  urssafRate: number;
+  onChanged: () => void;
+}) {
   async function removePaymentRow(id: string) {
     if (!confirm("Supprimer ce paiement ?")) return;
     await fetch(`/api/admin/payments/${id}`, { method: "DELETE" });
@@ -2193,6 +2582,7 @@ function PaymentsSection({ intervention, onChanged }: { intervention: Interventi
   const totalPaid = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
   const priceNum = intervention.price != null ? Number(intervention.price) : null;
   const remaining = priceNum != null ? priceNum - totalPaid : null;
+  const urssafDue = totalPaid * (urssafRate / 100);
 
   return (
     <div className="mt-2 text-xs">
@@ -2221,11 +2611,14 @@ function PaymentsSection({ intervention, onChanged }: { intervention: Interventi
               <span className="text-amber-400"> · reste {remaining.toFixed(2)}€</span>
             )}
             {remaining != null && remaining <= 0.005 && <span className="text-green-400"> · payé intégralement</span>}
+            {totalPaid > 0 && (
+              <span title={`${urssafRate}% URSSAF sur le total encaissé`}> · dont {urssafDue.toFixed(2)}€ URSSAF</span>
+            )}
           </span>
         </div>
       )}
 
-      <PaymentForm interventionId={intervention.id} onAdded={onChanged} />
+      <PaymentForm interventionId={intervention.id} urssafRate={urssafRate} onAdded={onChanged} />
     </div>
   );
 }

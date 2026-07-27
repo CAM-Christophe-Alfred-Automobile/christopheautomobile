@@ -13,3 +13,11 @@ export async function updateHourlyRate(hourlyRate: number) {
     data: { hourlyRate },
   });
 }
+
+export async function updateShopSettings(data: { hourlyRate?: number; urssafRate?: number }) {
+  const settings = await getShopSettings();
+  return prisma.shopSettings.update({
+    where: { id: settings.id },
+    data,
+  });
+}

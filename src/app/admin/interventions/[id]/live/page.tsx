@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, use as usePromise } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { buildWhatsAppLink, buildStartWorkMessage, buildFinishWorkMessage } from "@/lib/whatsapp";
 
 const inputClass =
@@ -85,6 +86,26 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     setLoading(false);
   }, [id]);
 
+  // Vérifie une réponse fetch et lève une erreur explicite en cas d'échec réseau/serveur —
+  // sans ça, un problème de connexion (fréquent chez un client, garage, sous-sol...) passait
+  // inaperçu : l'écran affichait "enregistré" alors que rien n'avait été sauvegardé.
+  async function patchIntervention(body: Record<string, unknown>): Promise<void> {
+    const res = await fetch(`/api/admin/interventions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    let json: { success?: boolean } = {};
+    try {
+      json = await res.json();
+    } catch {
+      // réponse non-JSON (ex: coupure réseau) — traité comme un échec ci-dessous
+    }
+    if (!res.ok || !json.success) {
+      throw new Error("save-failed");
+    }
+  }
+
   useEffect(() => {
     load();
     fetch("/api/admin/maintenance-types")
@@ -119,11 +140,14 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
 
   async function startChrono() {
     const isFirstStart = !data?.hoursSpent;
-    await fetch(`/api/admin/interventions/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chronoStartedAt: new Date().toISOString() }),
-    });
+    try {
+      await patchIntervention({ chronoStartedAt: new Date().toISOString() });
+    } catch {
+      alert(
+        "⚠️ Le chrono n'a pas pu démarrer (connexion internet ?). Réessaie — l'intervention n'a pas été perdue, mais rien n'est encore enregistré."
+      );
+      return;
+    }
 
     if (isFirstStart && data?.vehicle.client.phone && !data.vehicle.client.isPersonal) {
       const vehicleLabel =
@@ -141,11 +165,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   async function stopChronoAndAccumulate(): Promise<number> {
     if (!data) return 0;
     const total = currentHoursSpent();
-    await fetch(`/api/admin/interventions/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hoursSpent: total, chronoStartedAt: null }),
-    });
+    await patchIntervention({ hoursSpent: total, chronoStartedAt: null });
     return total;
   }
 
@@ -155,19 +175,26 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     if (category === "before") setUploadingBefore(true);
     else setUploadingDamage(true);
 
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("category", category);
-    await fetch(`/api/admin/interventions/${id}/photos`, { method: "POST", body: fd });
-    e.target.value = "";
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("category", category);
+      const res = await fetch(`/api/admin/interventions/${id}/photos`, { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error("upload-failed");
+      e.target.value = "";
 
-    if (category === "before" && data && !data.chronoStartedAt) {
-      await startChrono();
-    } else {
-      await load();
+      if (category === "before" && data && !data.chronoStartedAt) {
+        await startChrono();
+      } else {
+        await load();
+      }
+    } catch {
+      alert("⚠️ La photo n'a pas pu être envoyée (connexion internet ?). Réessaie dans quelques secondes.");
+    } finally {
+      setUploadingBefore(false);
+      setUploadingDamage(false);
     }
-    setUploadingBefore(false);
-    setUploadingDamage(false);
   }
 
   async function addNote() {
@@ -175,17 +202,25 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     const time = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     const line = `[${time}] ${noteText.trim()}`;
     const updated = data.vehicleCondition ? `${data.vehicleCondition}\n${line}` : line;
-    await fetch(`/api/admin/interventions/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ vehicleCondition: updated }),
-    });
+    try {
+      await patchIntervention({ vehicleCondition: updated });
+    } catch {
+      alert("⚠️ La note n'a pas pu être enregistrée (connexion internet ?). Réessaie.");
+      return;
+    }
     setNoteText("");
     load();
   }
 
   async function handlePause() {
-    await stopChronoAndAccumulate();
+    try {
+      await stopChronoAndAccumulate();
+    } catch {
+      alert(
+        "⚠️ La mise en pause n'a pas pu être enregistrée (connexion internet ?). L'intervention reste ouverte ici, réessaie."
+      );
+      return;
+    }
     if (data) router.push(`/admin/clients/${data.vehicle.client.id}`);
   }
 
@@ -207,7 +242,16 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     if (!data) return;
     setFinalizing(true);
 
-    const totalHours = await stopChronoAndAccumulate();
+    let totalHours: number;
+    try {
+      totalHours = await stopChronoAndAccumulate();
+    } catch {
+      alert(
+        "⚠️ Échec de l'enregistrement (connexion internet ?). Rien n'a été perdu — reste sur cette page et réessaie."
+      );
+      setFinalizing(false);
+      return;
+    }
 
     const isMultiDay = new Date(data.date).toDateString() !== new Date().toDateString();
 
@@ -222,10 +266,8 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         ? [data.vehicleCondition, wearLines.join("\n")].filter(Boolean).join("\n")
         : data.vehicleCondition;
 
-    await fetch(`/api/admin/interventions/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await patchIntervention({
         description: finalDescription,
         maintenanceTypeId: finalMaintenanceTypeId || null,
         price: !data.vehicle.client.isPersonal && finalPrice ? Number(finalPrice) : null,
@@ -233,20 +275,33 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         vehicleCondition: vehicleConditionUpdate,
         status: "done",
         ...(isMultiDay ? { endDate: new Date().toISOString() } : {}),
-      }),
-    });
+      });
+    } catch {
+      alert(
+        "⚠️ Échec de l'enregistrement final (connexion internet ?). Le temps travaillé est sauvegardé, mais l'intervention n'est PAS encore marquée terminée — reste sur cette page et réessaie."
+      );
+      setFinalizing(false);
+      return;
+    }
 
     if (clientLastName || clientPhone || clientEmail || clientAddress) {
-      await fetch(`/api/admin/clients/${data.vehicle.client.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...(clientLastName ? { lastName: clientLastName } : {}),
-          ...(clientPhone ? { phone: clientPhone } : {}),
-          ...(clientEmail ? { email: clientEmail } : {}),
-          ...(clientAddress ? { address: clientAddress } : {}),
-        }),
-      });
+      try {
+        const res = await fetch(`/api/admin/clients/${data.vehicle.client.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...(clientLastName ? { lastName: clientLastName } : {}),
+            ...(clientPhone ? { phone: clientPhone } : {}),
+            ...(clientEmail ? { email: clientEmail } : {}),
+            ...(clientAddress ? { address: clientAddress } : {}),
+          }),
+        });
+        if (!res.ok) throw new Error("client-update-failed");
+      } catch {
+        alert(
+          "⚠️ L'intervention est bien enregistrée, mais la mise à jour des coordonnées du client a échoué — à corriger sur sa fiche."
+        );
+      }
     }
 
     const effectivePhone = clientPhone || data.vehicle.client.phone;
@@ -306,6 +361,12 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
 
   return (
     <main className="min-h-screen bg-gray-900 text-white px-4 py-6 max-w-lg mx-auto space-y-5">
+      <Link
+        href={`/admin/clients/${data.vehicle.client.id}`}
+        className="text-sm text-gray-400 hover:text-amber-400 transition-colors cursor-pointer inline-block"
+      >
+        ← Retour à la fiche client
+      </Link>
       <div>
         <p className="text-xs text-gray-500">Intervention en direct</p>
         <h1 className="text-xl font-semibold">{vehicleLabel}</h1>

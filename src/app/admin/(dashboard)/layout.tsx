@@ -1,15 +1,18 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
+import AdminMoreMenu from "@/components/admin/AdminMoreMenu";
+import CamFinanceLink from "@/components/admin/CamFinanceLink";
 
 const TOP_LEVEL_PATHS = [
   "/admin",
   "/admin/mes-vehicules",
   "/admin/stock",
   "/admin/qr-codes",
+  "/admin/calcul-prix",
   "/admin/settings/maintenance-types",
   "/admin/settings/sync-clients",
 ];
@@ -35,19 +38,9 @@ const NAV_ITEMS = [
     isActive: (path: string) => path.startsWith("/admin/stock"),
   },
   {
-    href: "/admin/qr-codes",
-    label: "QR codes",
-    isActive: (path: string) => path.startsWith("/admin/qr-codes"),
-  },
-  {
-    href: "/admin/settings/maintenance-types",
-    label: "Types d'entretien",
-    isActive: (path: string) => path.startsWith("/admin/settings/maintenance-types"),
-  },
-  {
-    href: "/admin/settings/sync-clients",
-    label: "Mise à jour des clients",
-    isActive: (path: string) => path.startsWith("/admin/settings/sync-clients"),
+    href: "/admin/calcul-prix",
+    label: "Calcul prix",
+    isActive: (path: string) => path.startsWith("/admin/calcul-prix"),
   },
 ];
 
@@ -78,21 +71,23 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
                 className="h-9 w-auto flex-shrink-0"
               />
             )}
-            <AdminLogoutButton />
+            <AdminMoreMenu />
           </div>
           <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
             {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  item.isActive(pathname)
-                    ? "font-semibold text-amber-400"
-                    : "text-gray-400 hover:text-white transition-colors"
-                }
-              >
-                {item.label}
-              </Link>
+              <Fragment key={item.href}>
+                <Link
+                  href={item.href}
+                  className={
+                    item.isActive(pathname)
+                      ? "font-semibold text-amber-400"
+                      : "text-gray-400 hover:text-white transition-colors"
+                  }
+                >
+                  {item.label}
+                </Link>
+                {item.href === "/admin/calcul-prix" && <CamFinanceLink />}
+              </Fragment>
             ))}
           </nav>
         </div>

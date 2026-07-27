@@ -32,6 +32,9 @@ export async function PATCH(req: Request, { params }: Context) {
       ...(body.chronoStartedAt !== undefined
         ? { chronoStartedAt: body.chronoStartedAt ? new Date(body.chronoStartedAt) : null }
         : {}),
+      ...(body.depositDate !== undefined
+        ? { depositDate: body.depositDate ? new Date(body.depositDate) : null }
+        : {}),
     });
     return NextResponse.json({ success: true, intervention });
   } catch (error) {

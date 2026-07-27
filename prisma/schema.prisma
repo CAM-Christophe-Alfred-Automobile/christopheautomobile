@@ -51,8 +51,26 @@ model Vehicle {
   interventions      Intervention[]
   plannedRepairs     PlannedRepair[]
   maintenanceRecords MaintenanceRecord[]
+  fuelLogs           FuelLog[]
 
   @@index([clientId])
+}
+
+model FuelLog {
+  id        String  @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  date     DateTime
+  price    Decimal @db.Decimal(10, 2) // prix payé au total
+  quantity Decimal @db.Decimal(6, 2) // litres
+  mileage  Int? // kilométrage au moment du plein
+
+  trackedByBank Boolean @default(false) // déjà visible dans le relevé bancaire synchronisé de CAMfinance (carte) — exclu de la synchro carburant pour éviter un doublon
+
+  createdAt DateTime @default(now())
+
+  @@index([vehicleId])
 }
 
 model Intervention {
@@ -66,14 +84,14 @@ model Intervention {
   normalPrice Decimal? @db.Decimal(10, 2) // prix normal / de référence, avant remise
   price       Decimal? @db.Decimal(10, 2) // prix final facturé au client (ou main d'œuvre estimée si status = reserved)
 
-  bookedOnline      Boolean  @default(false) // réservée via le site public
-  calcomBookingUid  String?  @unique // identifiant unique de la réservation Cal.com, pour éviter les doublons si le webhook est renvoyé
-  depositAmount     Decimal? @db.Decimal(10, 2) // acompte versé
-  depositDate       DateTime? // date de versement de l'acompte
-  deliveryPrice     Decimal? @db.Decimal(10, 2) // frais de livraison des pièces
-  dossierFee        Decimal? @db.Decimal(10, 2) // frais de dossier (montant total × taux URSSAF), figé au moment de la réservation
-  distanceKm        Decimal? @db.Decimal(6, 2) // distance domicile client <-> Salon-de-Provence, calculée à la réservation en ligne
-  travelFee         Decimal? @db.Decimal(10, 2) // frais de déplacement (distanceKm × tarif au km), figé au moment de la réservation
+  bookedOnline     Boolean   @default(false) // réservée via le site public
+  calcomBookingUid String?   @unique // identifiant unique de la réservation Cal.com, pour éviter les doublons si le webhook est renvoyé
+  depositAmount    Decimal?  @db.Decimal(10, 2) // acompte versé
+  depositDate      DateTime? // date de versement de l'acompte
+  deliveryPrice    Decimal?  @db.Decimal(10, 2) // frais de livraison des pièces
+  dossierFee       Decimal?  @db.Decimal(10, 2) // frais de dossier (montant total × taux URSSAF), figé au moment de la réservation
+  distanceKm       Decimal?  @db.Decimal(6, 2) // distance domicile client <-> Salon-de-Provence, calculée à la réservation en ligne
+  travelFee        Decimal?  @db.Decimal(10, 2) // frais de déplacement (distanceKm × tarif au km), figé au moment de la réservation
   photos      String[] @default([]) // photos de pièces endommagées / notes manuscrites
   photosBefore String[] @default([]) // état du véhicule avant intervention
   photosAfter  String[] @default([]) // état du véhicule après intervention

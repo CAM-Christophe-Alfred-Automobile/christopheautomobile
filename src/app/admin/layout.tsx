@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import ServiceWorkerRegister from "@/components/admin/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
-  title: { absolute: "Espace privé | CAM" },
+  title: { absolute: "CAMadmin" },
   robots: { index: false, follow: false },
   manifest: "/admin-site.webmanifest",
   icons: {
@@ -12,5 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <div className="min-h-screen bg-gray-900 text-white">{children}</div>;
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      <ServiceWorkerRegister />
+      {children}
+    </div>
+  );
 }
