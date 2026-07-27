@@ -17,7 +17,7 @@ import { siteConfig } from "@/config/site";
 export const metadata: Metadata = {
   title: "Mécanicien indépendant en renfort pour garages | CAM",
   description:
-    "Besoin d'un mécanicien indépendant en renfort ponctuel ? Sous-traitance pour garages et professionnels, statut RQTH. Devis rapide par WhatsApp.",
+    "Mécanicien indépendant, 10+ ans d'expérience, polyvalent et autonome : renfort ponctuel pour garages et professionnels. Réservation directe ou devis rapide par WhatsApp.",
 };
 
 export default function ProfessionnelsPage() {
@@ -36,6 +36,63 @@ export default function ProfessionnelsPage() {
               ponctuel : pic d&apos;activité, remplacement, dépannage.
             </p>
           </div>
+
+          {/* Qui je suis / Pourquoi me choisir */}
+          <section className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
+            <h2 className="text-2xl font-bold text-amber-400 mb-3">Qui je suis</h2>
+            <p className="text-gray-300 leading-relaxed mb-5">
+              Ancien militaire, mécanicien passionné depuis toujours, j&apos;interviens
+              en toute autonomie depuis plus de 10 ans, avec la rigueur acquise
+              sous l&apos;uniforme. Mon camion-atelier est équipé comme un garage —
+              outillage complet et valise de diagnostic — opérationnel dès mon
+              arrivée.
+            </p>
+
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+              Compétences
+            </h3>
+            <div className="flex flex-wrap gap-2 mb-5">
+              {[
+                "Entretien courant",
+                "Freinage",
+                "Moteur",
+                "Transmission",
+                "Suspension / Direction",
+                "Électricité",
+                "Climatisation",
+                "Diagnostic",
+              ].map((skill) => (
+                <span
+                  key={skill}
+                  className="px-3 py-1 rounded-full bg-gray-700 text-gray-200 text-sm"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+              Pourquoi me choisir
+            </h3>
+            <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-gray-300">
+              <li>
+                <span className="text-amber-400 font-semibold">Autonome</span> — je
+                m&apos;intègre sans supervision constante
+              </li>
+              <li>
+                <span className="text-amber-400 font-semibold">Polyvalent</span> — de
+                l&apos;entretien courant aux pannes plus complexes
+              </li>
+              <li>
+                <span className="text-amber-400 font-semibold">Équipé</span> —
+                opérationnel immédiatement à mon arrivée
+              </li>
+              <li>
+                <span className="text-amber-400 font-semibold">Rigoureux</span> —
+                discipline et méthode acquises dans l&apos;armée
+              </li>
+            </ul>
+          </section>
 
           {/* Tarifs */}
           <section className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
@@ -64,22 +121,9 @@ export default function ProfessionnelsPage() {
               Tarifs main d&apos;œuvre, hors pièces et frais de déplacement.
               Devis établi selon la mission.
             </p>
-          </section>
-
-          {/* RQTH */}
-          <section className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
-            <h2 className="text-2xl font-bold text-amber-400 mb-4">
-              Statut RQTH
-            </h2>
-            <p className="text-gray-300 leading-relaxed">
-              Je suis reconnu travailleur handicapé (RQTH). Faire appel à mes
-              services en sous-traitance peut être valorisé par votre
-              entreprise dans le cadre de son obligation d&apos;emploi de
-              travailleurs handicapés (OETH).
-            </p>
-            <p className="text-sm text-gray-500 mt-2 italic">
-              Modalités précises à vérifier avec votre service RH ou votre
-              expert-comptable selon votre situation.
+            <p className="text-xs text-gray-500 mt-2">
+              Par ailleurs, je suis reconnu travailleur handicapé (RQTH) — un
+              point à valoriser si votre entreprise est soumise à l&apos;OETH.
             </p>
           </section>
 
