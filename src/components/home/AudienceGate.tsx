@@ -14,20 +14,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
-const STORAGE_KEY = "cam-audience-choice";
+import { AUDIENCE_CHOICE_KEY } from "@/lib/audienceChoice";
 
 export default function AudienceGate() {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const choice = window.localStorage.getItem(STORAGE_KEY);
+    const choice = window.localStorage.getItem(AUDIENCE_CHOICE_KEY);
     if (!choice) setVisible(true);
   }, []);
 
   const choose = (audience: "particulier" | "professionnel") => {
-    window.localStorage.setItem(STORAGE_KEY, audience);
+    window.localStorage.setItem(AUDIENCE_CHOICE_KEY, audience);
     setVisible(false);
     if (audience === "professionnel") router.push("/professionnels");
   };

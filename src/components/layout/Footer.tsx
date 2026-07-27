@@ -30,9 +30,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { AUDIENCE_CHOICE_KEY } from "@/lib/audienceChoice";
 
 export default function Footer() {
   const pathname = usePathname(); //! Récupère le chemin actuel
+
+  // Réinitialise le choix particulier/professionnel et revient à l'accueil
+  // pour que l'écran de choix se réaffiche (rechargement complet nécessaire
+  // pour que AudienceGate remonte proprement, même si on est déjà sur "/").
+  const resetAudienceChoice = () => {
+    window.localStorage.removeItem(AUDIENCE_CHOICE_KEY);
+    window.location.href = "/";
+  };
 
   /**
    * Fonction helper pour vérifier si un lien est actif
@@ -61,7 +70,14 @@ export default function Footer() {
           </div>
 
           {/* Liens légaux */}
-          <div className="flex space-x-4 mb-2 sm:mb-0">
+          <div className="flex items-center space-x-4 mb-2 sm:mb-0">
+            <button
+              onClick={resetAudienceChoice}
+              className="cursor-pointer text-gray-200 hover:text-white transition-colors text-sm underline decoration-dotted underline-offset-2"
+              title="Revoir le choix particulier / professionnel"
+            >
+              Particulier / Pro ?
+            </button>
             <Link
               href="/professionnels"
               className="relative text-gray-200 hover:text-white transition-colors text-sm group"
