@@ -14,6 +14,7 @@ import { symptoms, type SymptomKey } from "@/app/data/symptomGuide";
 import ZoneBooking from "@/components/booking/ZoneBooking";
 import { partsGuidance, defaultPartsGuidance, partsGuidanceByService } from "@/app/data/partsGuidance";
 import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
+import { VEHICLE_TIERS, type VehicleTier } from "@/app/data/vehicleTiers";
 
 const AUTRE_MODELE = "__autre__";
 const SEUIL_ANNEE_MOTORISATIONS_RECENTES = 2016;
@@ -30,15 +31,6 @@ const formatDuree = (minutes: number | string | null) => {
 
 //! Limite d'une journée d'intervention (8h = 480 min)
 const LIMITE_JOURNEE = 480;
-
-//! Tarif selon la taille/motorisation du véhicule (multiplicateur appliqué au tarif standard)
-type VehicleTier = "citadine" | "standard" | "suv";
-
-const VEHICLE_TIERS: { key: VehicleTier; label: string; examples: string; multiplier: number }[] = [
-  { key: "citadine", label: "Citadine", examples: "Clio, 208, Twingo...", multiplier: 50 / 60 },
-  { key: "standard", label: "Berline / Standard", examples: "308, Golf, Mégane...", multiplier: 1 },
-  { key: "suv", label: "SUV / Utilitaire", examples: "Duster, Kangoo, Trafic...", multiplier: 65 / 60 },
-];
 
 export default function BookingPage() {
   // 🔹 HOOKS - Toujours en premier (règle React)
@@ -1408,7 +1400,9 @@ export default function BookingPage() {
               <ZoneBooking
                 dureeTotale={dureeTotale}
                 vehicleTierLabel={VEHICLE_TIERS.find((t) => t.key === vehicleTier)?.label}
+                vehicleTierKey={vehicleTier}
                 estimatedPrice={typeof prixTotal === "number" ? prixTotal : undefined}
+                selectedServiceNames={selected}
               />
             )}
           </div>

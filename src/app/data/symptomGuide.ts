@@ -196,7 +196,7 @@ export const symptoms: Symptom[] = [
         label: "Vert, bleu ou rose, pas huileux",
         categorie: "Refroidissement",
         explication: "Un liquide coloré et fluide est généralement du liquide de refroidissement.",
-        services: ["Durite / raccord / fuite", "Détection de fuite", "Radiateur moteur"],
+        services: ["Durite / raccord / fuite", "Vase d'expansion", "Détection de fuite", "Radiateur moteur"],
       },
       {
         key: "fuite-autre",
@@ -219,7 +219,7 @@ export const symptoms: Symptom[] = [
         categorie: "Refroidissement",
         explication:
           "Une surchauffe moteur vient souvent d'une fuite de liquide de refroidissement, d'un ventilateur ou d'un thermostat défaillant.",
-        services: ["Détection de fuite", "Sonde température / LDR", "Ventilateur moteur"],
+        services: ["Détection de fuite", "Vase d'expansion", "Sonde température / LDR", "Ventilateur moteur"],
       },
       {
         key: "fume",
@@ -331,8 +331,8 @@ export const symptoms: Symptom[] = [
     label: "Une lumière ne fonctionne pas (phare, feu...)",
     categorie: "Électricité",
     explication:
-      "Le plus souvent, il s'agit simplement d'une ampoule à remplacer, parfois du phare ou du feu complet.",
-    services: ["Ampoule", "Phare (unité)", "Feu arrière (unité)"],
+      "Le plus souvent, il s'agit simplement d'une ampoule à remplacer, parfois du phare ou du feu complet. Pour un feu stop qui ne s'allume pas, ce peut aussi être le contacteur de frein.",
+    services: ["Ampoule", "Phare (unité)", "Feu arrière (unité)", "Contacteur de stop / frein"],
   },
   {
     key: "autre",
