@@ -108,30 +108,39 @@ export default function Header() {
             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </Link>
 
-          {/* MENU BURGER MOBILE - À droite */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-300 hover:text-white p-1 z-10"
-            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          {/* MENU BURGER MOBILE - À droite, avec le badge de profil actif */}
+          <div className="md:hidden flex items-center gap-2 z-10">
+            <button
+              onClick={resetAudienceChoice}
+              className="cursor-pointer text-[10px] leading-none text-gray-500 hover:text-gray-300 transition-colors border border-gray-700 rounded-full px-1.5 py-1"
+              title="Changer de profil"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={
-                  isMenuOpen
-                    ? "M6 18L18 6M6 6l12 12"
-                    : "M4 6h16M4 12h16M4 18h16"
-                }
-              />
-            </svg>
-          </button>
+              {isPro ? "Pro" : "Particulier"}
+            </button>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-300 hover:text-white p-1"
+              aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={
+                    isMenuOpen
+                      ? "M6 18L18 6M6 6l12 12"
+                      : "M4 6h16M4 12h16M4 18h16"
+                  }
+                />
+              </svg>
+            </button>
+          </div>
 
           {/* NAVIGATION DESKTOP */}
           <nav className="hidden md:flex space-x-8">
@@ -187,10 +196,10 @@ export default function Header() {
             </Link>
             <button
               onClick={resetAudienceChoice}
-              className="cursor-pointer font-medium text-gray-400 hover:text-white transition-colors text-sm border border-gray-600 rounded-full px-3 py-1"
-              title="Revoir le choix particulier / professionnel"
+              className="cursor-pointer text-[10px] leading-none text-gray-500 hover:text-gray-300 transition-colors border border-gray-700 rounded-full px-2 py-1"
+              title="Changer de profil"
             >
-              Particulier / Pro ?
+              {isPro ? "Pro" : "Particulier"}
             </button>
           </nav>
         </div>
@@ -228,12 +237,6 @@ export default function Header() {
               >
                 Contact
               </Link>
-              <button
-                onClick={resetAudienceChoice}
-                className="cursor-pointer block w-full px-3 py-2 rounded-md text-base font-medium text-center text-gray-400 hover:text-white hover:bg-gray-700"
-              >
-                Particulier / Pro ?
-              </button>
             </div>
           </div>
         )}
