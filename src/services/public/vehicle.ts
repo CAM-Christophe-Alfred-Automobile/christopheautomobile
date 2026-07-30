@@ -91,6 +91,64 @@ export async function getPublicVehicleView(id: string): Promise<PublicVehicleVie
   };
 }
 
+export interface CarnetIntervention {
+  id: string;
+  date: Date;
+  endDate: Date | null;
+  description: string;
+  price: number | null;
+  normalPrice: number | null;
+  photos: string[];
+  maintenanceType: string | null;
+}
+
+export interface VehicleCarnet {
+  id: string;
+  make: string | null;
+  model: string | null;
+  plate: string | null;
+  year: number | null;
+  mileage: number | null;
+  interventions: CarnetIntervention[];
+}
+
+// Carnet d'entretien : accessible même après revente (contrairement à la fiche de suivi QR,
+// révoquée si le nouveau propriétaire n'est pas connu) — sert de preuve d'entretien pour
+// l'acheteur. Volontairement sans coordonnées du (des) propriétaire(s), pour la confidentialité.
+export async function getVehicleCarnet(id: string): Promise<VehicleCarnet | null> {
+  const vehicle = await prisma.vehicle.findUnique({
+    where: { id },
+    include: {
+      interventions: {
+        where: { status: "done" },
+        orderBy: { date: "asc" },
+        include: { maintenanceType: true },
+      },
+    },
+  });
+
+  if (!vehicle) return null;
+
+  return {
+    id: vehicle.id,
+    make: vehicle.make,
+    model: vehicle.model,
+    plate: vehicle.plate,
+    year: vehicle.year,
+    mileage: vehicle.mileage,
+    interventions: vehicle.interventions.map((i) => ({
+      id: i.id,
+      date: i.date,
+      endDate: i.endDate,
+      description: i.description,
+      price: i.price != null ? Number(i.price) : null,
+      normalPrice: i.normalPrice != null ? Number(i.normalPrice) : null,
+      photos: i.photos,
+      maintenanceType: i.maintenanceType?.label ?? null,
+    })),
+  };
+}
+
 export interface ClientSelfUpdateInput {
   firstName?: string;
   lastName?: string;

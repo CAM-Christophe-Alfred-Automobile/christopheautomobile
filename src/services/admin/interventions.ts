@@ -20,6 +20,7 @@ export interface InterventionInput {
   depositDate?: Date | null;
   deliveryPrice?: number | null;
   dossierFee?: number | null;
+  reviewReminderSent?: boolean;
 }
 
 export async function startDraftIntervention(vehicleId: string) {
@@ -50,6 +51,27 @@ export async function listInProgressInterventions() {
     where: { status: { in: ["draft", "reserved"] } },
     include: { vehicle: { include: { client: true } } },
     orderBy: { date: "asc" },
+  });
+}
+
+// Interventions terminées récemment (2 à 10 jours) sans relance avis Google envoyée —
+// laisse un peu de temps au client avant de le solliciter, sans remonter tout l'historique.
+export async function listReviewReminderCandidates() {
+  const now = new Date();
+  const from = new Date(now);
+  from.setDate(from.getDate() - 10);
+  const to = new Date(now);
+  to.setDate(to.getDate() - 2);
+
+  return prisma.intervention.findMany({
+    where: {
+      status: "done",
+      reviewReminderSent: false,
+      date: { gte: from, lte: to },
+      vehicle: { client: { isPersonal: false, phone: { not: null } } },
+    },
+    include: { vehicle: { include: { client: true } } },
+    orderBy: { date: "desc" },
   });
 }
 

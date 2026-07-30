@@ -147,6 +147,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>([]);
   const [hourlyRate, setHourlyRate] = useState(60);
   const [urssafRate, setUrssafRate] = useState(21.2);
+  const [loyaltyThreshold, setLoyaltyThreshold] = useState(1000);
   const [loading, setLoading] = useState(true);
   const [editingClient, setEditingClient] = useState(false);
   const [clientDraft, setClientDraft] = useState({
@@ -209,6 +210,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
     if (settingsRes.success) {
       setHourlyRate(Number(settingsRes.settings.hourlyRate));
       setUrssafRate(Number(settingsRes.settings.urssafRate));
+      setLoyaltyThreshold(Number(settingsRes.settings.loyaltyThreshold));
     }
     setLoading(false);
   }, [id]);
@@ -292,6 +294,24 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                 {[client.phone, client.email, client.address].filter(Boolean).join(" · ") || "Aucune coordonnée"}
               </p>
               {client.notes && <p className="text-gray-500 text-sm mt-2 whitespace-pre-wrap">{client.notes}</p>}
+              {!client.isPersonal &&
+                (() => {
+                  const totalSpent = client.vehicles.reduce(
+                    (sum, v) =>
+                      sum +
+                      v.interventions.reduce(
+                        (s, i) => s + i.payments.reduce((ps, p) => ps + Number(p.amount), 0),
+                        0
+                      ),
+                    0
+                  );
+                  return totalSpent >= loyaltyThreshold ? (
+                    <p className="text-sm text-amber-400 mt-2">
+                      🎁 Client fidèle — {totalSpent.toFixed(0)}€ dépensés (seuil {loyaltyThreshold.toFixed(0)}€),
+                      pense à un geste
+                    </p>
+                  ) : null;
+                })()}
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
               <button

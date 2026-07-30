@@ -5,6 +5,11 @@ export function buildWhatsAppLink(phone: string, message: string): string {
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
 }
 
+export function buildReviewReminderMessage(params: { firstName: string; vehicleLabel: string }): string {
+  const { firstName, vehicleLabel } = params;
+  return `Bonjour ${firstName}, ici CAM Christophe Auto-Mobile. J'espère que tout va bien avec votre ${vehicleLabel} depuis l'intervention. Si vous êtes satisfait(e), un avis Google me ferait très plaisir 🙏 : ${GOOGLE_REVIEW_URL}`;
+}
+
 export function buildRelanceMessage(params: {
   firstName: string;
   vehicleLabel: string;

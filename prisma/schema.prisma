@@ -103,6 +103,7 @@ model Intervention {
   hoursSpent Decimal? @db.Decimal(5, 2) // temps passé, en heures
 
   status          String    @default("done") // draft (en cours sur place) | done (terminée) | reserved (réservation prévue, pas encore commencée)
+  reviewReminderSent Boolean @default(false) // relance avis Google déjà envoyée pour cette intervention
   chronoStartedAt DateTime? // si non nul, le chrono tourne actuellement pour cette intervention
 
   abbyInvoiceNumber String? @unique
@@ -194,6 +195,7 @@ model ShopSettings {
   hourlyRate      Decimal  @default(60) @db.Decimal(6, 2)
   urssafRate      Decimal  @default(21.2) @db.Decimal(5, 2) // taux de cotisation URSSAF, pour calculer le frais de dossier des réservations
   travelRatePerKm Decimal  @default(0.35) @db.Decimal(5, 2) // tarif au km facturé pour le déplacement (aller simple depuis Salon-de-Provence)
+  loyaltyThreshold Decimal @default(1000) @db.Decimal(10, 2) // montant total dépensé par un client à partir duquel proposer un geste fidélité
   updatedAt       DateTime @updatedAt
 }
 

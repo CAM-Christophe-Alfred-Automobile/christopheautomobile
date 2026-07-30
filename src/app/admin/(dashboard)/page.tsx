@@ -6,7 +6,7 @@ import Link from "next/link";
 import SearchField from "@/components/search/SearchField";
 import AlertBadge from "@/components/admin/AlertBadge";
 import type { AlertStatus } from "@/services/admin/maintenanceAlerts";
-import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { buildWhatsAppLink, buildReviewReminderMessage } from "@/lib/whatsapp";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 interface ClientRow {
@@ -32,10 +32,22 @@ interface InProgressIntervention {
   };
 }
 
+interface ReviewCandidate {
+  id: string;
+  date: string;
+  vehicle: {
+    make: string | null;
+    model: string | null;
+    plate: string | null;
+    client: { id: string; firstName: string; lastName: string; phone: string | null };
+  };
+}
+
 export default function AdminClientsPage() {
   const router = useRouter();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [inProgress, setInProgress] = useState<InProgressIntervention[]>([]);
+  const [reviewCandidates, setReviewCandidates] = useState<ReviewCandidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -51,7 +63,21 @@ export default function AdminClientsPage() {
       .then((data) => {
         if (data.success) setInProgress(data.interventions);
       });
+    fetch("/api/admin/interventions/review-reminders")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setReviewCandidates(data.interventions);
+      });
   }, []);
+
+  async function markReviewReminderSent(id: string) {
+    setReviewCandidates((prev) => prev.filter((i) => i.id !== id));
+    await fetch(`/api/admin/interventions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewReminderSent: true }),
+    });
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -148,6 +174,52 @@ export default function AdminClientsPage() {
                   >
                     Reprendre
                   </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {reviewCandidates.length > 0 && (
+        <div className="mb-6 bg-yellow-950/20 border border-dashed border-yellow-700/50 rounded-lg p-3">
+          <p className="text-sm font-medium text-yellow-300 mb-2">
+            ⭐ Demander un avis Google ({reviewCandidates.length})
+          </p>
+          <ul className="space-y-1.5">
+            {reviewCandidates.map((i) => {
+              const vehicleLabel =
+                [i.vehicle.make, i.vehicle.model, i.vehicle.plate].filter(Boolean).join(" ") || "véhicule";
+              return (
+                <li key={i.id} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="text-gray-300">
+                    {i.vehicle.client.firstName} {i.vehicle.client.lastName !== "." ? i.vehicle.client.lastName : ""}{" "}
+                    — {vehicleLabel}
+                    <span className="text-gray-500"> · terminée le {new Date(i.date).toLocaleDateString("fr-FR")}</span>
+                  </span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {i.vehicle.client.phone && (
+                      <a
+                        href={buildWhatsAppLink(
+                          i.vehicle.client.phone,
+                          buildReviewReminderMessage({ firstName: i.vehicle.client.firstName, vehicleLabel })
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => markReviewReminderSent(i.id)}
+                        className="text-xs text-green-400 hover:text-green-300 cursor-pointer"
+                      >
+                        📱 Envoyer
+                      </a>
+                    )}
+                    <button
+                      onClick={() => markReviewReminderSent(i.id)}
+                      className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer"
+                      title="Ne plus proposer pour cette intervention"
+                    >
+                      Ignorer
+                    </button>
+                  </div>
                 </li>
               );
             })}

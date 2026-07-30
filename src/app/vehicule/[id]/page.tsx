@@ -82,6 +82,15 @@ export default async function VehiculePublicPage({ params }: { params: Promise<{
           <h2 className="text-sm font-medium text-gray-300 mb-2">Vos coordonnées</h2>
           <PublicContactForm vehicleId={vehicle.id} initial={vehicle.client} />
         </section>
+
+        <Link
+          href={`/vehicule/${vehicle.id}/carnet`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-center px-4 py-2.5 rounded-lg border border-gray-700 text-sm text-gray-300 hover:border-amber-500 hover:text-amber-400"
+        >
+          🖨 Carnet d&apos;entretien (PDF)
+        </Link>
       </div>
     </div>
   );
