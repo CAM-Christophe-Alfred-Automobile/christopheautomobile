@@ -103,11 +103,12 @@ export const symptoms: Symptom[] = [
         label: "En tournant le volant ou sur les bosses",
         categorie: "Suspension / Direction",
         explication:
-          "Ce type de bruit est souvent lié à la suspension ou à la direction.",
+          "Ce type de bruit est souvent lié à la suspension ou à la direction, mais peut aussi venir de plaquettes de frein qui bougent légèrement dans leur logement (bruit sur les petites bosses).",
         services: [
           "Détection bruit de suspension / direction",
           "Amortisseurs (paire)",
           "Biellettes de barre stabilisatrice (paire)",
+          "Plaquettes (essieu)",
         ],
       },
       {
