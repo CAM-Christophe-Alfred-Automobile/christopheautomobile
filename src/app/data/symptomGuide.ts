@@ -59,6 +59,62 @@ export const symptoms: Symptom[] = [
     subQuestion: "Savez-vous quel voyant est allumé ?",
     subAnswers: [
       {
+        key: "voyant-moteur",
+        label: "Le voyant moteur (orange, souvent en forme de moteur)",
+        categorie: "Diagnostic",
+        explication:
+          "Ce voyant peut avoir de nombreuses causes différentes (EGR/FAP, injection, capteurs...) — un diagnostic avec valise est nécessaire pour lire le code défaut précis avant toute réparation.",
+        services: DIAGNOSTIC_GENERIQUE,
+      },
+      {
+        key: "voyant-huile",
+        label: "Le voyant huile (une burette d'huile)",
+        categorie: "Moteur",
+        explication:
+          "⚠️ Ce voyant signale une pression d'huile insuffisante : il est recommandé d'arrêter le véhicule dès que possible pour éviter d'endommager le moteur. Cela peut venir du niveau d'huile, de la pompe à huile, ou d'un capteur défaillant.",
+        services: ["Pompe à huile", "Inspection / contrôle panne"],
+      },
+      {
+        key: "voyant-batterie",
+        label: "Le voyant batterie (une pile / batterie)",
+        categorie: "Électricité",
+        explication:
+          "Ce voyant évoque le plus souvent une batterie ou un alternateur qui charge mal.",
+        services: ["Batterie", "Alternateur", "Inspection / contrôle panne"],
+      },
+      {
+        key: "voyant-temperature",
+        label: "Le voyant température (un thermomètre)",
+        categorie: "Refroidissement",
+        explication:
+          "Ce voyant signale souvent une fuite de liquide de refroidissement, un ventilateur ou un thermostat défaillant.",
+        services: ["Détection de fuite", "Vase d'expansion", "Sonde température / LDR", "Ventilateur moteur"],
+      },
+      {
+        key: "voyant-frein",
+        label: "Le voyant frein (un point d'exclamation dans un cercle)",
+        categorie: "Freinage",
+        explication:
+          "Ce voyant peut signaler un frein à main mal desserré, un niveau de liquide de frein bas, ou des plaquettes usées.",
+        services: ["Détection panne de freinage /bruit", "Plaquettes (essieu)", "Purge de frein"],
+      },
+      {
+        key: "voyant-abs",
+        label: "Le voyant ABS",
+        categorie: "Freinage",
+        explication:
+          "Ce voyant concerne le système antiblocage des roues — un diagnostic électronique permet d'identifier le capteur ou le boîtier en cause.",
+        services: ["Capteur ABS", "Boitier ABS complet"],
+      },
+      {
+        key: "voyant-service",
+        label: "Une petite clé à outils / voyant \"service\"",
+        categorie: "Électricité",
+        explication:
+          "C'est en général juste un rappel d'entretien programmé (pas une panne) — il se réinitialise après la révision.",
+        services: ["Réinitialisation voyant service"],
+      },
+      {
         key: "voyant-airbag",
         label: "Le voyant airbag",
         nonPropose: MESSAGE_AIRBAG,
@@ -110,6 +166,14 @@ export const symptoms: Symptom[] = [
           "Biellettes de barre stabilisatrice (paire)",
           "Plaquettes (essieu)",
         ],
+      },
+      {
+        key: "roulement",
+        label: "Un ronflement ou sifflement qui change avec la vitesse",
+        categorie: "Suspension / Direction",
+        explication:
+          "Ce type de bruit, qui varie avec la vitesse et parfois en tournant, évoque presque toujours un roulement de roue usé.",
+        services: ["Roulement de roue", "Détection bruit de suspension / direction"],
       },
       {
         key: "autre-bruit",
@@ -200,6 +264,12 @@ export const symptoms: Symptom[] = [
         services: ["Durite / raccord / fuite", "Vase d'expansion", "Détection de fuite", "Radiateur moteur"],
       },
       {
+        key: "fuite-eau",
+        label: "Transparent, comme de l'eau",
+        explication:
+          "C'est très probablement de la condensation de la climatisation (normal, surtout par temps chaud) — pas d'inquiétude à avoir, aucune intervention n'est nécessaire.",
+      },
+      {
         key: "fuite-autre",
         label: "Je ne sais pas / autre couleur",
         categorie: "Refroidissement",
@@ -243,6 +313,14 @@ export const symptoms: Symptom[] = [
         categorie: "Moteur",
         explication: "Une perte de puissance vient souvent des bougies, du filtre à gasoil, ou de l'EGR/FAP.",
         services: ["Bougies d'allumage", "Filtre gasoil", "EGR / FAP", "Diagnostic valise complet"],
+      },
+      {
+        key: "cale",
+        label: "Il cale (s'arrête tout seul) en roulant ou au ralenti",
+        categorie: "Diagnostic",
+        explication:
+          "Un calage évoque souvent un filtre à gasoil encrassé ou un capteur défaillant — un diagnostic permet d'identifier la cause précise.",
+        services: ["Filtre gasoil", "Diagnostic valise complet"],
       },
       {
         key: "moteur-autre",
