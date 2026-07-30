@@ -69,6 +69,7 @@ interface Intervention {
   partsUsed: PartUsed[];
   payments: Payment[];
   maintenanceTypeId: string | null;
+  maintenanceTypeIds: string[];
   maintenanceType: MaintenanceType | null;
   status: string;
   bookedOnline: boolean;
@@ -910,7 +911,7 @@ function MaintenancePanel({
               currentMileage: vehicle.mileage,
             });
             const lastIntervention = vehicle.interventions
-              .filter((i) => i.maintenanceTypeId === type.id)
+              .filter((i) => i.maintenanceTypeId === type.id || i.maintenanceTypeIds?.includes(type.id))
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
             return (
@@ -1113,7 +1114,7 @@ function InterventionHistory({
   const [price, setPrice] = useState("");
   const [mileage, setMileage] = useState("");
   const [hoursSpent, setHoursSpent] = useState("");
-  const [maintenanceTypeId, setMaintenanceTypeId] = useState("");
+  const [maintenanceTypeIds, setMaintenanceTypeIds] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [vehicleCondition, setVehicleCondition] = useState("");
   const [todoText, setTodoText] = useState("");
@@ -1167,6 +1168,10 @@ function InterventionHistory({
 
   function removeQueuedPart(idx: number) {
     setQueuedParts((q) => q.filter((_, i) => i !== idx));
+  }
+
+  function toggleMaintenanceType(typeId: string) {
+    setMaintenanceTypeIds((ids) => (ids.includes(typeId) ? ids.filter((id) => id !== typeId) : [...ids, typeId]));
   }
 
   const timerKey = `cam_timer_${vehicle.id}`;
@@ -1234,7 +1239,7 @@ function InterventionHistory({
           price: price ? Number(price) : null,
           mileage: mileage ? Number(mileage) : null,
           hoursSpent: hoursSpent ? Number(hoursSpent) : null,
-          maintenanceTypeId: maintenanceTypeId || null,
+          maintenanceTypeIds,
           notes: notes || null,
           vehicleCondition: vehicleCondition || null,
           ...(entryStatus === "reserved"
@@ -1296,7 +1301,7 @@ function InterventionHistory({
     setPrice("");
     setMileage("");
     setHoursSpent("");
-    setMaintenanceTypeId("");
+    setMaintenanceTypeIds([]);
     setNotes("");
     setVehicleCondition("");
     setTodoText("");
@@ -1442,28 +1447,46 @@ function InterventionHistory({
                 onChange={(e) => setMileage(e.target.value)}
               />
             </div>
-            <select
-              className={inputClass}
-              value={maintenanceTypeId}
-              onChange={(e) => setMaintenanceTypeId(e.target.value)}
-            >
-              <option value="">Type d&apos;entretien lié (optionnel)</option>
+          </div>
+
+          <div>
+            <label className="block text-[11px] text-gray-500 mb-1">
+              {entryStatus === "reserved"
+                ? "Type(s) d'entretien liés (optionnel — coche tout ce qui est prévu, ex: vidange + plaquettes)"
+                : "Type(s) d'entretien liés (optionnel — coche tout ce qui a été fait, ex: vidange + plaquettes)"}
+            </label>
+            <div className="flex flex-wrap gap-1.5">
               {maintenanceTypes
                 .filter((t) => t.isActive)
                 .map((t) => (
-                  <option key={t.id} value={t.id}>
+                  <label
+                    key={t.id}
+                    className={`px-2 py-1 rounded-lg border text-xs cursor-pointer ${
+                      maintenanceTypeIds.includes(t.id)
+                        ? "border-amber-500 bg-amber-500/10 text-amber-400"
+                        : "border-gray-700 text-gray-400 hover:border-gray-600"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={maintenanceTypeIds.includes(t.id)}
+                      onChange={() => toggleMaintenanceType(t.id)}
+                      className="hidden"
+                    />
                     {t.label}
-                  </option>
+                  </label>
                 ))}
-            </select>
+            </div>
           </div>
 
-          {/* 2. Ce qui a été fait */}
+          {/* 2. Ce qui a été fait / ce qui est prévu */}
           <div>
-            <label className="block text-[11px] text-gray-500 mb-0.5">Ce qui a été fait</label>
+            <label className="block text-[11px] text-gray-500 mb-0.5">
+              {entryStatus === "reserved" ? "Ce qui est prévu" : "Ce qui a été fait"}
+            </label>
             <input
               type="text"
-              placeholder="Description de l'intervention"
+              placeholder={entryStatus === "reserved" ? "Description de l'intervention prévue" : "Description de l'intervention"}
               required
               className={inputClass}
               value={description}

@@ -166,9 +166,16 @@ export async function POST(req: Request) {
     }
   }
 
+  // Sans plaque (client n'ayant pas rempli l'immatriculation), on retombe sur le véhicule
+  // déjà connu du même client portant le même modèle, pour ne pas dupliquer un véhicule/une
+  // fiche à chaque nouvelle réservation en ligne du même client pour la même voiture.
   let vehicle = immatriculation
     ? await prisma.vehicle.findFirst({ where: { clientId: client.id, plate: immatriculation } })
-    : null;
+    : modele
+      ? await prisma.vehicle.findFirst({
+          where: { clientId: client.id, model: { equals: modele, mode: "insensitive" } },
+        })
+      : null;
 
   if (!vehicle) {
     vehicle = await prisma.vehicle.create({

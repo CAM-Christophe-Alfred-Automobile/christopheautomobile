@@ -7,6 +7,7 @@ export interface InterventionInput {
   normalPrice?: number | null;
   price?: number | null;
   maintenanceTypeId?: string | null;
+  maintenanceTypeIds?: string[];
   notes?: string | null;
   toolLink?: string | null;
   mileage?: number | null;
@@ -66,13 +67,25 @@ async function syncMaintenanceRecord(vehicleId: string, maintenanceTypeId: strin
   });
 }
 
+// Une intervention peut couvrir plusieurs types d'entretien à la fois (ex: vidange + plaquettes
+// le même jour) — normalise vers un tableau, en repli sur l'ancien champ unique le cas échéant.
+function normalizeMaintenanceTypeIds(data: {
+  maintenanceTypeId?: string | null;
+  maintenanceTypeIds?: string[];
+}): string[] | undefined {
+  if (data.maintenanceTypeIds !== undefined) return data.maintenanceTypeIds;
+  if (data.maintenanceTypeId !== undefined) return data.maintenanceTypeId ? [data.maintenanceTypeId] : [];
+  return undefined;
+}
+
 export async function addIntervention(vehicleId: string, data: InterventionInput) {
+  const ids = normalizeMaintenanceTypeIds(data) ?? [];
   const intervention = await prisma.intervention.create({
-    data: { ...data, vehicleId },
+    data: { ...data, vehicleId, maintenanceTypeId: ids[0] ?? null, maintenanceTypeIds: ids },
   });
 
-  if (data.maintenanceTypeId) {
-    await syncMaintenanceRecord(vehicleId, data.maintenanceTypeId, data.date);
+  for (const typeId of ids) {
+    await syncMaintenanceRecord(vehicleId, typeId, data.date);
   }
 
   if (data.mileage != null) {
@@ -89,7 +102,19 @@ export async function addIntervention(vehicleId: string, data: InterventionInput
 }
 
 export async function updateIntervention(id: string, data: Partial<InterventionInput>) {
-  return prisma.intervention.update({ where: { id }, data });
+  const ids = normalizeMaintenanceTypeIds(data);
+  const intervention = await prisma.intervention.update({
+    where: { id },
+    data: ids !== undefined ? { ...data, maintenanceTypeId: ids[0] ?? null, maintenanceTypeIds: ids } : data,
+  });
+
+  if (ids && ids.length > 0) {
+    for (const typeId of ids) {
+      await syncMaintenanceRecord(intervention.vehicleId, typeId, intervention.date);
+    }
+  }
+
+  return intervention;
 }
 
 export async function deleteIntervention(id: string) {

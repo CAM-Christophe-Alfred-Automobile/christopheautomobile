@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, use as usePromise } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { buildWhatsAppLink, buildStartWorkMessage, buildFinishWorkMessage } from "@/lib/whatsapp";
+import { buildWhatsAppLink, buildStartWorkMessage, buildFinishWorkMessage, buildDelayMessage } from "@/lib/whatsapp";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -28,6 +28,7 @@ interface InterventionData {
   description: string;
   price: string | number | null;
   maintenanceTypeId: string | null;
+  maintenanceTypeIds: string[];
   vehicle: {
     id: string;
     make: string | null;
@@ -60,7 +61,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [hourlyRate, setHourlyRate] = useState(60);
 
   const [finalDescription, setFinalDescription] = useState("");
-  const [finalMaintenanceTypeId, setFinalMaintenanceTypeId] = useState("");
+  const [finalMaintenanceTypeIds, setFinalMaintenanceTypeIds] = useState<string[]>([]);
   const [finalPrice, setFinalPrice] = useState("");
   const [clientLastName, setClientLastName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
@@ -75,6 +76,12 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [startWhatsAppUrl, setStartWhatsAppUrl] = useState<string | null>(null);
   const [finishWhatsAppUrl, setFinishWhatsAppUrl] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [showDelayForm, setShowDelayForm] = useState(false);
+  const [delayDate, setDelayDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  });
 
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const damageInputRef = useRef<HTMLInputElement>(null);
@@ -227,7 +234,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   function openFinalize() {
     if (!data) return;
     setFinalDescription(data.description || "");
-    setFinalMaintenanceTypeId(data.maintenanceTypeId || "");
+    setFinalMaintenanceTypeIds(data.maintenanceTypeIds?.length ? data.maintenanceTypeIds : data.maintenanceTypeId ? [data.maintenanceTypeId] : []);
     setFinalPrice((currentHoursSpent() * hourlyRate).toFixed(2));
     setClientLastName(data.vehicle.client.lastName === "." ? "" : data.vehicle.client.lastName);
     setClientPhone(data.vehicle.client.phone || "");
@@ -269,7 +276,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     try {
       await patchIntervention({
         description: finalDescription,
-        maintenanceTypeId: finalMaintenanceTypeId || null,
+        maintenanceTypeIds: finalMaintenanceTypeIds,
         price: !data.vehicle.client.isPersonal && finalPrice ? Number(finalPrice) : null,
         hoursSpent: totalHours,
         vehicleCondition: vehicleConditionUpdate,
@@ -499,12 +506,94 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
           >
             ✅ Terminer l&apos;intervention
           </button>
-          <button
-            onClick={handlePause}
-            className="w-full py-2.5 rounded-lg border border-gray-600 text-sm text-gray-300 cursor-pointer"
-          >
-            ⏸ Pas terminé — reprendre plus tard
-          </button>
+          {!showDelayForm ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (data.vehicle.client.phone && !data.vehicle.client.isPersonal) {
+                  setShowDelayForm(true);
+                } else {
+                  handlePause();
+                }
+              }}
+              className="w-full py-2.5 rounded-lg border border-gray-600 text-sm text-gray-300 cursor-pointer"
+            >
+              ⏸ Problème / pas terminé — mettre en pause
+            </button>
+          ) : (
+            <div className="rounded-lg border border-gray-600 p-2.5 space-y-2">
+              <p className="text-xs text-gray-400">
+                Un souci sur l&apos;intervention ? Préviens {data.vehicle.client.firstName} avant de mettre en pause :
+              </p>
+              <label className="block text-[11px] text-gray-400">
+                Date proposée pour reprendre (vérifie ta dispo ce jour-là)
+              </label>
+              <div className="flex gap-1.5">
+                {[5, 7].map((days) => (
+                  <button
+                    key={days}
+                    type="button"
+                    onClick={() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + days);
+                      setDelayDate(d.toISOString().slice(0, 10));
+                    }}
+                    className="px-2 py-1 rounded border border-gray-600 text-xs text-gray-300 hover:border-amber-500 hover:text-amber-400 cursor-pointer"
+                  >
+                    +{days}j
+                  </button>
+                ))}
+                <input
+                  type="date"
+                  className={`${inputClass} flex-1`}
+                  value={delayDate}
+                  onChange={(e) => setDelayDate(e.target.value)}
+                />
+              </div>
+              {data.vehicle.client.phone && (
+                <div className="flex gap-1.5">
+                  <a
+                    href={buildWhatsAppLink(
+                      data.vehicle.client.phone,
+                      buildDelayMessage({
+                        firstName: data.vehicle.client.firstName,
+                        vehicleLabel,
+                        proposedDate: delayDate,
+                      })
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      setShowDelayForm(false);
+                      handlePause();
+                    }}
+                    className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm font-semibold text-center cursor-pointer"
+                  >
+                    📱 Envoyer le message et mettre en pause
+                  </a>
+                </div>
+              )}
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDelayForm(false);
+                    handlePause();
+                  }}
+                  className="flex-1 py-1.5 rounded-lg border border-gray-700 text-xs text-gray-400 hover:text-gray-300 cursor-pointer"
+                >
+                  Mettre en pause sans message
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDelayForm(false)}
+                  className="px-3 py-1.5 rounded-lg border border-gray-700 text-xs text-gray-400 hover:text-gray-300 cursor-pointer"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <form onSubmit={handleFinalize} className="space-y-3 border-t border-gray-700 pt-4">
@@ -519,18 +608,35 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
               onChange={(e) => setFinalDescription(e.target.value)}
             />
           </div>
-          <select
-            className={inputClass}
-            value={finalMaintenanceTypeId}
-            onChange={(e) => setFinalMaintenanceTypeId(e.target.value)}
-          >
-            <option value="">Type d&apos;entretien lié (optionnel)</option>
-            {maintenanceTypes.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-[11px] text-gray-500 mb-1">
+              Type(s) d&apos;entretien liés (optionnel — coche tout ce qui a été fait)
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {maintenanceTypes.map((t) => (
+                <label
+                  key={t.id}
+                  className={`px-2 py-1 rounded-lg border text-xs cursor-pointer ${
+                    finalMaintenanceTypeIds.includes(t.id)
+                      ? "border-amber-500 bg-amber-500/10 text-amber-400"
+                      : "border-gray-700 text-gray-400 hover:border-gray-600"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={finalMaintenanceTypeIds.includes(t.id)}
+                    onChange={() =>
+                      setFinalMaintenanceTypeIds((ids) =>
+                        ids.includes(t.id) ? ids.filter((id) => id !== t.id) : [...ids, t.id]
+                      )
+                    }
+                    className="hidden"
+                  />
+                  {t.label}
+                </label>
+              ))}
+            </div>
+          </div>
           {!data.vehicle.client.isPersonal && (
             <div>
               <label className="block text-[11px] text-gray-500 mb-0.5">

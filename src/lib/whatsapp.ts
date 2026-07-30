@@ -29,6 +29,22 @@ export function buildStartWorkMessage(params: { firstName: string; vehicleLabel:
   return `Bonjour ${firstName}, ici CAM Christophe Auto-Mobile. Je commence l'intervention sur votre ${vehicleLabel}. Je vous tiens informé(e) à la fin.`;
 }
 
+export function buildDelayMessage(params: {
+  firstName: string;
+  vehicleLabel: string;
+  proposedDate?: string | null;
+}): string {
+  const { firstName, vehicleLabel, proposedDate } = params;
+  const dateText = proposedDate
+    ? ` Je vous propose de reprendre le ${new Date(proposedDate).toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })}, dites-moi si ça vous convient.`
+    : " Je reviens vers vous rapidement pour la suite.";
+  return `Bonjour ${firstName}, ici CAM Christophe Auto-Mobile. Petite information sur l'intervention de votre ${vehicleLabel} : [ex: ça prend plus de temps que prévu / une pièce s'avère incompatible / le créneau réservé est écoulé].${dateText}`;
+}
+
 export function buildFinishWorkMessage(params: {
   firstName: string;
   vehicleLabel: string;

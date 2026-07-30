@@ -107,8 +107,9 @@ model Intervention {
 
   abbyInvoiceNumber String? @unique
 
-  maintenanceTypeId String?
-  maintenanceType   MaintenanceType? @relation(fields: [maintenanceTypeId], references: [id])
+  maintenanceTypeId  String? // type d'entretien principal (rétrocompatibilité / affichage)
+  maintenanceType    MaintenanceType? @relation(fields: [maintenanceTypeId], references: [id])
+  maintenanceTypeIds String[]         @default([]) // tous les types d'entretien couverts (intervention "combo" : plusieurs types faits en une visite)
 
   partsUsed PartUsed[]
   payments  Payment[]
