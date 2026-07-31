@@ -55,12 +55,18 @@ export async function listInProgressInterventions() {
 }
 
 // Interventions terminées avec un solde restant dû (prix fixé, paiements insuffisants) —
-// pour les relances de paiement.
+// pour les relances de paiement. Limité aux 60 derniers jours : les paiements plus anciens
+// étaient souvent suivis dans Abby plutôt que dans les paiements CAMadmin, donc les vieilles
+// interventions "impayées" ici sont surtout des paiements réels non ressaisis dans l'outil.
 export async function listUnpaidInterventions() {
+  const since = new Date();
+  since.setDate(since.getDate() - 60);
+
   const rows = await prisma.intervention.findMany({
     where: {
       status: "done",
       price: { not: null },
+      date: { gte: since },
       vehicle: { client: { isPersonal: false } },
     },
     include: { vehicle: { include: { client: true } }, payments: true, partsUsed: true },
