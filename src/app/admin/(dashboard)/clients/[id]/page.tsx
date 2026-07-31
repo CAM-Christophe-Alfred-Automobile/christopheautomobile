@@ -2617,7 +2617,9 @@ function FinalCalcBreakdown({ intervention, urssafRate }: { intervention: Interv
   const partsTotal = intervention.partsUsed
     .filter((p) => !p.boughtByClient)
     .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-  const total = priceNum + partsTotal;
+  const deliveryPriceNum = intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0;
+  const dossierFeeNum = intervention.dossierFee != null ? Number(intervention.dossierFee) : 0;
+  const total = priceNum + partsTotal + deliveryPriceNum + dossierFeeNum;
   const urssafDue = total * (urssafRate / 100);
   const net = total - urssafDue;
 
@@ -2631,6 +2633,18 @@ function FinalCalcBreakdown({ intervention, urssafRate }: { intervention: Interv
         <div className="flex justify-between text-gray-400">
           <span>+ Pièces (hors achetées par le client)</span>
           <span>{partsTotal.toFixed(2)}€</span>
+        </div>
+      )}
+      {deliveryPriceNum > 0 && (
+        <div className="flex justify-between text-gray-400">
+          <span>+ Livraison</span>
+          <span>{deliveryPriceNum.toFixed(2)}€</span>
+        </div>
+      )}
+      {dossierFeeNum > 0 && (
+        <div className="flex justify-between text-gray-400">
+          <span>+ Frais de dossier</span>
+          <span>{dossierFeeNum.toFixed(2)}€</span>
         </div>
       )}
       <div className="flex justify-between text-gray-300 font-medium border-t border-gray-700 pt-0.5">
@@ -2664,9 +2678,14 @@ function PaymentsSection({
     onChanged();
   }
 
-  const totalPaid = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const paymentsTotal = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const depositNum = intervention.depositAmount != null ? Number(intervention.depositAmount) : 0;
+  const totalPaid = paymentsTotal + depositNum;
   const priceNum = intervention.price != null ? Number(intervention.price) : null;
-  const remaining = priceNum != null ? priceNum - totalPaid : null;
+  const deliveryPriceNum = intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0;
+  const dossierFeeNum = intervention.dossierFee != null ? Number(intervention.dossierFee) : 0;
+  const totalDue = priceNum != null ? priceNum + deliveryPriceNum + dossierFeeNum : null;
+  const remaining = totalDue != null ? totalDue - totalPaid : null;
   const urssafDue = totalPaid * (urssafRate / 100);
   const daysSince = Math.floor((Date.now() - new Date(intervention.date).getTime()) / 86_400_000);
 
@@ -2692,7 +2711,11 @@ function PaymentsSection({
             </span>
           ))}
           <span className="text-gray-500">
-            {totalPaid > 0 && <>Payé : {totalPaid}€</>}
+            {totalPaid > 0 && (
+              <>
+                Payé : {totalPaid.toFixed(2)}€{depositNum > 0 && ` (dont ${depositNum.toFixed(2)}€ d'acompte)`}
+              </>
+            )}
             {remaining != null && remaining > 0.005 && (
               <span className="text-amber-400">
                 {" "}

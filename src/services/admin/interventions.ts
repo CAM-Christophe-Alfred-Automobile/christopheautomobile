@@ -69,8 +69,11 @@ export async function listUnpaidInterventions() {
 
   return rows
     .map((i) => {
-      const totalPaid = i.payments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const remaining = Number(i.price) - totalPaid;
+      const paymentsTotal = i.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const totalPaid = paymentsTotal + (i.depositAmount != null ? Number(i.depositAmount) : 0);
+      const totalDue =
+        Number(i.price) + (i.deliveryPrice != null ? Number(i.deliveryPrice) : 0) + (i.dossierFee != null ? Number(i.dossierFee) : 0);
+      const remaining = totalDue - totalPaid;
       return { ...i, remaining };
     })
     .filter((i) => i.remaining > 0.005);
