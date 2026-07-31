@@ -71,9 +71,9 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
                 className="h-9 w-auto flex-shrink-0"
               />
             )}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <span className="text-xs text-gray-500 capitalize hidden sm:inline">
-                {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <span className="text-[11px] sm:text-xs text-gray-500 capitalize whitespace-nowrap">
+                {new Date().toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}
               </span>
               <AdminMoreMenu />
             </div>

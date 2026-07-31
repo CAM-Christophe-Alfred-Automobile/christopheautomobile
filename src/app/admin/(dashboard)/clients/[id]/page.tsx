@@ -1882,6 +1882,7 @@ function InterventionHistory({
                     Reprendre
                   </a>
                 </div>
+                {!isPersonal && <FinalCalcBreakdown intervention={i} urssafRate={urssafRate} />}
                 {!isPersonal && <PaymentsSection intervention={i} urssafRate={urssafRate} onChanged={onChanged} />}
               </li>
             ) : (
@@ -2175,42 +2176,7 @@ function InterventionRow({
         <div className="text-xs text-gray-500 mt-1 whitespace-pre-wrap">📋 {intervention.vehicleCondition}</div>
       )}
 
-      {!isPersonal &&
-        priceNum != null &&
-        (() => {
-          const partsTotal = intervention.partsUsed
-            .filter((p) => !p.boughtByClient)
-            .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-          const total = priceNum + partsTotal;
-          const urssafDue = total * (urssafRate / 100);
-          const net = total - urssafDue;
-          return (
-            <div className="mt-2 text-xs bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-2 space-y-0.5">
-              <div className="flex justify-between text-gray-400">
-                <span>Main d&apos;œuvre</span>
-                <span>{priceNum.toFixed(2)}€</span>
-              </div>
-              {partsTotal > 0 && (
-                <div className="flex justify-between text-gray-400">
-                  <span>+ Pièces (hors achetées par le client)</span>
-                  <span>{partsTotal.toFixed(2)}€</span>
-                </div>
-              )}
-              <div className="flex justify-between text-gray-300 font-medium border-t border-gray-700 pt-0.5">
-                <span>= Total facturé</span>
-                <span>{total.toFixed(2)}€</span>
-              </div>
-              <div className="flex justify-between text-red-400">
-                <span>− URSSAF ({urssafRate}%)</span>
-                <span>{urssafDue.toFixed(2)}€</span>
-              </div>
-              <div className="flex justify-between text-green-400 font-medium">
-                <span>= Net pour toi</span>
-                <span>{net.toFixed(2)}€</span>
-              </div>
-            </div>
-          );
-        })()}
+      {!isPersonal && <FinalCalcBreakdown intervention={intervention} urssafRate={urssafRate} />}
 
       {!isPersonal && <PaymentsSection intervention={intervention} urssafRate={urssafRate} onChanged={onChanged} />}
 
@@ -2640,6 +2606,45 @@ function PaymentForm({
       >
         ✕
       </button>
+    </div>
+  );
+}
+
+function FinalCalcBreakdown({ intervention, urssafRate }: { intervention: Intervention; urssafRate: number }) {
+  const priceNum = intervention.price != null ? Number(intervention.price) : null;
+  if (priceNum == null) return null;
+
+  const partsTotal = intervention.partsUsed
+    .filter((p) => !p.boughtByClient)
+    .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
+  const total = priceNum + partsTotal;
+  const urssafDue = total * (urssafRate / 100);
+  const net = total - urssafDue;
+
+  return (
+    <div className="mt-2 text-xs bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-2 space-y-0.5">
+      <div className="flex justify-between text-gray-400">
+        <span>Main d&apos;œuvre</span>
+        <span>{priceNum.toFixed(2)}€</span>
+      </div>
+      {partsTotal > 0 && (
+        <div className="flex justify-between text-gray-400">
+          <span>+ Pièces (hors achetées par le client)</span>
+          <span>{partsTotal.toFixed(2)}€</span>
+        </div>
+      )}
+      <div className="flex justify-between text-gray-300 font-medium border-t border-gray-700 pt-0.5">
+        <span>= Total facturé</span>
+        <span>{total.toFixed(2)}€</span>
+      </div>
+      <div className="flex justify-between text-red-400">
+        <span>− URSSAF ({urssafRate}%)</span>
+        <span>{urssafDue.toFixed(2)}€</span>
+      </div>
+      <div className="flex justify-between text-green-400 font-medium">
+        <span>= Net pour toi</span>
+        <span>{net.toFixed(2)}€</span>
+      </div>
     </div>
   );
 }
