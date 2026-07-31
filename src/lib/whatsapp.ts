@@ -74,6 +74,15 @@ export function buildFinishWorkMessage(params: {
   return parts.join("\n\n");
 }
 
+export function buildUnpaidReminderMessage(params: {
+  firstName: string;
+  vehicleLabel: string;
+  remaining: number;
+}): string {
+  const { firstName, vehicleLabel, remaining } = params;
+  return `Bonjour ${firstName}, ici CAM Christophe Auto-Mobile. Petit rappel concernant l'intervention sur votre ${vehicleLabel} : il reste ${remaining.toFixed(2)}€ à régler. Merci de me dire quand ça vous arrange, bonne journée !`;
+}
+
 export function buildPartsOrderMessage(params: {
   firstName: string;
   vehicleLabel: string;

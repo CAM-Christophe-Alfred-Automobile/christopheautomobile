@@ -34,6 +34,7 @@ interface InterventionData {
     make: string | null;
     model: string | null;
     plate: string | null;
+    mileage: number | null;
     client: {
       id: string;
       firstName: string;
@@ -76,6 +77,11 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [startWhatsAppUrl, setStartWhatsAppUrl] = useState<string | null>(null);
   const [finishWhatsAppUrl, setFinishWhatsAppUrl] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [showInfoEdit, setShowInfoEdit] = useState(false);
+  const [editPlate, setEditPlate] = useState("");
+  const [editMileage, setEditMileage] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [savingInfo, setSavingInfo] = useState(false);
   const [showDelayForm, setShowDelayForm] = useState(false);
   const [delayDate, setDelayDate] = useState(() => {
     const d = new Date();
@@ -231,6 +237,52 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     if (data) router.push(`/admin/clients/${data.vehicle.client.id}`);
   }
 
+  function openInfoEdit() {
+    if (!data) return;
+    setEditPlate(data.vehicle.plate || "");
+    setEditMileage(data.vehicle.mileage != null ? String(data.vehicle.mileage) : "");
+    setEditPhone(data.vehicle.client.phone || "");
+    setShowInfoEdit(true);
+  }
+
+  async function saveInfoEdit() {
+    if (!data) return;
+    setSavingInfo(true);
+    try {
+      const vehicleBody: Record<string, unknown> = {};
+      if (editPlate !== (data.vehicle.plate || "")) vehicleBody.plate = editPlate || null;
+      if (editMileage !== (data.vehicle.mileage != null ? String(data.vehicle.mileage) : "")) {
+        vehicleBody.mileage = editMileage ? Number(editMileage) : null;
+      }
+      if (Object.keys(vehicleBody).length > 0) {
+        const res = await fetch(`/api/admin/vehicles/${data.vehicle.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(vehicleBody),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error("vehicle-update-failed");
+      }
+
+      if (editPhone !== (data.vehicle.client.phone || "")) {
+        const res = await fetch(`/api/admin/clients/${data.vehicle.client.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: editPhone || null }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error("client-update-failed");
+      }
+    } catch {
+      alert("⚠️ La mise à jour n'a pas pu être enregistrée (connexion internet ?). Réessaie.");
+      setSavingInfo(false);
+      return;
+    }
+    setSavingInfo(false);
+    setShowInfoEdit(false);
+    load();
+  }
+
   function openFinalize() {
     if (!data) return;
     setFinalDescription(data.description || "");
@@ -379,6 +431,73 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         <h1 className="text-xl font-semibold">{vehicleLabel}</h1>
         <p className="text-sm text-gray-400">{data.vehicle.client.firstName}</p>
       </div>
+
+      {/* Plaque / km / téléphone — modifiables à tout moment */}
+      {!showInfoEdit ? (
+        <div className="flex items-center justify-between gap-2 bg-gray-800/30 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-400">
+          <span>
+            🚗 {data.vehicle.plate || "plaque ?"} · 📏{" "}
+            {data.vehicle.mileage != null ? `${data.vehicle.mileage} km` : "km ?"} · 📱{" "}
+            {data.vehicle.client.phone || "tél ?"}
+          </span>
+          <button
+            type="button"
+            onClick={openInfoEdit}
+            className="text-amber-400 hover:text-amber-300 cursor-pointer flex-shrink-0"
+          >
+            Modifier
+          </button>
+        </div>
+      ) : (
+        <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-3 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[11px] text-gray-500 mb-0.5">Plaque</label>
+              <input
+                type="text"
+                className={inputClass}
+                value={editPlate}
+                onChange={(e) => setEditPlate(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-gray-500 mb-0.5">Kilométrage</label>
+              <input
+                type="number"
+                className={inputClass}
+                value={editMileage}
+                onChange={(e) => setEditMileage(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] text-gray-500 mb-0.5">Téléphone client</label>
+            <input
+              type="text"
+              className={inputClass}
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={saveInfoEdit}
+              disabled={savingInfo}
+              className="flex-1 py-1.5 rounded-lg bg-amber-500 text-gray-900 text-xs font-semibold cursor-pointer disabled:opacity-50"
+            >
+              {savingInfo ? "Enregistrement..." : "Enregistrer"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowInfoEdit(false)}
+              className="px-3 py-1.5 rounded-lg border border-gray-700 text-xs text-gray-400 hover:text-gray-300 cursor-pointer"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Chrono */}
       <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 text-center">

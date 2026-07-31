@@ -54,6 +54,28 @@ export async function listInProgressInterventions() {
   });
 }
 
+// Interventions terminées avec un solde restant dû (prix fixé, paiements insuffisants) —
+// pour les relances de paiement.
+export async function listUnpaidInterventions() {
+  const rows = await prisma.intervention.findMany({
+    where: {
+      status: "done",
+      price: { not: null },
+      vehicle: { client: { isPersonal: false } },
+    },
+    include: { vehicle: { include: { client: true } }, payments: true },
+    orderBy: { date: "asc" },
+  });
+
+  return rows
+    .map((i) => {
+      const totalPaid = i.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const remaining = Number(i.price) - totalPaid;
+      return { ...i, remaining };
+    })
+    .filter((i) => i.remaining > 0.005);
+}
+
 // Interventions terminées récemment (2 à 10 jours) sans relance avis Google envoyée —
 // laisse un peu de temps au client avant de le solliciter, sans remonter tout l'historique.
 export async function listReviewReminderCandidates() {
