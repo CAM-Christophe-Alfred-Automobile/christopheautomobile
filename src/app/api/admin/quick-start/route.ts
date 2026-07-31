@@ -14,6 +14,7 @@ export async function POST(req: Request) {
         data: {
           firstName: body.firstName,
           lastName: body.lastName || ".",
+          phone: body.phone || null,
         },
       });
 

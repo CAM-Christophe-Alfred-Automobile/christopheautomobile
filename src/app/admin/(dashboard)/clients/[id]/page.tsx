@@ -1432,6 +1432,14 @@ function InterventionHistory({
             </button>
           </div>
 
+          {vehicle.interventions.some((i) => i.status === "draft" || i.status === "reserved") && (
+            <p className="text-xs text-amber-400 bg-amber-950/20 border border-amber-700/50 rounded-lg px-2.5 py-1.5">
+              ⚠️ Ce véhicule a déjà une intervention en cours ou programmée — vérifie que ce n&apos;est pas la
+              continuité de celle-ci (dans ce cas, complète-la plutôt que d&apos;en créer une nouvelle) avant
+              d&apos;enregistrer.
+            </p>
+          )}
+
           {/* 1. Quand / kilométrage */}
           <div className="grid sm:grid-cols-4 gap-2">
             <div>

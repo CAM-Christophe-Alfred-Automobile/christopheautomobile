@@ -15,10 +15,12 @@ interface MatchedVehicle {
   make: string | null;
   model: string | null;
   plate: string | null;
+  mileage: number | null;
   client: {
     id: string;
     firstName: string;
     lastName: string;
+    phone: string | null;
   };
 }
 
@@ -27,6 +29,7 @@ export default function QuickStartPage() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
+    phone: "",
     make: "",
     model: "",
     plate: "",
@@ -130,6 +133,14 @@ export default function QuickStartPage() {
                 <br />
                 {[matchedVehicle.make, matchedVehicle.model, matchedVehicle.plate].filter(Boolean).join(" ")}
               </p>
+              <p className="text-xs text-gray-400">
+                📏 Dernier km connu : {matchedVehicle.mileage != null ? `${matchedVehicle.mileage} km` : "inconnu"}
+                <br />
+                📱{" "}
+                {matchedVehicle.client.phone
+                  ? matchedVehicle.client.phone
+                  : "aucun téléphone enregistré — pense à le compléter en direct"}
+              </p>
               <button
                 type="button"
                 onClick={startExisting}
@@ -161,6 +172,17 @@ export default function QuickStartPage() {
                   className={inputClass}
                   value={form.lastName}
                   onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-gray-500 mb-0.5">
+                  Téléphone (optionnel — pour pouvoir envoyer des messages WhatsApp)
+                </label>
+                <input
+                  type="tel"
+                  className={inputClass}
+                  value={form.phone}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                 />
               </div>
 
