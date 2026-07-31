@@ -54,43 +54,6 @@ export async function listInProgressInterventions() {
   });
 }
 
-// Interventions terminées avec un solde restant dû (prix fixé, paiements insuffisants) —
-// pour les relances de paiement. Limité aux 60 derniers jours : les paiements plus anciens
-// étaient souvent suivis dans Abby plutôt que dans les paiements CAMadmin, donc les vieilles
-// interventions "impayées" ici sont surtout des paiements réels non ressaisis dans l'outil.
-export async function listUnpaidInterventions() {
-  const since = new Date();
-  since.setDate(since.getDate() - 60);
-
-  const rows = await prisma.intervention.findMany({
-    where: {
-      status: "done",
-      price: { not: null },
-      date: { gte: since },
-      vehicle: { client: { isPersonal: false } },
-    },
-    include: { vehicle: { include: { client: true } }, payments: true, partsUsed: true },
-    orderBy: { date: "asc" },
-  });
-
-  return rows
-    .map((i) => {
-      const paymentsTotal = i.payments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const totalPaid = paymentsTotal + (i.depositAmount != null ? Number(i.depositAmount) : 0);
-      const partsTotal = i.partsUsed
-        .filter((p) => !p.boughtByClient)
-        .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-      const totalDue =
-        Number(i.price) +
-        partsTotal +
-        (i.deliveryPrice != null ? Number(i.deliveryPrice) : 0) +
-        (i.dossierFee != null ? Number(i.dossierFee) : 0);
-      const remaining = totalDue - totalPaid;
-      return { ...i, remaining };
-    })
-    .filter((i) => i.remaining > 0.005);
-}
-
 // Interventions terminées récemment (2 à 10 jours) sans relance avis Google envoyée —
 // laisse un peu de temps au client avant de le solliciter, sans remonter tout l'historique.
 export async function listReviewReminderCandidates() {

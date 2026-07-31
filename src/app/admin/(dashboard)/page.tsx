@@ -6,7 +6,7 @@ import Link from "next/link";
 import SearchField from "@/components/search/SearchField";
 import AlertBadge from "@/components/admin/AlertBadge";
 import type { AlertStatus } from "@/services/admin/maintenanceAlerts";
-import { buildWhatsAppLink, buildReviewReminderMessage, buildUnpaidReminderMessage } from "@/lib/whatsapp";
+import { buildWhatsAppLink, buildReviewReminderMessage } from "@/lib/whatsapp";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 interface ClientRow {
@@ -43,24 +43,11 @@ interface ReviewCandidate {
   };
 }
 
-interface UnpaidIntervention {
-  id: string;
-  date: string;
-  remaining: number;
-  vehicle: {
-    make: string | null;
-    model: string | null;
-    plate: string | null;
-    client: { id: string; firstName: string; lastName: string; phone: string | null };
-  };
-}
-
 export default function AdminClientsPage() {
   const router = useRouter();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [inProgress, setInProgress] = useState<InProgressIntervention[]>([]);
   const [reviewCandidates, setReviewCandidates] = useState<ReviewCandidate[]>([]);
-  const [unpaid, setUnpaid] = useState<UnpaidIntervention[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -80,11 +67,6 @@ export default function AdminClientsPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setReviewCandidates(data.interventions);
-      });
-    fetch("/api/admin/interventions/unpaid")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setUnpaid(data.interventions);
       });
   }, []);
 
@@ -192,48 +174,6 @@ export default function AdminClientsPage() {
                   >
                     Reprendre
                   </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      {unpaid.length > 0 && (
-        <div className="mb-6 bg-red-950/20 border border-dashed border-red-700/50 rounded-lg p-3">
-          <p className="text-sm font-medium text-red-300 mb-2">
-            💶 Impayés ({unpaid.length}) — {unpaid.reduce((sum, i) => sum + i.remaining, 0).toFixed(2)}€ au total
-          </p>
-          <ul className="space-y-1.5">
-            {unpaid.map((i) => {
-              const vehicleLabel =
-                [i.vehicle.make, i.vehicle.model, i.vehicle.plate].filter(Boolean).join(" ") || "véhicule";
-              const daysSince = Math.floor((Date.now() - new Date(i.date).getTime()) / 86_400_000);
-              return (
-                <li key={i.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span className="text-gray-300">
-                    {i.vehicle.client.firstName}{" "}
-                    {i.vehicle.client.lastName !== "." ? i.vehicle.client.lastName : ""} — {vehicleLabel}
-                    <span className="text-red-400 font-medium"> · {i.remaining.toFixed(2)}€</span>
-                    <span className="text-gray-500"> · depuis {daysSince}j</span>
-                  </span>
-                  {i.vehicle.client.phone && (
-                    <a
-                      href={buildWhatsAppLink(
-                        i.vehicle.client.phone,
-                        buildUnpaidReminderMessage({
-                          firstName: i.vehicle.client.firstName,
-                          vehicleLabel,
-                          remaining: i.remaining,
-                        })
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-green-400 hover:text-green-300 cursor-pointer flex-shrink-0"
-                    >
-                      📱 Relancer
-                    </a>
-                  )}
                 </li>
               );
             })}
