@@ -2682,9 +2682,12 @@ function PaymentsSection({
   const depositNum = intervention.depositAmount != null ? Number(intervention.depositAmount) : 0;
   const totalPaid = paymentsTotal + depositNum;
   const priceNum = intervention.price != null ? Number(intervention.price) : null;
+  const partsTotal = intervention.partsUsed
+    .filter((p) => !p.boughtByClient)
+    .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
   const deliveryPriceNum = intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0;
   const dossierFeeNum = intervention.dossierFee != null ? Number(intervention.dossierFee) : 0;
-  const totalDue = priceNum != null ? priceNum + deliveryPriceNum + dossierFeeNum : null;
+  const totalDue = priceNum != null ? priceNum + partsTotal + deliveryPriceNum + dossierFeeNum : null;
   const remaining = totalDue != null ? totalDue - totalPaid : null;
   const urssafDue = totalPaid * (urssafRate / 100);
   const daysSince = Math.floor((Date.now() - new Date(intervention.date).getTime()) / 86_400_000);

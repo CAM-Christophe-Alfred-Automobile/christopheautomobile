@@ -63,7 +63,7 @@ export async function listUnpaidInterventions() {
       price: { not: null },
       vehicle: { client: { isPersonal: false } },
     },
-    include: { vehicle: { include: { client: true } }, payments: true },
+    include: { vehicle: { include: { client: true } }, payments: true, partsUsed: true },
     orderBy: { date: "asc" },
   });
 
@@ -71,8 +71,14 @@ export async function listUnpaidInterventions() {
     .map((i) => {
       const paymentsTotal = i.payments.reduce((sum, p) => sum + Number(p.amount), 0);
       const totalPaid = paymentsTotal + (i.depositAmount != null ? Number(i.depositAmount) : 0);
+      const partsTotal = i.partsUsed
+        .filter((p) => !p.boughtByClient)
+        .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
       const totalDue =
-        Number(i.price) + (i.deliveryPrice != null ? Number(i.deliveryPrice) : 0) + (i.dossierFee != null ? Number(i.dossierFee) : 0);
+        Number(i.price) +
+        partsTotal +
+        (i.deliveryPrice != null ? Number(i.deliveryPrice) : 0) +
+        (i.dossierFee != null ? Number(i.dossierFee) : 0);
       const remaining = totalDue - totalPaid;
       return { ...i, remaining };
     })
