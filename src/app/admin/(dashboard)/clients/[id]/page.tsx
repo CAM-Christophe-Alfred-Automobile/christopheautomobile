@@ -2175,6 +2175,43 @@ function InterventionRow({
         <div className="text-xs text-gray-500 mt-1 whitespace-pre-wrap">📋 {intervention.vehicleCondition}</div>
       )}
 
+      {!isPersonal &&
+        priceNum != null &&
+        (() => {
+          const partsTotal = intervention.partsUsed
+            .filter((p) => !p.boughtByClient)
+            .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
+          const total = priceNum + partsTotal;
+          const urssafDue = total * (urssafRate / 100);
+          const net = total - urssafDue;
+          return (
+            <div className="mt-2 text-xs bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-2 space-y-0.5">
+              <div className="flex justify-between text-gray-400">
+                <span>Main d&apos;œuvre</span>
+                <span>{priceNum.toFixed(2)}€</span>
+              </div>
+              {partsTotal > 0 && (
+                <div className="flex justify-between text-gray-400">
+                  <span>+ Pièces (hors achetées par le client)</span>
+                  <span>{partsTotal.toFixed(2)}€</span>
+                </div>
+              )}
+              <div className="flex justify-between text-gray-300 font-medium border-t border-gray-700 pt-0.5">
+                <span>= Total facturé</span>
+                <span>{total.toFixed(2)}€</span>
+              </div>
+              <div className="flex justify-between text-red-400">
+                <span>− URSSAF ({urssafRate}%)</span>
+                <span>{urssafDue.toFixed(2)}€</span>
+              </div>
+              <div className="flex justify-between text-green-400 font-medium">
+                <span>= Net pour toi</span>
+                <span>{net.toFixed(2)}€</span>
+              </div>
+            </div>
+          );
+        })()}
+
       {!isPersonal && <PaymentsSection intervention={intervention} urssafRate={urssafRate} onChanged={onChanged} />}
 
       {(
@@ -2626,10 +2663,11 @@ function PaymentsSection({
   const priceNum = intervention.price != null ? Number(intervention.price) : null;
   const remaining = priceNum != null ? priceNum - totalPaid : null;
   const urssafDue = totalPaid * (urssafRate / 100);
+  const daysSince = Math.floor((Date.now() - new Date(intervention.date).getTime()) / 86_400_000);
 
   return (
     <div className="mt-2 text-xs">
-      {intervention.payments.length > 0 && (
+      {(intervention.payments.length > 0 || (remaining != null && remaining > 0.005)) && (
         <div className="flex flex-wrap items-center gap-1.5 mb-1">
           {intervention.payments.map((p) => (
             <span
@@ -2649,9 +2687,12 @@ function PaymentsSection({
             </span>
           ))}
           <span className="text-gray-500">
-            Payé : {totalPaid}€
+            {totalPaid > 0 && <>Payé : {totalPaid}€</>}
             {remaining != null && remaining > 0.005 && (
-              <span className="text-amber-400"> · reste {remaining.toFixed(2)}€</span>
+              <span className="text-amber-400">
+                {" "}
+                · reste {remaining.toFixed(2)}€ — en attente depuis {daysSince} jour{daysSince > 1 ? "s" : ""}
+              </span>
             )}
             {remaining != null && remaining <= 0.005 && <span className="text-green-400"> · payé intégralement</span>}
             {totalPaid > 0 && (
