@@ -759,7 +759,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
           {!data.vehicle.client.isPersonal && (
             <div>
               <label className="block text-[11px] text-gray-500 mb-0.5">
-                Prix € (calculé : {currentHoursSpent().toFixed(2)}h × {hourlyRate}€/h)
+                Main d&apos;œuvre € — hors pièces (calculé : {currentHoursSpent().toFixed(2)}h × {hourlyRate}€/h)
               </label>
               <input
                 type="number"
@@ -768,6 +768,9 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
                 value={finalPrice}
                 onChange={(e) => setFinalPrice(e.target.value)}
               />
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                Les pièces s&apos;ajoutent séparément juste après, sur la fiche du véhicule.
+              </p>
             </div>
           )}
 

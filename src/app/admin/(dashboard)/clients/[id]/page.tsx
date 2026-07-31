@@ -1679,12 +1679,12 @@ function InterventionHistory({
             {!isPersonal && (
               <div>
                 <label className="block text-[11px] text-gray-500 mb-0.5">
-                  {entryStatus === "reserved" ? "Prix main d'œuvre estimé €" : "Prix €"}
+                  {entryStatus === "reserved" ? "Main d'œuvre estimée € (hors pièces)" : "Main d'œuvre € (hors pièces)"}
                 </label>
                 <div className="flex gap-1">
                   <input
                     type="number"
-                    placeholder="Prix €"
+                    placeholder="Main d'œuvre €"
                     className={inputClass}
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
@@ -1702,6 +1702,37 @@ function InterventionHistory({
               </div>
             )}
           </div>
+
+          {!isPersonal && (Number(price) > 0 || queuedPartsTotal > 0) && (
+            <div className="text-xs bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-2 space-y-0.5">
+              <div className="flex justify-between text-gray-400">
+                <span>Main d&apos;œuvre</span>
+                <span>{(Number(price) || 0).toFixed(2)}€</span>
+              </div>
+              {queuedPartsTotal > 0 && (
+                <div className="flex justify-between text-gray-400">
+                  <span>+ Pièces (hors achetées par le client)</span>
+                  <span>
+                    {queuedParts
+                      .filter((p) => !p.boughtByClient)
+                      .reduce((sum, p) => sum + (Number(p.price) || 0), 0)
+                      .toFixed(2)}
+                    €
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-gray-200 font-medium border-t border-gray-700 pt-0.5">
+                <span>= Total facturé</span>
+                <span>
+                  {(
+                    (Number(price) || 0) +
+                    queuedParts.filter((p) => !p.boughtByClient).reduce((sum, p) => sum + (Number(p.price) || 0), 0)
+                  ).toFixed(2)}
+                  €
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* 7b. Réservation : acompte, livraison, frais de dossier */}
           {entryStatus === "reserved" && !isPersonal && (
@@ -2529,10 +2560,12 @@ function InterventionRow({
 function PaymentForm({
   interventionId,
   urssafRate,
+  remaining,
   onAdded,
 }: {
   interventionId: string;
   urssafRate: number;
+  remaining?: number | null;
   onAdded: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -2574,6 +2607,16 @@ function PaymentForm({
         onChange={(e) => setAmount(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && submit()}
       />
+      {remaining != null && remaining > 0.005 && (
+        <button
+          type="button"
+          onClick={() => setAmount(remaining.toFixed(2))}
+          className="text-amber-400 hover:text-amber-300 cursor-pointer text-xs"
+          title="Remplir avec le solde restant"
+        >
+          Solder ({remaining.toFixed(2)}€)
+        </button>
+      )}
       {Number(amount) > 0 && (
         <span className="text-gray-500" title={`${urssafRate}% URSSAF`}>
           → {(Number(amount) * (urssafRate / 100)).toFixed(2)}€ URSSAF
@@ -2717,7 +2760,7 @@ function PaymentsSection({
         </div>
       )}
 
-      <PaymentForm interventionId={intervention.id} urssafRate={urssafRate} onAdded={onChanged} />
+      <PaymentForm interventionId={intervention.id} urssafRate={urssafRate} remaining={remaining} onAdded={onChanged} />
     </div>
   );
 }
