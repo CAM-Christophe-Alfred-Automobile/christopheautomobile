@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { listAccounts, getAllCurrentBalances } from "@/services/finance/accounts";
-import { reconcileAccountAction, syncCashAction } from "./actions";
+import { reconcileAccountAction, syncCashAction, syncBankConnectionAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +61,50 @@ export default async function AccountsPage() {
                 Réconcilier
               </button>
             </form>
+
+            {account.bankConnection ? (
+              <div className="space-y-1.5 text-xs pt-1 border-t border-gray-800">
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`px-2 py-0.5 rounded-full ${
+                      account.bankConnection.status === "active"
+                        ? "bg-emerald-500/15 text-emerald-300"
+                        : "bg-amber-500/15 text-amber-300"
+                    }`}
+                  >
+                    {account.bankConnection.status === "active"
+                      ? `Connecté (${account.bankConnection.aspspName})`
+                      : `Connexion expirée (${account.bankConnection.aspspName})`}
+                  </span>
+                  <span className="text-gray-500">
+                    {account.bankConnection.lastSyncedAt
+                      ? `Synchro : ${new Intl.DateTimeFormat("fr-FR").format(new Date(account.bankConnection.lastSyncedAt))}`
+                      : "Jamais synchronisé"}
+                  </span>
+                </div>
+                {account.bankConnection.status === "active" ? (
+                  <form action={syncBankConnectionAction.bind(null, account.bankConnection.id)}>
+                    <button type="submit" className="w-full px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-800">
+                      Synchroniser maintenant
+                    </button>
+                  </form>
+                ) : (
+                  <Link
+                    href={`/admin/finance/accounts/connect?accountId=${account.id}`}
+                    className="block text-center px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-800 text-gray-300"
+                  >
+                    Reconnecter
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <Link
+                href={`/admin/finance/accounts/connect?accountId=${account.id}`}
+                className="block text-center text-xs pt-1 border-t border-gray-800 text-gray-500 hover:text-emerald-400"
+              >
+                Connecter à ma banque (Enable Banking)
+              </Link>
+            )}
 
             {account.type === "cash" && (
               <form action={syncCashAction.bind(null, account.id)} className="pt-1 border-t border-gray-800">

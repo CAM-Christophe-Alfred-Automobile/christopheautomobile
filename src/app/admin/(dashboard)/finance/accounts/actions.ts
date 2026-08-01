@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createAccount, reconcileBalance } from "@/services/finance/accounts";
 import { syncCashPayments } from "@/services/finance/cashPaymentSync";
 import { syncFuelExpenses } from "@/services/finance/fuelExpenseSync";
+import { syncBankConnection } from "@/services/finance/bankSync";
 
 export async function createAccountAction(formData: FormData) {
   await createAccount({
@@ -28,6 +29,13 @@ export async function reconcileAccountAction(id: string, formData: FormData) {
 export async function syncCashAction(accountId: string) {
   await syncCashPayments(accountId);
   await syncFuelExpenses(accountId);
+  revalidatePath("/admin/finance/accounts");
+  revalidatePath("/admin/finance/transactions");
+  revalidatePath("/admin/finance");
+}
+
+export async function syncBankConnectionAction(connectionId: string) {
+  await syncBankConnection(connectionId);
   revalidatePath("/admin/finance/accounts");
   revalidatePath("/admin/finance/transactions");
   revalidatePath("/admin/finance");
