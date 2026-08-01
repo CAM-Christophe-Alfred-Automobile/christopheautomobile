@@ -5,6 +5,14 @@
     {
       "path": "/api/sync-absences",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/finance-sync-cash",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/finance-weekly-summary",
+      "schedule": "0 7 * * 1"
     }
   ]
 }
