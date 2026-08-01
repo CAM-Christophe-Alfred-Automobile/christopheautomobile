@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getShopSettings } from "@/services/admin/shopSettings";
+import { findClientVehicleByPlate, formatPlate } from "@/services/admin/vehicles";
 import { findProBookingTypeByEventTypeId, proEventTypes } from "@/app/data/proSchedule";
 
 function verifySignature(rawBody: string, signature: string | null): boolean {
@@ -168,9 +169,12 @@ export async function POST(req: Request) {
 
   // Sans plaque (client n'ayant pas rempli l'immatriculation), on retombe sur le véhicule
   // déjà connu du même client portant le même modèle, pour ne pas dupliquer un véhicule/une
-  // fiche à chaque nouvelle réservation en ligne du même client pour la même voiture.
-  let vehicle = immatriculation
-    ? await prisma.vehicle.findFirst({ where: { clientId: client.id, plate: immatriculation } })
+  // fiche à chaque nouvelle réservation en ligne du même client pour la même voiture. La
+  // comparaison de plaque ignore espaces/tirets (ex: "EN043DQ" vs "EN-043-DQ" ne doivent pas
+  // créer deux véhicules).
+  const formattedPlate = immatriculation ? formatPlate(immatriculation) : undefined;
+  let vehicle = formattedPlate
+    ? await findClientVehicleByPlate(client.id, formattedPlate)
     : modele
       ? await prisma.vehicle.findFirst({
           where: { clientId: client.id, model: { equals: modele, mode: "insensitive" } },
@@ -179,7 +183,7 @@ export async function POST(req: Request) {
 
   if (!vehicle) {
     vehicle = await prisma.vehicle.create({
-      data: { clientId: client.id, plate: immatriculation, model: modele },
+      data: { clientId: client.id, plate: formattedPlate, model: modele },
     });
   }
 
