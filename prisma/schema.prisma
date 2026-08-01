@@ -251,3 +251,192 @@ model MaintenanceRecord {
 
   @@unique([vehicleId, maintenanceTypeId])
 }
+
+// ---------------------------------------------------------------------------
+// Section Finance (ex-CAMfinance / finance-copilot, fusionnée dans CAMadmin)
+// ---------------------------------------------------------------------------
+
+model Account {
+  id             String   @id @default(cuid())
+  name           String
+  type           String // "checking" | "savings" | "cash"
+  scope          String // "PRO" | "PERSO"
+  currentBalance Decimal  @default(0)
+  balanceAsOf    DateTime @default(now())
+  isArchived     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  transactions   Transaction[]
+  recurringItems RecurringItem[]
+  importBatches  ImportBatch[]
+  bankConnection BankConnection?
+
+  @@index([scope])
+}
+
+model Category {
+  id            String   @id @default(cuid())
+  name          String
+  scope         String // "PRO" | "PERSO" | "BOTH"
+  kind          String // "income" | "expense"
+  monthlyBudget Decimal?
+  isEssential   Boolean  @default(false)
+  color         String?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions   Transaction[]
+  recurringItems RecurringItem[]
+
+  @@index([scope, kind])
+}
+
+model Transaction {
+  id         String    @id @default(cuid())
+  accountId  String
+  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  date        DateTime
+  description String
+  amount      Decimal // signed: negative = expense, positive = income
+  scope       String // "PRO" | "PERSO" — denormalized for fast filtering
+  type        String  @default("manual") // "manual" | "imported" | "recurring_generated" | "synced"
+  externalId  String? // bank/CRM dedup key, set only for type="synced"
+
+  recurringItemId String?
+  recurringItem   RecurringItem? @relation(fields: [recurringItemId], references: [id])
+
+  importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id])
+
+  isTransfer       Boolean @default(false)
+  linkedTransferId String? @unique
+
+  notes          String?
+  attachmentPath String? // URL Vercel Blob du justificatif (photo de ticket)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([accountId, externalId])
+  @@index([accountId])
+  @@index([categoryId])
+  @@index([date])
+  @@index([scope, date])
+}
+
+model RecurringItem {
+  id         String    @id @default(cuid())
+  accountId  String
+  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  label            String
+  scope            String // "PRO" | "PERSO"
+  direction        String // "income" | "expense"
+  amount           Decimal
+  amountIsEstimate Boolean @default(false)
+
+  frequency    String // "monthly" | "quarterly" | "annual" | "weekly" | "custom_days"
+  intervalDays Int?
+  dayOfMonth   Int?
+  startDate    DateTime
+  endDate      DateTime?
+
+  isActive     Boolean @default(true)
+  autoGenerate Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@index([accountId])
+  @@index([scope])
+}
+
+model ImportBatch {
+  id            String   @id @default(cuid())
+  accountId     String
+  account       Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  fileName      String
+  columnMapping String // JSON-encoded mapping, stored as string
+  rowCount      Int
+  importedCount Int
+  skippedCount  Int
+  status        String   @default("completed") // "pending" | "completed" | "failed"
+  source        String   @default("csv") // "csv" | "pdf" | "bank_sync" | "crm_cash" | "crm_fuel"
+  createdAt     DateTime @default(now())
+
+  transactions Transaction[]
+
+  @@index([accountId])
+}
+
+model BankConnection {
+  id        String  @id @default(cuid())
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  aspspName          String
+  aspspCountry       String
+  externalAccountUid String    @unique
+  sessionId          String
+  consentValidUntil  DateTime
+  status             String    @default("active") // "active" | "expired" | "revoked" | "error"
+  lastSyncedAt       DateTime?
+  lastSyncError      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Advice {
+  id                String    @id @default(cuid())
+  ruleKey           String // e.g. "urssaf_shortfall", "category_overspend", "low_balance_forecast"
+  severity          String // "info" | "warning" | "critical"
+  title             String
+  detail            String
+  scope             String? // "PRO" | "PERSO" | null (global)
+  relatedAccountId  String?
+  relatedCategoryId String?
+  dismissedAt       DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@index([ruleKey])
+  @@index([dismissedAt])
+}
+
+model FinanceSettings {
+  id                       String    @id @default(cuid())
+  urssafRatePct            Decimal   @default(22)
+  urssafFrequency          String    @default("quarterly") // "monthly" | "quarterly"
+  lowBalanceThresholdPro   Decimal   @default(200)
+  lowBalanceThresholdPerso Decimal   @default(100)
+  forecastHorizonDays      Int       @default(90)
+  savingsGoalAmount        Decimal?
+  savingsGoalLabel         String?
+  savingsGoalTargetDate    DateTime?
+  updatedAt                DateTime  @updatedAt
+}
+
+model PlannedPurchase {
+  id          String    @id @default(cuid())
+  label       String
+  link        String?
+  price       Decimal?
+  plannedDate DateTime?
+  scope       String // "PRO" | "PERSO"
+  status      String    @default("planned") // "planned" | "bought" | "cancelled"
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+}
