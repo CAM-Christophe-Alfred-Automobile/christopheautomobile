@@ -94,7 +94,22 @@ async function main() {
     (row) => newDb.plannedPurchase.create({ data: row })
   );
 
-  const oldSettings = await oldDb.appSettings.findMany();
+  // AppSettings n'existe pas dans le schéma de CAMadmin (renommé FinanceSettings) — le client
+  // généré de ce dépôt ne connaît donc pas ce modèle pour l'ancienne base ; on passe par du SQL
+  // brut pour lire cette seule ligne.
+  type RawAppSettingsRow = {
+    id: string;
+    urssafRatePct: string | number;
+    urssafFrequency: string;
+    lowBalanceThresholdPro: string | number;
+    lowBalanceThresholdPerso: string | number;
+    forecastHorizonDays: number;
+    savingsGoalAmount: string | number | null;
+    savingsGoalLabel: string | null;
+    savingsGoalTargetDate: Date | null;
+    updatedAt: Date;
+  };
+  const oldSettings = await oldDb.$queryRawUnsafe<RawAppSettingsRow[]>('SELECT * FROM "AppSettings"');
   let settingsOk = 0;
   for (const s of oldSettings) {
     try {
