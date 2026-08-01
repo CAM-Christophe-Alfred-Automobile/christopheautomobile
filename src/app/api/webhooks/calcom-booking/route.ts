@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getShopSettings } from "@/services/admin/shopSettings";
 import { findClientVehicleByPlate, formatPlate } from "@/services/admin/vehicles";
 import { findProBookingTypeByEventTypeId, proEventTypes } from "@/app/data/proSchedule";
+import { sendPendingPaymentAlert } from "@/services/email";
 
 function verifySignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.CALCOM_WEBHOOK_SECRET;
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "JSON invalide" }, { status: 400 });
   }
 
-  if (event.triggerEvent !== "BOOKING_CREATED" || !event.payload) {
+  if (!event.payload || (event.triggerEvent !== "BOOKING_CREATED" && event.triggerEvent !== "BOOKING_PAYMENT_INITIATED")) {
     return NextResponse.json({ success: true, ignored: true });
   }
 
@@ -52,6 +53,30 @@ export async function POST(req: Request) {
     attendees?: { name?: string; email?: string }[];
     responses?: Record<string, CalResponseField>;
   };
+
+  // Le client a atteint l'étape de paiement de l'acompte mais n'a pas (encore) payé :
+  // la réservation reste "pending" côté Cal.com et ne créera pas de fiche tant que ce
+  // n'est pas réglé. On alerte tout de suite plutôt que de le découvrir plus tard.
+  if (event.triggerEvent === "BOOKING_PAYMENT_INITIATED") {
+    const attendee = payload.attendees?.[0];
+    const responses = payload.responses ?? {};
+    const name = responses.name?.value || attendee?.name || "Client site";
+    const startTime = payload.startTime ? new Date(payload.startTime) : null;
+    const dateLabel = startTime
+      ? startTime.toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })
+      : "date inconnue";
+
+    await sendPendingPaymentAlert({
+      clientName: name,
+      phone: responses.attendeePhoneNumber?.value || undefined,
+      email: responses.email?.value || attendee?.email || undefined,
+      date: dateLabel,
+      description: responses.description?.value || responses.besoin?.value || payload.title || undefined,
+      address: responses.address?.value || responses.adresse?.value || undefined,
+    });
+
+    return NextResponse.json({ success: true, alertSent: true });
+  }
 
   const uid = payload.uid;
   if (!uid || !payload.startTime) {
