@@ -1,11 +1,9 @@
 "use client";
 
-import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import AdminMoreMenu from "@/components/admin/AdminMoreMenu";
-import CamFinanceLink from "@/components/admin/CamFinanceLink";
 
 const TOP_LEVEL_PATHS = [
   "/admin",
@@ -13,6 +11,7 @@ const TOP_LEVEL_PATHS = [
   "/admin/stock",
   "/admin/qr-codes",
   "/admin/calcul-prix",
+  "/admin/finance",
   "/admin/settings/maintenance-types",
   "/admin/settings/sync-clients",
 ];
@@ -41,6 +40,11 @@ const NAV_ITEMS = [
     href: "/admin/calcul-prix",
     label: "Calcul prix",
     isActive: (path: string) => path.startsWith("/admin/calcul-prix"),
+  },
+  {
+    href: "/admin/finance",
+    label: "Finance",
+    isActive: (path: string) => path.startsWith("/admin/finance"),
   },
 ];
 
@@ -80,19 +84,17 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
           </div>
           <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
             {NAV_ITEMS.map((item) => (
-              <Fragment key={item.href}>
-                <Link
-                  href={item.href}
-                  className={
-                    item.isActive(pathname)
-                      ? "font-semibold text-amber-400"
-                      : "text-gray-400 hover:text-white transition-colors"
-                  }
-                >
-                  {item.label}
-                </Link>
-                {item.href === "/admin/calcul-prix" && <CamFinanceLink />}
-              </Fragment>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  item.isActive(pathname)
+                    ? "font-semibold text-amber-400"
+                    : "text-gray-400 hover:text-white transition-colors"
+                }
+              >
+                {item.label}
+              </Link>
             ))}
           </nav>
         </div>
