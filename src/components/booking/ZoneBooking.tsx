@@ -58,6 +58,7 @@ export default function ZoneBooking({
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [resolvedZone, setResolvedZone] = useState<ResolvedZoneInfo | null>(null);
   const [slotsData, setSlotsData] = useState<Record<string, { start: string }[]> | null>(null);
+  const [zonePaused, setZonePaused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -120,6 +121,7 @@ export default function ZoneBooking({
     const res = await fetch(`/api/cal-availability?${params.toString()}`);
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.error || "Erreur");
+    setZonePaused(Boolean(json.zonePaused));
     return json.data as Record<string, { start: string }[]>;
   };
 
@@ -277,6 +279,12 @@ export default function ZoneBooking({
             <p className="text-center text-gray-400 text-xs mb-4">
               Votre adresse semble un peu en dehors de mon secteur habituel (~{resolvedZone.distanceKm} km) —
               je confirmerai avec vous la faisabilité du déplacement.
+            </p>
+          )}
+          {zonePaused && (
+            <p className="text-center text-gray-400 text-xs mb-4">
+              Mon jour habituel dans votre secteur est peu disponible prochainement (congés ou planning
+              chargé) — je vous propose aussi d&apos;autres jours pour éviter une trop longue attente.
             </p>
           )}
           <p className="text-center text-amber-400 font-semibold mb-4 mt-2">Choisissez un créneau</p>

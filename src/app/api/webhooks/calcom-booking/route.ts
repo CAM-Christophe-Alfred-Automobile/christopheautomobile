@@ -20,6 +20,27 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
   return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
 }
 
+// Récupère le montant de l'acompte (en euros) configuré sur le type d'événement Cal.com
+// concerné, pour l'indiquer dans l'alerte de paiement en attente.
+async function fetchDepositAmount(eventTypeId: number | undefined): Promise<number | null> {
+  if (!eventTypeId) return null;
+  try {
+    const res = await fetch(`https://api.cal.com/v2/event-types/${eventTypeId}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.CALCOM_API_KEY}`,
+        "cal-api-version": "2024-06-14",
+      },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const { data } = (await res.json()) as { data?: { price?: number; currency?: string } };
+    if (typeof data?.price !== "number" || data.currency !== "eur") return null;
+    return data.price / 100;
+  } catch {
+    return null;
+  }
+}
+
 interface CalResponseField {
   value?: string;
 }
@@ -52,6 +73,7 @@ export async function POST(req: Request) {
     eventType?: { id?: number };
     attendees?: { name?: string; email?: string }[];
     responses?: Record<string, CalResponseField>;
+    payment?: { amount?: number; currency?: string };
   };
 
   // Le client a atteint l'étape de paiement de l'acompte mais n'a pas (encore) payé :
@@ -66,6 +88,14 @@ export async function POST(req: Request) {
       ? startTime.toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })
       : "date inconnue";
 
+    // Le payload contient parfois directement le montant (en centimes) ; sinon on
+    // retombe sur le prix configuré sur le type d'événement Cal.com concerné.
+    const eventTypeId = payload.eventTypeId ?? payload.eventType?.id;
+    const amount =
+      payload.payment?.amount != null && payload.payment.currency === "eur"
+        ? payload.payment.amount / 100
+        : await fetchDepositAmount(eventTypeId);
+
     await sendPendingPaymentAlert({
       clientName: name,
       phone: responses.attendeePhoneNumber?.value || undefined,
@@ -73,6 +103,7 @@ export async function POST(req: Request) {
       date: dateLabel,
       description: responses.description?.value || responses.besoin?.value || payload.title || undefined,
       address: responses.address?.value || responses.adresse?.value || undefined,
+      amount,
     });
 
     return NextResponse.json({ success: true, alertSent: true });

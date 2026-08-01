@@ -111,6 +111,7 @@ export async function sendPendingPaymentAlert({
   date,
   description,
   address,
+  amount,
 }: {
   clientName: string;
   phone?: string;
@@ -118,6 +119,7 @@ export async function sendPendingPaymentAlert({
   date: string; // déjà formatée, lisible
   description?: string;
   address?: string;
+  amount?: number | null; // montant de l'acompte en euros
 }) {
   if (!siteConfig.smtp.host || !siteConfig.contact.receiver) {
     console.warn("⚠️ Configuration SMTP ou destinataire manquante. Alerte paiement non envoyée.");
@@ -133,9 +135,10 @@ export async function sendPendingPaymentAlert({
         <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
           <div style="max-width: 600px; margin: auto; background-color: white; padding: 20px; border-radius: 8px;">
             <h1 style="color: #BB4D00;">⚠️ Réservation en attente de paiement</h1>
-            <p><strong>${clientName}</strong> a choisi un créneau mais n'a pas encore payé l'acompte demandé. Tant que ce n'est pas réglé, ce rendez-vous ne sera ni confirmé, ni visible dans CAMadmin.</p>
+            <p><strong>${clientName}</strong> a choisi un créneau mais n'a pas encore payé l'acompte demandé${amount != null ? ` (<strong>${amount.toFixed(2)} €</strong>)` : ""}. Tant que ce n'est pas réglé, ce rendez-vous ne sera ni confirmé, ni visible dans CAMadmin.</p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
             <p><strong>Créneau :</strong> ${date}</p>
+            ${amount != null ? `<p><strong>Acompte attendu :</strong> ${amount.toFixed(2)} €</p>` : ""}
             ${phone ? `<p><strong>Téléphone :</strong> ${phone}</p>` : ""}
             ${email ? `<p><strong>Email :</strong> ${email}</p>` : ""}
             ${address ? `<p><strong>Adresse :</strong> ${address}</p>` : ""}
