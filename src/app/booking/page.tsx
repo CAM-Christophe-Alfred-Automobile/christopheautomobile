@@ -415,7 +415,7 @@ export default function BookingPage() {
           </label>
 
           {/* Toggle entre recherche et catégorie */}
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 mb-6">
             <button
               onClick={() => {
                 setSearchMode("search");
