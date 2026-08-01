@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     // Optimise les fonts
     optimizePackageImports: ["@heroicons/react", "@fortawesome/react-fontawesome"],
+    // Autorise l'upload de relevés bancaires PDF (section Finance) au-delà de la limite par défaut (1 Mo)
+    serverActions: { bodySizeLimit: "15mb" },
   },
 
   // Autorise l'accès en développement depuis le réseau local (téléphone, etc.)
