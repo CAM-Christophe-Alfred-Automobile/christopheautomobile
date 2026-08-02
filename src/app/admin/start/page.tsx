@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import BackButton from "@/components/admin/BackButton";
+import LongPressButton from "@/components/admin/LongPressButton";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -141,14 +142,13 @@ export default function QuickStartPage() {
                   ? matchedVehicle.client.phone
                   : "aucun téléphone enregistré — pense à le compléter en direct"}
               </p>
-              <button
-                type="button"
-                onClick={startExisting}
+              <LongPressButton
+                onLongPress={startExisting}
                 disabled={startingExisting}
-                className="w-full py-2.5 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm font-semibold disabled:opacity-50"
+                className="w-full py-2.5 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm disabled:opacity-50"
               >
-                {startingExisting ? "Démarrage..." : "▶ Continuer avec ce client"}
-              </button>
+                {startingExisting ? "Démarrage..." : "▶ Continuer avec ce client (maintenir)"}
+              </LongPressButton>
               <p className="text-[11px] text-gray-500 text-center">
                 Ce n&apos;est pas le bon véhicule ? Change la plaque ci-dessus.
               </p>

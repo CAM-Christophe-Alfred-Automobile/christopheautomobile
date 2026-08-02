@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, use as usePromise } from "rea
 import { useRouter } from "next/navigation";
 import AlertBadge from "@/components/admin/AlertBadge";
 import VehicleQrCode from "@/components/admin/VehicleQrCode";
+import LongPressButton from "@/components/admin/LongPressButton";
 import { computeMaintenanceAlert } from "@/services/admin/maintenanceAlerts";
 import { buildWhatsAppLink, buildRelanceMessage, buildQuoteMessage, buildPartsOrderMessage } from "@/lib/whatsapp";
 import { MAINTENANCE_PART_HINTS, buildSupplierSearchUrl } from "@/lib/maintenancePartHints";
@@ -1364,13 +1365,13 @@ function InterventionHistory({
       <div className="flex items-center justify-between mb-2 gap-2">
         <h3 className="text-sm font-medium text-gray-300">Historique des interventions</h3>
         <div className="flex items-center gap-3">
-          <button
-            onClick={startLiveIntervention}
+          <LongPressButton
+            onLongPress={startLiveIntervention}
             disabled={startingLive}
-            className="text-xs text-green-400 hover:text-green-300 cursor-pointer disabled:opacity-50"
+            className="text-xs text-green-400 hover:text-green-300 cursor-pointer disabled:opacity-50 rounded px-1"
           >
-            {startingLive ? "..." : "▶ Démarrer en direct"}
-          </button>
+            {startingLive ? "..." : "▶ Démarrer en direct (maintenir)"}
+          </LongPressButton>
           <button
             onClick={() => setShowForm((v) => !v)}
             className="text-xs text-amber-400 hover:text-amber-300 cursor-pointer"
@@ -1867,12 +1868,12 @@ function InterventionHistory({
                     {i.bookedOnline && <span className="text-gray-500"> · 🌐 réservée sur le site</span>}
                   </span>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => startReserved(i.id)}
-                      className="text-xs text-green-400 hover:text-green-300 cursor-pointer"
+                    <LongPressButton
+                      onLongPress={() => startReserved(i.id)}
+                      className="text-xs text-green-400 hover:text-green-300 cursor-pointer rounded px-1"
                     >
-                      ▶ Démarrer
-                    </button>
+                      ▶ Démarrer (maintenir)
+                    </LongPressButton>
                     <button
                       onClick={() => deleteReserved(i.id)}
                       className="text-gray-600 hover:text-red-400 cursor-pointer"
