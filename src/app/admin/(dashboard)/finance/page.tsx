@@ -51,6 +51,7 @@ export default async function FinanceDashboardPage() {
   );
   const savingsGoal = settings.savingsGoalAmount != null ? Number(settings.savingsGoalAmount) : null;
   const goalProgress = savingsGoal ? Math.min(100, Math.max(0, (balances.combined / savingsGoal) * 100)) : null;
+  const cashAccounts = accounts.filter((a) => a.type === "cash");
 
   return (
     <div className="space-y-8">
@@ -104,10 +105,24 @@ export default async function FinanceDashboardPage() {
         )}
       </div>
 
-      {accounts.some((a) => a.type === "cash") && (
+      {cashAccounts.length > 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3">
           <h2 className="text-sm font-medium text-gray-300">Dépense espèces rapide</h2>
           <form action={quickCashExpenseAction} className="flex flex-wrap gap-2 items-center">
+            {cashAccounts.length > 1 ? (
+              <select
+                name="accountId"
+                className="bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm"
+              >
+                {cashAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({a.scope})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input type="hidden" name="accountId" value={cashAccounts[0].id} />
+            )}
             <input
               type="number"
               step="0.01"

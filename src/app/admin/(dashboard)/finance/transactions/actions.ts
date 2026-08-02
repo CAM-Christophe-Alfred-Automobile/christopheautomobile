@@ -86,7 +86,13 @@ const QUICK_CASH_CATEGORIES = ["Courses", "Carburant", "Péage", "Santé", "Autr
  * (from the "Scanner un ticket" flow or a plain manual upload) stored the same way
  * as the full transaction form's justificatif. */
 export async function quickCashExpenseAction(formData: FormData) {
-  const account = await prisma.account.findFirstOrThrow({ where: { type: "cash" } });
+  const accountId = String(formData.get("accountId") || "");
+  const account = accountId
+    ? await prisma.account.findUniqueOrThrow({ where: { id: accountId } })
+    : await prisma.account.findFirstOrThrow({ where: { type: "cash" } });
+  if (account.type !== "cash") {
+    throw new Error(`Le compte "${account.name}" n'est pas un compte espèces.`);
+  }
   const amount = Math.abs(Number(formData.get("amount")));
   const categoryLabel = String(formData.get("category") || "Autre");
   const label = QUICK_CASH_CATEGORIES.includes(categoryLabel as (typeof QUICK_CASH_CATEGORIES)[number])
