@@ -15,6 +15,7 @@ import ZoneBooking from "@/components/booking/ZoneBooking";
 import { partsGuidance, defaultPartsGuidance, partsGuidanceByService } from "@/app/data/partsGuidance";
 import { marques, modelesParMarque } from "@/app/data/vehicleOptions";
 import { VEHICLE_TIERS, type VehicleTier } from "@/app/data/vehicleTiers";
+import { applyTierToPrice } from "@/lib/pricing";
 
 const AUTRE_MODELE = "__autre__";
 const SEUIL_ANNEE_MOTORISATIONS_RECENTES = 2016;
@@ -1065,7 +1066,7 @@ export default function BookingPage() {
                     key={p.service}
                     service={p.service}
                     duree={p.duree}
-                    prix={p.prix}
+                    prix={applyTierToPrice(p.prix, vehicleTier)}
                     description={p.description}
                     isSelected={selected.includes(p.service)}
                     onSelect={() => handleSelect(p.service)}
@@ -1155,11 +1156,14 @@ export default function BookingPage() {
                       </div>
                       <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                         <span className="text-base sm:text-lg text-amber-400 font-bold leading-none">
-                          {service.prix !== undefined && service.prix !== null
-                            ? typeof service.prix === "number"
-                              ? `${service.prix}€`
-                              : service.prix
-                            : "Sur devis"}
+                          {(() => {
+                            const prixAjuste = applyTierToPrice(service.prix, vehicleTier);
+                            return prixAjuste !== undefined && prixAjuste !== null
+                              ? typeof prixAjuste === "number"
+                                ? `${prixAjuste}€`
+                                : prixAjuste
+                              : "Sur devis";
+                          })()}
                         </span>
                         {service.duree !== null && service.duree !== "Sur devis" && (
                           <span
