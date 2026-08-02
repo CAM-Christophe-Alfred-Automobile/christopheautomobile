@@ -152,7 +152,7 @@ export default function ServiceCard({
       </div>
 
       <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-        <span className="text-base sm:text-lg text-amber-400 font-bold leading-none">
+        <span className="text-base sm:text-lg text-amber-400 font-bold leading-none whitespace-nowrap">
           {prix !== undefined && prix !== null
             ? (typeof prix === 'number' ? `${prix}€` : prix)
             : "Sur devis"}

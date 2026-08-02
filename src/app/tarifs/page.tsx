@@ -38,6 +38,7 @@ import servicesData from "@/app/data/services.json";
 import { ColorLegend } from "@/components/services/ServiceCard";
 import SearchField from "@/components/search/SearchField";
 import { ConceptBanner } from "@/components";
+import VehicleTierLegend from "@/components/services/VehicleTierLegend";
 
 // ✅ Import dynamique de ta modale (empêche le SSR)
 const AutodocModal = dynamic(() => import("@/components/modals/autodocModal"), {
@@ -137,9 +138,10 @@ export default function TarifsPage() {
           </div>
 
           {/* Explication du concept */}
-          <div className="mb-8 max-w-4xl mx-auto">
+          <div className="mb-8 max-w-4xl mx-auto space-y-4">
             <ConceptBanner />
-            <div className="mt-4 text-center">
+            <VehicleTierLegend />
+            <div className="text-center">
               <AutodocModal />
             </div>
           </div>

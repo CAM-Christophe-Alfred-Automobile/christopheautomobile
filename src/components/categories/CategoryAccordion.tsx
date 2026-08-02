@@ -35,6 +35,7 @@
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { ServiceCard } from "@/components";
+import { formatPriceRange } from "@/lib/pricing";
 
 interface Service {
   service: string;
@@ -91,12 +92,13 @@ export default function CategoryAccordion({
           >
             <Disclosure.Panel unmount={false} className="p-3 space-y-2">
               {services.map((service) => {
-                // Gérer l'affichage du prix : ajouter € seulement si c'est un nombre
+                // Gérer l'affichage du prix : fourchette selon le gabarit du véhicule
+                // (citadine -> SUV/utilitaire) plutôt qu'un chiffre unique désormais faux.
                 let prixAffiche = "Sur devis";
                 if (service.prix !== null && service.prix !== undefined) {
                   prixAffiche =
                     typeof service.prix === "number"
-                      ? `${service.prix}€`
+                      ? formatPriceRange(service.prix)
                       : service.prix;
                 }
 
