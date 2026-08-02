@@ -183,7 +183,13 @@ export async function getRevenueTarget(): Promise<RevenueTarget> {
       1,
       Math.round((target.getTime() - today.getTime()) / (30.44 * MS_PER_DAY))
     );
-    monthlySavingsNeeded = Number(settings.savingsGoalAmount) / monthsUntilGoal;
+    // The dashboard tracks progress toward the goal as the combined account balance (see
+    // finance/page.tsx's goalProgress bar), so what's still needed is the goal minus what's
+    // already there — not the full goal amount divided by months, which ignored any progress
+    // already made and kept demanding the full pace even once the goal was mostly (or fully) hit.
+    const { combined } = await getBalancesByScope();
+    const remainingToSave = Math.max(0, Number(settings.savingsGoalAmount) - combined);
+    monthlySavingsNeeded = remainingToSave / monthsUntilGoal;
   }
 
   const monthlyNetNeeded = monthlyExpenses + (monthlySavingsNeeded ?? 0) - monthlyOtherIncome;
