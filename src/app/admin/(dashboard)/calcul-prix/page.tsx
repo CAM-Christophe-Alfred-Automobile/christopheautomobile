@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { VEHICLE_TIERS, getVehicleTierMultiplier, type VehicleTier } from "@/app/data/vehicleTiers";
 
 const PRESETS = [
   { label: "15 min", hours: 0, minutes: 15 },
@@ -19,6 +20,7 @@ export default function CalculPrixPage() {
   const [hours, setHours] = useState("0");
   const [minutes, setMinutes] = useState("0");
   const [saving, setSaving] = useState(false);
+  const [tier, setTier] = useState<VehicleTier>("standard");
 
   useEffect(() => {
     fetch("/api/admin/shop-settings")
@@ -33,7 +35,9 @@ export default function CalculPrixPage() {
   }, []);
 
   const totalHours = (Number(hours) || 0) + (Number(minutes) || 0) / 60;
-  const price = totalHours * (Number(rate) || 0);
+  const basePrice = totalHours * (Number(rate) || 0);
+  const multiplier = getVehicleTierMultiplier(tier);
+  const price = basePrice * multiplier;
   const rateChanged = defaultRate != null && Number(rate) !== defaultRate && !Number.isNaN(Number(rate));
 
   function applyPreset(h: number, m: number) {
@@ -119,13 +123,43 @@ export default function CalculPrixPage() {
           </div>
         </div>
 
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Gabarit du véhicule</label>
+          <div className="flex flex-wrap gap-1.5">
+            {VEHICLE_TIERS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTier(t.key)}
+                title={t.examples}
+                className={`px-3 py-1.5 rounded-full border text-xs cursor-pointer ${
+                  tier === t.key
+                    ? "border-amber-500 bg-amber-500/10 text-amber-400"
+                    : "border-gray-700 text-gray-300 hover:border-amber-500 hover:text-amber-400"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-gray-500 mt-1">
+            {VEHICLE_TIERS.find((t) => t.key === tier)?.examples}
+          </p>
+        </div>
+
         <div className="rounded-xl bg-gray-900 border border-gray-700 p-5 text-center">
           <p className="text-xs text-gray-500 mb-1">
             {totalHours.toFixed(2)}h × {rate || 0}€/h
+            {multiplier !== 1 && ` × ${multiplier.toFixed(2)} (gabarit)`}
           </p>
           <p className="text-4xl font-bold text-amber-400">
             {price.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
           </p>
+          {multiplier !== 1 && (
+            <p className="text-[11px] text-gray-500 mt-1">
+              Prix standard (berline) : {basePrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+            </p>
+          )}
         </div>
       </div>
     </div>
