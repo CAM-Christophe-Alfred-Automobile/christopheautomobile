@@ -299,6 +299,9 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   async function handleFinalize(e: React.FormEvent) {
     e.preventDefault();
     if (!data) return;
+    if (!confirm("Es-tu sûr de vouloir terminer l'intervention ? Si ce n'est pas fini, utilise plutôt \"pas terminé — mettre en pause\".")) {
+      return;
+    }
     setFinalizing(true);
 
     let totalHours: number;
