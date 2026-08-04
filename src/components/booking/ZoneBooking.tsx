@@ -21,6 +21,20 @@ interface AddressSuggestion {
   lon: number;
 }
 
+interface SlotOption {
+  slot: string;
+  label: string;
+  start: string; // ISO datetime, à renvoyer tel quel lors de la réservation
+}
+
+// Estimation indicative (à titre de garde-fou) : n'impose plus le créneau, le client
+// choisit lui-même Matin/Après-midi/Journée en fonction de ce qui lui convient.
+function formatDureeHint(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h > 0 ? `${h}h` : ""}${m > 0 ? `${m.toString().padStart(2, "0")}` : ""}`.trim();
+}
+
 interface ResolvedZoneInfo {
   zoneKey: string;
   zoneLabel: string;
@@ -57,11 +71,10 @@ export default function ZoneBooking({
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [resolvedZone, setResolvedZone] = useState<ResolvedZoneInfo | null>(null);
-  const [slotsData, setSlotsData] = useState<Record<string, { start: string }[]> | null>(null);
-  const [zonePaused, setZonePaused] = useState(false);
+  const [slotsData, setSlotsData] = useState<Record<string, SlotOption[]> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SlotOption | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -113,16 +126,15 @@ export default function ZoneBooking({
     const end = new Date();
     end.setDate(end.getDate() + 90); // fenêtre de ~3 mois
     const params = new URLSearchParams({
-      duree: String(dureeTotale),
       zone: zoneKey,
       start: start.toISOString().slice(0, 10),
       end: end.toISOString().slice(0, 10),
+      services: (selectedServiceNames ?? []).join(","),
     });
     const res = await fetch(`/api/cal-availability?${params.toString()}`);
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.error || "Erreur");
-    setZonePaused(Boolean(json.zonePaused));
-    return json.data as Record<string, { start: string }[]>;
+    return json.data as Record<string, SlotOption[]>;
   };
 
   const handleAddressChange = (value: string) => {
@@ -193,8 +205,9 @@ export default function ZoneBooking({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          duree: dureeTotale,
-          start: selectedSlot,
+          slot: selectedSlot.slot,
+          zone: resolvedZone?.zoneKey,
+          start: selectedSlot.start,
           nom,
           email,
           telephone,
@@ -211,7 +224,7 @@ export default function ZoneBooking({
       });
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || "Erreur lors de la réservation");
-      setConfirmedStart(selectedSlot);
+      setConfirmedStart(selectedSlot.start);
       setStep("confirm");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur lors de la réservation");
@@ -281,10 +294,10 @@ export default function ZoneBooking({
               je confirmerai avec vous la faisabilité du déplacement.
             </p>
           )}
-          {zonePaused && (
+          {dureeTotale > 0 && (
             <p className="text-center text-gray-400 text-xs mb-4">
-              Mon jour habituel dans votre secteur est peu disponible prochainement (congés ou planning
-              chargé) — je vous propose aussi d&apos;autres jours pour éviter une trop longue attente.
+              Durée estimée de vos interventions : ~{formatDureeHint(dureeTotale)} — choisissez le créneau
+              qui vous convient.
             </p>
           )}
           <p className="text-center text-amber-400 font-semibold mb-4 mt-2">Choisissez un créneau</p>
@@ -301,14 +314,14 @@ export default function ZoneBooking({
                   <div className="flex flex-wrap gap-2">
                     {slots.map((s) => (
                       <button
-                        key={s.start}
+                        key={s.slot}
                         onClick={() => {
-                          setSelectedSlot(s.start);
+                          setSelectedSlot(s);
                           setStep("form");
                         }}
                         className="cursor-pointer px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-amber-600 text-sm text-gray-200 hover:text-white transition-colors"
                       >
-                        {formatTimeLabel(s.start)}
+                        {s.label}
                       </button>
                     ))}
                   </div>
@@ -328,7 +341,7 @@ export default function ZoneBooking({
             ← Changer de créneau
           </button>
           <p className="text-center text-amber-400 font-semibold mb-1">
-            Créneau choisi : {formatDateLabel(selectedSlot.slice(0, 10))} à {formatTimeLabel(selectedSlot)}
+            Créneau choisi : {formatDateLabel(selectedSlot.start.slice(0, 10))} — {selectedSlot.label}
           </p>
           {resolvedZone && (
             <p className="text-center text-gray-400 text-xs mb-1">

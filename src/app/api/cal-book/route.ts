@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { getEventTypeId, resolveZone } from "@/app/data/zoneSchedule";
+import { zones, resolveZone } from "@/app/data/zoneSchedule";
+import { getSlotDef } from "@/app/data/particulierSlots";
 import { getVehicleTierMultiplier } from "@/app/data/vehicleTiers";
 import servicesData from "@/app/data/services.json";
+import { prisma } from "@/lib/prisma";
 
 const CALCOM_API_VERSION_BOOKINGS = "2024-08-13";
 
@@ -57,7 +59,8 @@ async function computeServerDistanceKm(commune: unknown): Promise<number | null>
 export async function POST(req: Request) {
   const body = await req.json();
   const {
-    duree,
+    slot: slotKey,
+    zone: zoneKey,
     start, // ISO string du créneau choisi
     nom,
     email,
@@ -71,12 +74,51 @@ export async function POST(req: Request) {
     selectedServiceNames,
   } = body;
 
-  const eventTypeId = getEventTypeId(duree);
-  if (!eventTypeId || !start || !nom || !email || !commune || !modele || !immatriculation || !description) {
+  const slotDef = getSlotDef(slotKey);
+  const zone = zones.find((z) => z.key === zoneKey);
+  if (
+    !slotDef ||
+    !zone ||
+    !start ||
+    !nom ||
+    !email ||
+    !commune ||
+    !modele ||
+    !immatriculation ||
+    !description
+  ) {
     return NextResponse.json(
       { success: false, error: "Informations manquantes pour la réservation" },
       { status: 400 }
     );
+  }
+
+  // Verrouillage dynamique de zone : la 1ère réservation d'une demi-journée sur une date
+  // impose sa zone à l'autre demi-journée de cette même date (voir DayZoneLock).
+  const bookingDate = new Date(`${start.slice(0, 10)}T00:00:00Z`);
+  const existingLocks = await prisma.dayZoneLock.findMany({ where: { date: bookingDate } });
+  if (existingLocks.length > 0) {
+    if (slotDef.key === "journee" || existingLocks.some((l) => l.slot === "journee")) {
+      return NextResponse.json(
+        { success: false, error: "Cette date n'est plus disponible." },
+        { status: 409 }
+      );
+    }
+    if (existingLocks.some((l) => l.slot === slotDef.key)) {
+      return NextResponse.json(
+        { success: false, error: "Ce créneau vient d'être réservé, merci d'en choisir un autre." },
+        { status: 409 }
+      );
+    }
+    if (existingLocks.some((l) => l.zoneKey !== zone.key)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Cette date est déjà réservée pour un autre secteur géographique.",
+        },
+        { status: 409 }
+      );
+    }
   }
 
   // Prix et distance recalculés côté serveur — jamais confiance aux valeurs envoyées par le client.
@@ -99,7 +141,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      eventTypeId,
+      eventTypeId: slotDef.eventTypeId,
       start,
       attendee: {
         name: nom,
@@ -128,6 +170,12 @@ export async function POST(req: Request) {
       { status: calRes.status }
     );
   }
+
+  // Verrou posé seulement après confirmation Cal.com — si l'appel ci-dessus a échoué, rien n'est écrit.
+  const calcomBookingUid: string | undefined = result?.data?.uid ?? result?.uid;
+  await prisma.dayZoneLock.create({
+    data: { date: bookingDate, slot: slotDef.key, zoneKey: zone.key, calcomBookingUid },
+  });
 
   return NextResponse.json({ success: true, booking: result });
 }

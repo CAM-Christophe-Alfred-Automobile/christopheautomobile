@@ -46,5 +46,24 @@ export async function GET(req: Request) {
     data: Record<string, { start: string }[]>;
   };
 
-  return NextResponse.json({ success: true, eventTypeId, data });
+  // Pour un forfait sur plusieurs jours consécutifs (ex. "journee" = 2 jours), une date
+  // n'est proposée que si les N jours suivants (calendaires) ont aussi un créneau libre.
+  const { consecutiveDays } = proEventTypes[typeParam];
+  const filtered: Record<string, { start: string }[]> = {};
+  for (const [date, slots] of Object.entries(data)) {
+    if (!slots.length) continue;
+    let allDaysFree = true;
+    for (let i = 1; i < consecutiveDays; i++) {
+      const nextDate = new Date(`${date}T12:00:00`);
+      nextDate.setDate(nextDate.getDate() + i);
+      const nextDateStr = nextDate.toISOString().slice(0, 10);
+      if (!data[nextDateStr] || data[nextDateStr].length === 0) {
+        allDaysFree = false;
+        break;
+      }
+    }
+    if (allDaysFree) filtered[date] = slots;
+  }
+
+  return NextResponse.json({ success: true, eventTypeId, data: filtered });
 }

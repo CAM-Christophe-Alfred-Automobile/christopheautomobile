@@ -30,8 +30,8 @@ const formatDuree = (minutes: number | string | null) => {
   return `${h > 0 ? `${h}h` : ""}${m > 0 ? `${m}min` : ""}`;
 };
 
-//! Limite d'une journée d'intervention (8h = 480 min)
-const LIMITE_JOURNEE = 480;
+//! Limite d'une journée d'intervention (créneau "Journée" = 9h-17h30 = 510 min)
+const LIMITE_JOURNEE = 510;
 
 export default function BookingPage() {
   // 🔹 HOOKS - Toujours en premier (règle React)

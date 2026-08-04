@@ -6,7 +6,7 @@ type Step = "slot" | "form" | "confirm";
 
 const TABS: { key: ProBookingType; label: string }[] = [
   { key: "urgence", label: "Urgence" },
-  { key: "journee", label: "Journée complète (9h-17h30)" },
+  { key: "journee", label: "2 jours consécutifs (9h-17h30)" },
 ];
 
 function formatDateLabel(dateStr: string) {
@@ -224,7 +224,9 @@ export default function ProBooking() {
           <p className="text-amber-400 font-semibold text-lg mb-2">Réservation confirmée !</p>
           <p className="text-gray-300">
             Rendez-vous le {formatDateLabel(confirmedStart.slice(0, 10))} à{" "}
-            {formatTimeLabel(confirmedStart)}. Vous allez recevoir un email de confirmation.
+            {formatTimeLabel(confirmedStart)}
+            {type === "journee" && " (et le lendemain, 2 jours consécutifs réservés)"}. Vous allez
+            recevoir un email de confirmation.
           </p>
         </div>
       )}

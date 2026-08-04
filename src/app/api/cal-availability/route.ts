@@ -1,56 +1,28 @@
 import { NextResponse } from "next/server";
-import { zones, getEventTypeId } from "@/app/data/zoneSchedule";
+import { zones } from "@/app/data/zoneSchedule";
+import {
+  PARTICULIER_SLOTS,
+  WEEKDAY_SLOT_KEYS,
+  MONDAY_SLOT_KEYS,
+  isMondayEligible,
+  type ParticulierSlotDef,
+} from "@/app/data/particulierSlots";
+import { prisma } from "@/lib/prisma";
 
 const CALCOM_API_VERSION_SLOTS = "2024-09-04";
 
-// Nombre d'occurrences à venir du jour de la zone à examiner pour détecter une
-// "pause" prolongée (congés, ou simplement un jour très chargé sur plusieurs
-// semaines) : si elles sont toutes vides, on bascule ce secteur en mode "tous
-// les jours" pour éviter de faire attendre le client un mois pour rien.
-const OCCURRENCES_TO_CHECK = 2;
-
-// Liste les dates (YYYY-MM-DD) tombant sur un jour de semaine donné, entre deux bornes incluses.
-function datesForWeekday(start: string, end: string, weekday: number): string[] {
-  const result: string[] = [];
-  const cur = new Date(`${start}T12:00:00`);
-  const endDate = new Date(`${end}T12:00:00`);
-  while (cur <= endDate) {
-    if (cur.getDay() === weekday) result.push(cur.toISOString().slice(0, 10));
-    cur.setDate(cur.getDate() + 1);
-  }
-  return result;
+export interface SlotOption {
+  slot: string;
+  label: string;
+  start: string; // ISO datetime renvoyé par Cal.com, à transmettre tel quel à /api/cal-book
 }
 
-// Retourne les créneaux disponibles pour une durée + un secteur donnés,
-// en ne gardant que les jours autorisés pour ce secteur — sauf si ce jour de
-// zone est vide plusieurs semaines de suite (congés, jour très chargé...),
-// auquel cas on propose aussi les autres jours disponibles.
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const dureeParam = url.searchParams.get("duree");
-  const zoneKey = url.searchParams.get("zone");
-  const start = url.searchParams.get("start"); // YYYY-MM-DD
-  const end = url.searchParams.get("end"); // YYYY-MM-DD
-
-  const duree = dureeParam ? parseInt(dureeParam, 10) : NaN;
-  const zone = zones.find((z) => z.key === zoneKey);
-
-  if (!duree || !zone || !start || !end) {
-    return NextResponse.json(
-      { success: false, error: "Paramètres manquants (duree, zone, start, end)" },
-      { status: 400 }
-    );
-  }
-
-  const eventTypeId = getEventTypeId(duree);
-  if (!eventTypeId) {
-    return NextResponse.json(
-      { success: false, error: "Durée non reconnue" },
-      { status: 400 }
-    );
-  }
-
-  const slotsRes = await fetch(
+async function fetchSlotsForEventType(
+  eventTypeId: number,
+  start: string,
+  end: string
+): Promise<Record<string, { start: string }[]>> {
+  const res = await fetch(
     `https://api.cal.com/v2/slots?eventTypeId=${eventTypeId}&start=${start}&end=${end}&timeZone=Europe/Paris`,
     {
       headers: {
@@ -60,40 +32,95 @@ export async function GET(req: Request) {
       cache: "no-store",
     }
   );
+  if (!res.ok) throw new Error(`Erreur Cal.com (${res.status})`);
+  const { data } = (await res.json()) as { data: Record<string, { start: string }[]> };
+  return data;
+}
 
-  if (!slotsRes.ok) {
+// Réservation particulier : créneaux fixes (Matin/Après-midi/Journée en semaine,
+// 3 créneaux dédiés le lundi) avec verrouillage dynamique de zone géographique.
+// La première réservation d'une demi-journée sur une date verrouille l'autre
+// demi-journée de cette date à la même zone (voir DayZoneLock, cal-book/route.ts).
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const zoneKey = url.searchParams.get("zone");
+  const start = url.searchParams.get("start"); // YYYY-MM-DD
+  const end = url.searchParams.get("end"); // YYYY-MM-DD
+  const servicesParam = url.searchParams.get("services") ?? "";
+  const selectedServiceNames = servicesParam ? servicesParam.split(",").filter(Boolean) : [];
+
+  const zone = zones.find((z) => z.key === zoneKey);
+  if (!zone || !start || !end) {
     return NextResponse.json(
-      { success: false, error: `Erreur Cal.com (${slotsRes.status})` },
+      { success: false, error: "Paramètres manquants (zone, start, end)" },
+      { status: 400 }
+    );
+  }
+
+  const mondayEligible = isMondayEligible(selectedServiceNames);
+  const slotDefs: ParticulierSlotDef[] = PARTICULIER_SLOTS.filter((s) =>
+    (mondayEligible ? MONDAY_SLOT_KEYS : WEEKDAY_SLOT_KEYS).includes(s.key)
+  );
+
+  let perSlotData: [ParticulierSlotDef, Record<string, { start: string }[]>][];
+  try {
+    perSlotData = await Promise.all(
+      slotDefs.map(async (def) => [def, await fetchSlotsForEventType(def.eventTypeId, start, end)] as const)
+    );
+  } catch (e) {
+    return NextResponse.json(
+      { success: false, error: e instanceof Error ? e.message : "Erreur Cal.com" },
       { status: 502 }
     );
   }
 
-  const { data } = (await slotsRes.json()) as {
-    data: Record<string, { start: string }[]>;
-  };
-
-  // Détecte si le jour de la zone est vide plusieurs occurrences de suite (congés,
-  // ou simplement très chargé) : on ne regarde que les prochaines occurrences à
-  // venir (pas les dates déjà passées dans la fenêtre demandée).
-  let zonePaused = false;
-  if (zone.weekday !== null) {
-    const today = new Date().toISOString().slice(0, 10);
-    const upcoming = datesForWeekday(start, end, zone.weekday).filter((d) => d >= today);
-    const firstOccurrences = upcoming.slice(0, OCCURRENCES_TO_CHECK);
-    zonePaused =
-      firstOccurrences.length >= OCCURRENCES_TO_CHECK &&
-      firstOccurrences.every((d) => !data[d] || data[d].length === 0);
-  }
-
-  // Filtre : ne garder que les jours correspondant au secteur (weekday), sauf jour libre
-  // (null = tous acceptés) ou secteur en pause détectée (on propose alors tous les jours).
-  const filtered: Record<string, { start: string }[]> = {};
-  for (const [date, slots] of Object.entries(data)) {
-    const jsWeekday = new Date(`${date}T12:00:00`).getDay(); // 0=dim ... 6=sam
-    if (zone.weekday === null || zonePaused || jsWeekday === zone.weekday) {
-      filtered[date] = slots;
+  // Regroupe les options de créneau disponibles par date (avant filtrage par zone).
+  const optionsByDate: Record<string, SlotOption[]> = {};
+  for (const [def, data] of perSlotData) {
+    for (const [date, slots] of Object.entries(data)) {
+      if (!slots.length) continue;
+      if (!optionsByDate[date]) optionsByDate[date] = [];
+      optionsByDate[date].push({ slot: def.key, label: def.label, start: slots[0].start });
     }
   }
 
-  return NextResponse.json({ success: true, eventTypeId, data: filtered, zonePaused });
+  const dates = Object.keys(optionsByDate);
+  if (dates.length === 0) {
+    return NextResponse.json({ success: true, data: {} });
+  }
+
+  // Verrous de zone déjà posés dans la fenêtre demandée.
+  const locks = await prisma.dayZoneLock.findMany({
+    where: { date: { gte: new Date(`${start}T00:00:00Z`), lte: new Date(`${end}T00:00:00Z`) } },
+  });
+  const locksByDate = new Map<string, { slot: string; zoneKey: string }[]>();
+  for (const lock of locks) {
+    const key = lock.date.toISOString().slice(0, 10);
+    if (!locksByDate.has(key)) locksByDate.set(key, []);
+    locksByDate.get(key)!.push({ slot: lock.slot, zoneKey: lock.zoneKey });
+  }
+
+  const filtered: Record<string, SlotOption[]> = {};
+  for (const date of dates) {
+    const dateLocks = locksByDate.get(date) ?? [];
+    if (dateLocks.length === 0) {
+      // Aucun verrou : tout ce que Cal.com propose est ouvert, à n'importe quelle zone.
+      filtered[date] = optionsByDate[date];
+      continue;
+    }
+    if (dateLocks.some((l) => l.slot === "journee")) {
+      // Journée complète déjà prise : rien d'autre ce jour-là.
+      continue;
+    }
+    const lockedZone = dateLocks[0].zoneKey;
+    if (lockedZone !== zone.key) {
+      // Zone différente : les créneaux restants de cette date ne sont pas pour ce client.
+      continue;
+    }
+    const takenSlots = new Set(dateLocks.map((l) => l.slot));
+    const remaining = optionsByDate[date].filter((o) => !takenSlots.has(o.slot) && o.slot !== "journee");
+    if (remaining.length > 0) filtered[date] = remaining;
+  }
+
+  return NextResponse.json({ success: true, data: filtered });
 }

@@ -440,3 +440,19 @@ model PlannedPurchase {
 
   @@index([status])
 }
+
+// Verrouillage dynamique de zone géographique par demi-journée : la première réservation
+// d'un créneau (matin/apres-midi/journee, ou lundi-1/2/3) sur une date impose sa zone
+// aux autres créneaux de cette même date. Écrit de façon synchrone par /api/cal-book,
+// indépendamment d'Intervention (qui reste alimentée par le webhook Cal.com, avec délai).
+model DayZoneLock {
+  id               String   @id @default(cuid())
+  date             DateTime @db.Date
+  slot             String // "matin" | "apres-midi" | "journee" | "lundi-1" | "lundi-2" | "lundi-3"
+  zoneKey          String // clé parmi celles de zoneSchedule.ts
+  calcomBookingUid String? // traçabilité vers la réservation Cal.com correspondante
+  createdAt        DateTime @default(now())
+
+  @@unique([date, slot])
+  @@index([date])
+}
