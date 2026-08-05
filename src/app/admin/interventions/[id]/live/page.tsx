@@ -15,6 +15,13 @@ interface MaintenanceType {
   isActive: boolean;
 }
 
+interface PartUsedData {
+  id: string;
+  designation: string;
+  price: string | number | null;
+  boughtByClient: boolean;
+}
+
 interface InterventionData {
   id: string;
   date: string;
@@ -29,6 +36,7 @@ interface InterventionData {
   price: string | number | null;
   maintenanceTypeId: string | null;
   maintenanceTypeIds: string[];
+  partsUsed: PartUsedData[];
   vehicle: {
     id: string;
     make: string | null;
@@ -56,6 +64,10 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [uploadingBefore, setUploadingBefore] = useState(false);
   const [uploadingDamage, setUploadingDamage] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [partDesignation, setPartDesignation] = useState("");
+  const [partPrice, setPartPrice] = useState("");
+  const [partBoughtByClient, setPartBoughtByClient] = useState(false);
+  const [addingPart, setAddingPart] = useState(false);
   const [showFinalize, setShowFinalize] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [maintenanceTypes, setMaintenanceTypes] = useState<MaintenanceType[]>([]);
@@ -222,6 +234,46 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
       return;
     }
     setNoteText("");
+    load();
+  }
+
+  async function addPart() {
+    if (!partDesignation.trim()) return;
+    setAddingPart(true);
+    try {
+      const res = await fetch(`/api/admin/interventions/${id}/parts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          designation: partDesignation.trim(),
+          price: partPrice ? Number(partPrice) : null,
+          boughtByClient: partBoughtByClient,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error("add-part-failed");
+    } catch {
+      alert("⚠️ La dépense n'a pas pu être enregistrée (connexion internet ?). Réessaie.");
+      return;
+    } finally {
+      setAddingPart(false);
+    }
+    setPartDesignation("");
+    setPartPrice("");
+    setPartBoughtByClient(false);
+    load();
+  }
+
+  async function removePart(partId: string) {
+    if (!confirm("Supprimer cette dépense ?")) return;
+    try {
+      const res = await fetch(`/api/admin/parts/${partId}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error("remove-part-failed");
+    } catch {
+      alert("⚠️ La suppression a échoué (connexion internet ?). Réessaie.");
+      return;
+    }
     load();
   }
 
@@ -420,6 +472,12 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
 
   const vehicleLabel = [data.vehicle.make, data.vehicle.model, data.vehicle.plate].filter(Boolean).join(" ") || "Véhicule";
   const notesLines = data.vehicleCondition ? data.vehicleCondition.split("\n") : [];
+  const partsTotalCam = data.partsUsed
+    .filter((p) => !p.boughtByClient)
+    .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
+  const partsTotalClient = data.partsUsed
+    .filter((p) => p.boughtByClient)
+    .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
 
   return (
     <main className="min-h-screen bg-gray-900 text-white px-4 py-6 max-w-lg mx-auto space-y-5">
@@ -620,6 +678,75 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
+      {/* Pièces / dépenses — utilisable dès la réservation jusqu'à la clôture */}
+      <div>
+        <h2 className="text-sm font-medium text-gray-300 mb-2">💰 Pièces / dépenses</h2>
+        {data.partsUsed.length > 0 && (
+          <ul className="space-y-1.5 mb-2">
+            {data.partsUsed.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center justify-between gap-2 bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-1.5 text-sm"
+              >
+                <span className="truncate">
+                  {p.designation}
+                  {p.boughtByClient && <span className="text-gray-500 text-xs"> (achetée par le client)</span>}
+                </span>
+                <span className="flex items-center gap-2 flex-shrink-0">
+                  {p.price != null && <span className="text-amber-400 font-medium">{Number(p.price).toFixed(2)}€</span>}
+                  <button
+                    onClick={() => removePart(p.id)}
+                    className="text-gray-600 hover:text-red-400 cursor-pointer"
+                    title="Supprimer"
+                  >
+                    🗑
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {partsTotalCam > 0 && (
+          <p className="text-xs text-gray-400 mb-2">
+            Total dépensé par CAM : <span className="text-amber-400 font-medium">{partsTotalCam.toFixed(2)}€</span>
+            {partsTotalClient > 0 && ` (+ ${partsTotalClient.toFixed(2)}€ acheté par le client)`}
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Pièce, acompte fournisseur, autre..."
+            className={`${inputClass} flex-1 min-w-[140px]`}
+            value={partDesignation}
+            onChange={(e) => setPartDesignation(e.target.value)}
+          />
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="€"
+            className={`${inputClass} w-24`}
+            value={partPrice}
+            onChange={(e) => setPartPrice(e.target.value)}
+          />
+          <label className="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={partBoughtByClient}
+              onChange={(e) => setPartBoughtByClient(e.target.checked)}
+            />
+            achetée par le client
+          </label>
+          <button
+            onClick={addPart}
+            disabled={addingPart || !partDesignation.trim()}
+            className="px-3 py-2 rounded-lg bg-amber-500 text-gray-900 text-sm font-semibold cursor-pointer disabled:opacity-50"
+          >
+            {addingPart ? "..." : "Ajouter"}
+          </button>
+        </div>
+      </div>
+
       {!showFinalize ? (
         <div className="grid grid-cols-1 gap-2 pt-2">
           <button
@@ -772,7 +899,9 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
                 onChange={(e) => setFinalPrice(e.target.value)}
               />
               <p className="text-[11px] text-gray-500 mt-0.5">
-                Les pièces s&apos;ajoutent séparément juste après, sur la fiche du véhicule.
+                {partsTotalCam > 0
+                  ? `+ ${partsTotalCam.toFixed(2)}€ de pièces/dépenses déjà enregistrées ci-dessus (à ajouter toi-même si besoin — ce champ reste hors pièces).`
+                  : "Les pièces se gèrent dans la section « Pièces / dépenses » ci-dessus, ou ensuite sur la fiche du véhicule."}
               </p>
             </div>
           )}
