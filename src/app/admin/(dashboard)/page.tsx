@@ -8,6 +8,7 @@ import AlertBadge from "@/components/admin/AlertBadge";
 import type { AlertStatus } from "@/services/admin/maintenanceAlerts";
 import { buildWhatsAppLink, buildReviewReminderMessage } from "@/lib/whatsapp";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import LongPressButton from "@/components/admin/LongPressButton";
 
 interface ClientRow {
   id: string;
@@ -168,12 +169,21 @@ export default function AdminClientsPage() {
                       {new Date(i.date).toLocaleDateString("fr-FR")}
                     </span>
                   </span>
-                  <button
-                    onClick={() => resume(i)}
-                    className="text-xs text-amber-400 hover:text-amber-300 flex-shrink-0 cursor-pointer"
-                  >
-                    Reprendre
-                  </button>
+                  {i.status === "reserved" ? (
+                    <LongPressButton
+                      onLongPress={() => resume(i)}
+                      className="text-xs text-amber-400 hover:text-amber-300 flex-shrink-0 cursor-pointer rounded px-1"
+                    >
+                      Démarrer (maintenir)
+                    </LongPressButton>
+                  ) : (
+                    <button
+                      onClick={() => resume(i)}
+                      className="text-xs text-amber-400 hover:text-amber-300 flex-shrink-0 cursor-pointer"
+                    >
+                      Reprendre
+                    </button>
+                  )}
                 </li>
               );
             })}
