@@ -73,6 +73,7 @@ interface Intervention {
   maintenanceTypeIds: string[];
   maintenanceType: MaintenanceType | null;
   status: string;
+  completedAt: string | null;
   bookedOnline: boolean;
   depositAmount: string | number | null;
   depositDate: string | null;
@@ -2046,6 +2047,26 @@ function InterventionRow({
     onChanged();
   }
 
+  async function reopenIntervention() {
+    if (
+      !confirm(
+        `Rouvrir cette intervention terminée (${intervention.description || "sans description"}) ? Elle repassera "en cours" — utilise ceci si le test/contrôle final a révélé un problème.`
+      )
+    )
+      return;
+    const res = await fetch(`/api/admin/interventions/${intervention.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "draft", completedAt: null }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.success) {
+      alert(`⚠️ ${json.error || "Impossible de rouvrir cette intervention."}`);
+      return;
+    }
+    onChanged();
+  }
+
   async function saveNotes() {
     await fetch(`/api/admin/interventions/${intervention.id}`, {
       method: "PATCH",
@@ -2108,6 +2129,11 @@ function InterventionRow({
       : null;
   const totalPaid = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
   const remaining = priceNum != null ? priceNum - totalPaid : null;
+
+  const REOPEN_WINDOW_DAYS = 7;
+  const completedAt = intervention.completedAt ? new Date(intervention.completedAt) : null;
+  const reopenDeadline = completedAt ? new Date(completedAt.getTime() + REOPEN_WINDOW_DAYS * 86_400_000) : null;
+  const canReopen = intervention.status === "done" && !!reopenDeadline && reopenDeadline.getTime() > Date.now();
 
   return (
     <li className="text-sm text-gray-300 border-b border-gray-800 pb-3 last:border-0 last:pb-0">
@@ -2195,6 +2221,15 @@ function InterventionRow({
                 )}
               </button>
             ))}
+          {canReopen && (
+            <button
+              onClick={reopenIntervention}
+              className="text-amber-400 hover:text-amber-300 cursor-pointer text-xs flex-shrink-0"
+              title={`Rouvrir — possible jusqu'au ${reopenDeadline!.toLocaleDateString("fr-FR")}`}
+            >
+              ↩ Reprendre
+            </button>
+          )}
           <button
             onClick={deleteThisIntervention}
             className="text-gray-600 hover:text-red-400 cursor-pointer"

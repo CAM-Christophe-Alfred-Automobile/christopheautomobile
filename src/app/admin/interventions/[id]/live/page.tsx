@@ -388,6 +388,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         hoursSpent: totalHours,
         vehicleCondition: vehicleConditionUpdate,
         status: "done",
+        completedAt: new Date().toISOString(),
         ...(isMultiDay ? { endDate: new Date().toISOString() } : {}),
       });
     } catch {

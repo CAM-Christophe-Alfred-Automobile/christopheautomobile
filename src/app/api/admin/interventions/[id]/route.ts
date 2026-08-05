@@ -35,11 +35,18 @@ export async function PATCH(req: Request, { params }: Context) {
       ...(body.depositDate !== undefined
         ? { depositDate: body.depositDate ? new Date(body.depositDate) : null }
         : {}),
+      ...(body.completedAt !== undefined
+        ? { completedAt: body.completedAt ? new Date(body.completedAt) : null }
+        : {}),
     });
     return NextResponse.json({ success: true, intervention });
   } catch (error) {
     console.error("Erreur API Admin Intervention (PATCH):", error);
-    return NextResponse.json({ success: false, error: "Erreur serveur" }, { status: 500 });
+    const isReopenGuard = error instanceof Error && error.message.startsWith("Impossible de rouvrir");
+    return NextResponse.json(
+      { success: false, error: isReopenGuard ? error.message : "Erreur serveur" },
+      { status: isReopenGuard ? 400 : 500 }
+    );
   }
 }
 

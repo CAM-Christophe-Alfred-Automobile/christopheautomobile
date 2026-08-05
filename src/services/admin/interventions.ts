@@ -15,6 +15,7 @@ export interface InterventionInput {
   vehicleCondition?: string | null;
   status?: "draft" | "done" | "reserved";
   chronoStartedAt?: Date | null;
+  completedAt?: Date | null;
   bookedOnline?: boolean;
   depositAmount?: number | null;
   depositDate?: Date | null;
@@ -123,7 +124,31 @@ export async function addIntervention(vehicleId: string, data: InterventionInput
   return intervention;
 }
 
+export const REOPEN_WINDOW_DAYS = 7;
+
+// Rouvrir une intervention terminée (status "done" -> "draft") n'est autorisé que dans les
+// REOPEN_WINDOW_DAYS suivant sa finalisation (completedAt) — au-delà, le prix/temps a
+// généralement déjà été facturé/réconcilié, donc on bloque au niveau service (pas seulement
+// en cachant le bouton côté UI) pour que la règle tienne même via un appel direct à l'API.
+async function assertReopenAllowed(id: string) {
+  const current = await prisma.intervention.findUniqueOrThrow({ where: { id } });
+  if (current.status !== "done") return;
+  if (!current.completedAt) {
+    throw new Error("Impossible de rouvrir cette intervention : date de finalisation inconnue.");
+  }
+  const daysSinceCompletion = (Date.now() - current.completedAt.getTime()) / (1000 * 60 * 60 * 24);
+  if (daysSinceCompletion > REOPEN_WINDOW_DAYS) {
+    throw new Error(
+      `Impossible de rouvrir une intervention terminée depuis plus de ${REOPEN_WINDOW_DAYS} jours.`
+    );
+  }
+}
+
 export async function updateIntervention(id: string, data: Partial<InterventionInput>) {
+  if (data.status !== undefined && data.status !== "done") {
+    await assertReopenAllowed(id);
+  }
+
   const ids = normalizeMaintenanceTypeIds(data);
   const intervention = await prisma.intervention.update({
     where: { id },
