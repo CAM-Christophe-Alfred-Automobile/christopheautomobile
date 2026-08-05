@@ -7,7 +7,7 @@ export default function BackButton({ className }: { className?: string }) {
 
   return (
     <button
-      onClick={() => router.back()}
+      onClick={() => router.push("/admin")}
       className={className ?? "text-sm text-gray-400 hover:text-amber-400 transition-colors cursor-pointer"}
     >
       ← Retour
