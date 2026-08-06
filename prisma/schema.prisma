@@ -39,6 +39,7 @@ model Vehicle {
   mileage          Int?
   mileageUpdatedAt DateTime?
   notes            String?
+  tier             String? // gabarit ("citadine" | "standard" | "suv") — même système que le site public (data/vehicleTiers.ts), pour un prix cohérent entre réservation en ligne et intervention en direct
 
   sold   Boolean   @default(false)
   soldAt DateTime?

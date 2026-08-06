@@ -7,6 +7,7 @@ export interface VehicleInput {
   year?: number | null;
   mileage?: number | null;
   notes?: string | null;
+  tier?: string | null;
 }
 
 export async function getVehicleWithHistory(id: string) {

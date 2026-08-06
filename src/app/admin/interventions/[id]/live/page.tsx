@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, use as usePromise } from "rea
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { buildWhatsAppLink, buildStartWorkMessage, buildFinishWorkMessage, buildDelayMessage } from "@/lib/whatsapp";
+import { VEHICLE_TIERS, getVehicleTierMultiplier, type VehicleTier } from "@/app/data/vehicleTiers";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -45,6 +46,7 @@ interface InterventionData {
     model: string | null;
     plate: string | null;
     mileage: number | null;
+    tier: string | null;
     client: {
       id: string;
       firstName: string;
@@ -95,6 +97,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [editPlate, setEditPlate] = useState("");
   const [editMileage, setEditMileage] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [editTier, setEditTier] = useState<VehicleTier>("standard");
   const [savingInfo, setSavingInfo] = useState(false);
   const [showDelayForm, setShowDelayForm] = useState(false);
   const [delayDate, setDelayDate] = useState(() => {
@@ -332,6 +335,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     setEditPlate(data.vehicle.plate || "");
     setEditMileage(data.vehicle.mileage != null ? String(data.vehicle.mileage) : "");
     setEditPhone(data.vehicle.client.phone || "");
+    setEditTier((data.vehicle.tier as VehicleTier) || "standard");
     setShowInfoEdit(true);
   }
 
@@ -344,6 +348,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
       if (editMileage !== (data.vehicle.mileage != null ? String(data.vehicle.mileage) : "")) {
         vehicleBody.mileage = editMileage ? Number(editMileage) : null;
       }
+      if (editTier !== ((data.vehicle.tier as VehicleTier) || "standard")) vehicleBody.tier = editTier;
       if (Object.keys(vehicleBody).length > 0) {
         const res = await fetch(`/api/admin/vehicles/${data.vehicle.id}`, {
           method: "PATCH",
@@ -377,7 +382,8 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     if (!data) return;
     setFinalDescription(data.description || "");
     setFinalMaintenanceTypeIds(data.maintenanceTypeIds?.length ? data.maintenanceTypeIds : data.maintenanceTypeId ? [data.maintenanceTypeId] : []);
-    setFinalPrice((currentHoursSpent() * hourlyRate).toFixed(2));
+    const tierMultiplier = getVehicleTierMultiplier(data.vehicle.tier);
+    setFinalPrice((currentHoursSpent() * hourlyRate * tierMultiplier).toFixed(2));
     setClientLastName(data.vehicle.client.lastName === "." ? "" : data.vehicle.client.lastName);
     setClientPhone(data.vehicle.client.phone || "");
     setClientEmail(data.vehicle.client.email || "");
@@ -538,7 +544,8 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
           <span>
             🚗 {data.vehicle.plate || "plaque ?"} · 📏{" "}
             {data.vehicle.mileage != null ? `${data.vehicle.mileage} km` : "km ?"} · 📱{" "}
-            {data.vehicle.client.phone || "tél ?"}
+            {data.vehicle.client.phone || "tél ?"} · 🚙{" "}
+            {VEHICLE_TIERS.find((t) => t.key === data.vehicle.tier)?.label || "gabarit ?"}
           </span>
           <button
             type="button"
@@ -578,6 +585,28 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
               value={editPhone}
               onChange={(e) => setEditPhone(e.target.value)}
             />
+          </div>
+          <div>
+            <label className="block text-[11px] text-gray-500 mb-0.5">
+              Gabarit du véhicule (comme sur le site — ajuste le prix main d&apos;œuvre)
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {VEHICLE_TIERS.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setEditTier(t.key)}
+                  title={t.examples}
+                  className={`px-2.5 py-1 rounded-full border text-xs cursor-pointer ${
+                    editTier === t.key
+                      ? "border-amber-500 bg-amber-500/10 text-amber-400"
+                      : "border-gray-700 text-gray-300 hover:border-amber-500 hover:text-amber-400"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="flex gap-1.5">
             <button
@@ -935,7 +964,12 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
           {!data.vehicle.client.isPersonal && (
             <div>
               <label className="block text-[11px] text-gray-500 mb-0.5">
-                Main d&apos;œuvre € — hors pièces (calculé : {currentHoursSpent().toFixed(2)}h × {hourlyRate}€/h)
+                Main d&apos;œuvre € — hors pièces (calculé : {currentHoursSpent().toFixed(2)}h × {hourlyRate}€/h
+                {getVehicleTierMultiplier(data.vehicle.tier) !== 1 &&
+                  ` × ${getVehicleTierMultiplier(data.vehicle.tier).toFixed(2)} (gabarit ${
+                    VEHICLE_TIERS.find((t) => t.key === data.vehicle.tier)?.label.toLowerCase()
+                  })`}
+                )
               </label>
               <input
                 type="number"
