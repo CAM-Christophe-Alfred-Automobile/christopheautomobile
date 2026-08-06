@@ -899,11 +899,18 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
                 value={finalPrice}
                 onChange={(e) => setFinalPrice(e.target.value)}
               />
-              <p className="text-[11px] text-gray-500 mt-0.5">
-                {partsTotalCam > 0
-                  ? `+ ${partsTotalCam.toFixed(2)}€ de pièces/dépenses déjà enregistrées ci-dessus (à ajouter toi-même si besoin — ce champ reste hors pièces).`
-                  : "Les pièces se gèrent dans la section « Pièces / dépenses » ci-dessus, ou ensuite sur la fiche du véhicule."}
-              </p>
+              {partsTotalCam > 0 ? (
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  + {partsTotalCam.toFixed(2)}€ de pièces/dépenses (enregistrées ci-dessus) ={" "}
+                  <span className="text-amber-400 font-medium">
+                    {((Number(finalPrice) || 0) + partsTotalCam).toFixed(2)}€ au total
+                  </span>
+                </p>
+              ) : (
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  Les pièces se gèrent dans la section « Pièces / dépenses » ci-dessus, ou ensuite sur la fiche du véhicule.
+                </p>
+              )}
             </div>
           )}
 
