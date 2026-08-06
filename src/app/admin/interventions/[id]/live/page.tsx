@@ -18,6 +18,8 @@ interface MaintenanceType {
 interface PartUsedData {
   id: string;
   designation: string;
+  reference: string | null;
+  quantity: string | null;
   price: string | number | null;
   boughtByClient: boolean;
 }
@@ -272,6 +274,42 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
       if (!res.ok || !json.success) throw new Error("remove-part-failed");
     } catch {
       alert("⚠️ La suppression a échoué (connexion internet ?). Réessaie.");
+      return;
+    }
+    load();
+  }
+
+  /** Pièce finalement pas montée sur ce véhicule : la retire de l'intervention (elle ne
+   * représente plus une dépense pour cette réparation) et la crée dans le stock, pour la
+   * retrouver et la réutiliser plus tard. Si la pièce doit plutôt être renvoyée au
+   * fournisseur, le bouton 🗑 suffit — pas besoin de passer par le stock. */
+  async function movePartToStock(part: PartUsedData) {
+    if (!data) return;
+    if (!confirm(`Mettre "${part.designation}" en stock (elle ne sera plus comptée comme dépense de cette intervention) ?`)) {
+      return;
+    }
+    const vehicleLbl = [data.vehicle.make, data.vehicle.model, data.vehicle.plate].filter(Boolean).join(" ") || "ce véhicule";
+    const parsedQuantity = part.quantity ? parseInt(part.quantity, 10) : NaN;
+    try {
+      const stockRes = await fetch("/api/admin/stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: part.designation,
+          reference: part.reference || null,
+          quantity: Number.isFinite(parsedQuantity) && parsedQuantity > 0 ? parsedQuantity : 1,
+          condition: "Neuf",
+          notes: `Achetée pour ${vehicleLbl} le ${new Date(data.date).toLocaleDateString("fr-FR")}, finalement pas montée.`,
+        }),
+      });
+      const stockJson = await stockRes.json().catch(() => ({}));
+      if (!stockRes.ok || !stockJson.success) throw new Error("stock-create-failed");
+
+      const removeRes = await fetch(`/api/admin/parts/${part.id}`, { method: "DELETE" });
+      const removeJson = await removeRes.json().catch(() => ({}));
+      if (!removeRes.ok || !removeJson.success) throw new Error("remove-part-failed");
+    } catch {
+      alert("⚠️ Échec de la mise en stock (connexion internet ?). Réessaie.");
       return;
     }
     load();
@@ -696,9 +734,16 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
                 <span className="flex items-center gap-2 flex-shrink-0">
                   {p.price != null && <span className="text-amber-400 font-medium">{Number(p.price).toFixed(2)}€</span>}
                   <button
+                    onClick={() => movePartToStock(p)}
+                    className="text-gray-500 hover:text-blue-400 cursor-pointer text-xs"
+                    title="Pas montée — mettre en stock pour plus tard"
+                  >
+                    → Stock
+                  </button>
+                  <button
                     onClick={() => removePart(p.id)}
                     className="text-gray-600 hover:text-red-400 cursor-pointer"
-                    title="Supprimer"
+                    title="Supprimer (ex: pièce renvoyée au fournisseur)"
                   >
                     🗑
                   </button>
