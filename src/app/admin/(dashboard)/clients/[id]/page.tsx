@@ -2121,6 +2121,39 @@ function InterventionRow({
     onChanged();
   }
 
+  /** Pièce achetée pour cette intervention mais finalement pas montée : la crée dans le stock
+   * (pour la retrouver et la réutiliser) et la retire d'ici, puisqu'elle ne représente plus une
+   * dépense pour cette réparation. Pour une pièce renvoyée au fournisseur, "Supprimer" suffit. */
+  async function movePartToStock(part: PartUsed) {
+    if (!confirm(`Mettre "${part.designation}" en stock (elle ne sera plus comptée comme dépense de cette intervention) ?`)) {
+      return;
+    }
+    const parsedQuantity = part.quantity ? parseInt(part.quantity, 10) : NaN;
+    try {
+      const stockRes = await fetch("/api/admin/stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: part.designation,
+          reference: part.reference || null,
+          quantity: Number.isFinite(parsedQuantity) && parsedQuantity > 0 ? parsedQuantity : 1,
+          condition: "Neuf",
+          notes: `Achetée pour ${vehicleLabel} le ${new Date(intervention.date).toLocaleDateString("fr-FR")}, finalement pas montée.`,
+        }),
+      });
+      const stockJson = await stockRes.json().catch(() => ({}));
+      if (!stockRes.ok || !stockJson.success) throw new Error("stock-create-failed");
+
+      const removeRes = await fetch(`/api/admin/parts/${part.id}`, { method: "DELETE" });
+      const removeJson = await removeRes.json().catch(() => ({}));
+      if (!removeRes.ok || !removeJson.success) throw new Error("remove-part-failed");
+    } catch {
+      alert("⚠️ Échec de la mise en stock (connexion internet ?). Réessaie.");
+      return;
+    }
+    onChanged();
+  }
+
   const normalPriceNum = intervention.normalPrice != null ? Number(intervention.normalPrice) : null;
   const priceNum = intervention.price != null ? Number(intervention.price) : null;
   const discountPct =
@@ -2436,6 +2469,13 @@ function InterventionRow({
                 >
                   🔍
                 </a>
+                <button
+                  onClick={() => movePartToStock(p)}
+                  className="text-gray-500 hover:text-blue-400 cursor-pointer"
+                  title="Pas montée — mettre en stock pour plus tard"
+                >
+                  📥
+                </button>
                 <button
                   onClick={() => removePart(p.id)}
                   className="text-gray-600 hover:text-red-400 cursor-pointer"
