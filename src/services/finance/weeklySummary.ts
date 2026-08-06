@@ -79,8 +79,11 @@ export async function buildWeeklySummaryEmail(): Promise<{ subject: string; html
           : ""
       }
 
-      <h3 style="font-size: 14px; margin-top: 20px;">Chiffre d'affaires cible ce mois-ci</h3>
-      <p style="font-size: 20px; font-weight: 700; color: #10b981; margin: 4px 0;">${formatMoney(revenueTarget.monthlyRevenueTarget)}</p>
+      <h3 style="font-size: 14px; margin-top: 20px;">Chiffre d'affaires cible</h3>
+      <p style="font-size: 20px; font-weight: 700; color: #10b981; margin: 4px 0;">${formatMoney(revenueTarget.monthlyRevenueTarget)} / mois</p>
+      <p style="font-size: 13px; color: #555; margin: 0;">
+        soit ${formatMoney(revenueTarget.weeklyRevenueTarget)} / semaine — ${formatMoney(revenueTarget.dailyRevenueTarget)} / jour (${revenueTarget.workingDaysPerWeek}j/sem.)
+      </p>
 
       ${
         adviceRows

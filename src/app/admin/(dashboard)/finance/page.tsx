@@ -203,12 +203,26 @@ export default async function FinanceDashboardPage() {
           <span className="font-semibold text-amber-300">{formatEUR(revenueTarget.monthlyRevenueTarget)}</span> de
           chiffre d&apos;affaires par mois.
         </p>
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <div className="bg-gray-950/50 border border-gray-800 rounded-lg px-3 py-2">
+            <p className="text-[11px] text-gray-500">Par semaine</p>
+            <p className="text-lg font-semibold text-amber-300">{formatEUR(revenueTarget.weeklyRevenueTarget)}</p>
+          </div>
+          <div className="bg-gray-950/50 border border-gray-800 rounded-lg px-3 py-2">
+            <p className="text-[11px] text-gray-500">Par jour ({revenueTarget.workingDaysPerWeek}j/sem.)</p>
+            <p className="text-lg font-semibold text-amber-300">{formatEUR(revenueTarget.dailyRevenueTarget)}</p>
+          </div>
+        </div>
         <p className="text-xs text-gray-500">
           Détail : {formatEUR(revenueTarget.monthlyExpenses)}/mois de charges (hors URSSAF)
           {revenueTarget.monthlyOtherIncome > 0 && ` − ${formatEUR(revenueTarget.monthlyOtherIncome)}/mois déjà couverts par tes autres rentrées (pension...)`}
           {revenueTarget.monthlySavingsNeeded != null &&
             ` + ${formatEUR(revenueTarget.monthlySavingsNeeded)}/mois pour ${settings.savingsGoalLabel || "ton objectif"} (${revenueTarget.monthsUntilGoal} mois restants)`}
           , puis remis à l&apos;échelle pour laisser {revenueTarget.urssafRatePct}% pour l&apos;URSSAF.
+        </p>
+        <p className="text-[11px] text-gray-600">
+          Ce sont des objectifs de facturation, pas ta trésorerie réelle : l&apos;argent facturé n&apos;arrive pas le
+          jour même (carte via Abby ≈ 7 jours, certains encaissements jusqu&apos;à 10 jours).
         </p>
       </div>
 

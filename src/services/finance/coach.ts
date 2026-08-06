@@ -149,8 +149,16 @@ export type RevenueTarget = {
   monthsUntilGoal: number | null;
   monthlyNetNeeded: number;
   monthlyRevenueTarget: number;
+  weeklyRevenueTarget: number;
+  dailyRevenueTarget: number;
+  workingDaysPerWeek: number;
   urssafRatePct: number;
 };
+
+// Semaine de travail lundi-vendredi — sert à ramener l'objectif mensuel à un rythme
+// hebdo/quotidien concret plutôt qu'une simple division par 30 (qui compterait les week-ends).
+const WORKING_DAYS_PER_WEEK = 5;
+const WEEKS_PER_YEAR = 52;
 
 /**
  * Reverse-engineers a target monthly revenue (chiffre d'affaires) from the cost side: recurring
@@ -195,6 +203,13 @@ export async function getRevenueTarget(): Promise<RevenueTarget> {
   const monthlyNetNeeded = monthlyExpenses + (monthlySavingsNeeded ?? 0) - monthlyOtherIncome;
   const urssafRatePct = Number(settings.urssafRatePct);
   const monthlyRevenueTarget = Math.max(0, monthlyNetNeeded) / (1 - urssafRatePct / 100);
+  // Ramené à l'année puis divisé par 52 semaines (plus précis qu'un simple /4.33) et par les
+  // jours réellement travaillés (lundi-vendredi), pour un rythme concret plutôt qu'un chiffre
+  // mensuel abstrait — l'argent facturé un jour donné n'arrive pas forcément ce jour-là (carte via
+  // Abby : ~7 jours ; certains encaissements : jusqu'à 10 jours), mais ce chiffre répond à "combien
+  // dois-je facturer aujourd'hui/cette semaine" plutôt qu'à la trésorerie réellement disponible.
+  const weeklyRevenueTarget = (monthlyRevenueTarget * 12) / WEEKS_PER_YEAR;
+  const dailyRevenueTarget = weeklyRevenueTarget / WORKING_DAYS_PER_WEEK;
 
   return {
     monthlyExpenses,
@@ -203,6 +218,9 @@ export async function getRevenueTarget(): Promise<RevenueTarget> {
     monthsUntilGoal,
     monthlyNetNeeded,
     monthlyRevenueTarget,
+    weeklyRevenueTarget,
+    dailyRevenueTarget,
+    workingDaysPerWeek: WORKING_DAYS_PER_WEEK,
     urssafRatePct,
   };
 }
