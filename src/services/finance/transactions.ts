@@ -89,6 +89,42 @@ export async function getMonthlyFlows(monthsBack = 6): Promise<MonthlyFlow[]> {
   return Array.from(buckets.values());
 }
 
+export type DailyIncomePoint = { day: number; date: string; amount: number };
+
+/** Encaissements (revenus, hors virements internes) par jour pour un mois donné et un scope
+ * donné — sert à l'agenda finance pour visualiser rapidement "les sous faits" jour par jour et
+ * faire le bilan du mois d'un coup d'œil. */
+export async function getDailyIncomeForMonth(
+  year: number,
+  month: number, // 1-12
+  scope: "PRO" | "PERSO" = "PRO"
+): Promise<{ days: DailyIncomePoint[]; total: number }> {
+  const from = new Date(Date.UTC(year, month - 1, 1));
+  const to = new Date(Date.UTC(year, month, 1));
+
+  const transactions = await prisma.transaction.findMany({
+    where: { date: { gte: from, lt: to }, isTransfer: false, scope, amount: { gt: 0 } },
+    select: { date: true, amount: true },
+  });
+
+  const byDay = new Map<number, number>();
+  for (const tx of transactions) {
+    const d = new Date(tx.date).getUTCDate();
+    byDay.set(d, (byDay.get(d) ?? 0) + Number(tx.amount));
+  }
+
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const days: DailyIncomePoint[] = [];
+  let total = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const amount = byDay.get(d) ?? 0;
+    total += amount;
+    days.push({ day: d, date: new Date(Date.UTC(year, month - 1, d)).toISOString(), amount });
+  }
+
+  return { days, total };
+}
+
 export function getTransaction(id: string) {
   return prisma.transaction.findUnique({
     where: { id },

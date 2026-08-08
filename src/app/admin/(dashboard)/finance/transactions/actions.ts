@@ -141,3 +141,31 @@ export async function createTransferAction(formData: FormData) {
   revalidatePath("/admin/finance");
   redirect("/admin/finance/transactions");
 }
+
+/** Virement rapide depuis le dashboard (ex: déposer les espèces en banque) — mêmes règles que
+ * createTransferAction (exclu des stats revenus/dépenses et des prévisions), mais reste sur le
+ * dashboard au lieu de rediriger vers la liste des transactions. */
+export async function quickTransferAction(formData: FormData) {
+  const fromAccountId = String(formData.get("fromAccountId"));
+  const toAccountId = String(formData.get("toAccountId"));
+  const amount = Number(formData.get("amount"));
+  if (!fromAccountId || !toAccountId || fromAccountId === toAccountId || !amount) return;
+
+  const [fromAccount, toAccount] = await Promise.all([
+    prisma.account.findUniqueOrThrow({ where: { id: fromAccountId } }),
+    prisma.account.findUniqueOrThrow({ where: { id: toAccountId } }),
+  ]);
+
+  await createTransfer({
+    fromAccountId,
+    toAccountId,
+    fromScope: fromAccount.scope as "PRO" | "PERSO",
+    toScope: toAccount.scope as "PRO" | "PERSO",
+    date: new Date(),
+    amount,
+    description: `Virement ${fromAccount.name} → ${toAccount.name}`,
+  });
+
+  revalidatePath("/admin/finance/transactions");
+  revalidatePath("/admin/finance");
+}
