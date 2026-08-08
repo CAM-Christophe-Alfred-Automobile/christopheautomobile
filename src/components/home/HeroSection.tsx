@@ -61,6 +61,7 @@ export default function HeroSection() {
               height={1200}
               quality={85}
               priority
+              fetchPriority="high"
               className="w-full h-auto rounded-2xl shadow-2xl"
               sizes="(max-width: 768px) 90vw, 448px"
             />

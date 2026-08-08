@@ -24,7 +24,8 @@ export default function LocalBusinessSchema() {
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: aggregateRating.ratingValue,
-          reviewCount: aggregateRating.reviewCount,
+          // Nombre réel d'avis affichés tant que le total exact de la fiche Google n'est pas confirmé.
+          reviewCount: aggregateRating.reviewCount ?? testimonials.length,
         },
         review: testimonials.map((t) => ({
           "@type": "Review",

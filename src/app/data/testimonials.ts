@@ -1,50 +1,44 @@
-// Avis clients réels, repris depuis le profil AlloVoisins de Christophe (vérifié) :
-// https://www.allovoisins.com/p/camchristopheautomobile
-// Sélection des avis positifs et détaillés (16 avis au total, note globale 4,6/5).
+// Avis clients réels, repris de la fiche Google Business de Christophe (avis vérifiés Google).
 // Ne pas inventer/modifier un avis : uniquement des textes réels, avec attribution.
+// TODO: demander à Christophe la note globale + nombre total d'avis affichés en haut de sa
+// fiche Google pour renseigner reviewCount ci-dessous (actuellement omis, pas de valeur confirmée).
 
 export const aggregateRating = {
-  ratingValue: 4.6,
-  reviewCount: 16,
-  sourceLabel: "AlloVoisins",
-  sourceUrl: "https://www.allovoisins.com/p/camchristopheautomobile",
+  ratingValue: 5,
+  reviewCount: undefined as number | undefined,
+  sourceLabel: "Avis Google",
+  sourceUrl: "https://www.google.com/search?q=Christophe+AutoMobile+(CAM)&kgmid=/g/11mrhqnz4m",
 };
 
 export const testimonials = [
   {
-    author: "Magali S.",
-    date: "2025-06-24",
+    author: "Jaqel Hral",
+    date: "2026-04-01",
     rating: 5,
-    text: "Un mécano super, professionnel et qui ne lâche pas l'affaire tant que le problème n'est pas résolu. Je recommande à 200%.",
+    text: "Un service exceptionnel qui mérite bien plus que 5 étoiles. Christophe fait preuve d'un professionnalisme rare et d'une minutie exemplaire. Je suis plus que satisfait du résultat. Merci encore pour ce travail de précision.",
   },
   {
-    author: "Chris M.",
-    date: "2023-02-23",
+    author: "Julie B.",
+    date: "2026-07-01",
     rating: 5,
-    text: "Personne très professionnelle et surtout très humaine ! Je conseille vraiment Christophe il est à l'écoute avec les clients sans prise de tête vraiment le top du top.",
+    text: "Bonne prestation. Personne sérieuse & aimable. Je recommande ce Monsieur.",
   },
   {
-    author: "Jos F.",
-    date: "2023-03-12",
+    author: "Ianis Medjdoub",
+    date: "2026-05-01",
     rating: 5,
-    text: "Super mécano qui connaît son métier à la perfection, sérieux, ponctuel, gentil, très rare de nos jours, je recommande à 200%.",
+    text: "Super garage au top, n'hésitez pas !!",
   },
   {
-    author: "Loïque A.",
-    date: "2023-03-19",
+    author: "Alois Marignane",
+    date: "2026-04-01",
     rating: 5,
-    text: "Personne consciencieuse et honnête mais surtout très compétente, je recommande.",
+    text: "Grand merci Christophe pour les échanges, la réactivité et le travail efficace.",
   },
   {
-    author: "Dounia S.",
-    date: "2023-05-28",
+    author: "OLTX",
+    date: "2026-02-01",
     rating: 5,
-    text: "Au top, rapide et très sérieux. Très bonne communication.",
-  },
-  {
-    author: "Jess J.",
-    date: "2023-01-17",
-    rating: 5,
-    text: "Christophe est un mécano au TOP, je recommande sans hésitation.",
+    text: "Personne très compétente et très professionnelle.",
   },
 ];

@@ -35,7 +35,7 @@ export default function Testimonials({ variant = "section" }: TestimonialsProps)
           <Stars rating={Math.round(aggregateRating.ratingValue)} />
           <span className="font-semibold text-white">{aggregateRating.ratingValue}/5</span>
           <span className="text-sm">
-            basé sur {aggregateRating.reviewCount} avis vérifiés (
+            {aggregateRating.reviewCount ? `basé sur ${aggregateRating.reviewCount} avis vérifiés` : "avis vérifiés"} (
             <a
               href={aggregateRating.sourceUrl}
               target="_blank"
