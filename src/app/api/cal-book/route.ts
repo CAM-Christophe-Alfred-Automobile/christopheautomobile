@@ -133,6 +133,12 @@ export async function POST(req: Request) {
   if (serverDistanceKm !== null) notesParts.push(`distanceKm=${serverDistanceKm}`);
   if (serverPrice !== null) notesParts.push(`estimatedPrice=${serverPrice}`);
 
+  // Prix affiché en clair (champ visible "prix" + tentative sur le titre du RDV) pour que
+  // Christophe voie le chiffre d'affaires prévisionnel directement dans l'email Cal.com et
+  // sur son agenda, sans devoir ouvrir chaque réservation.
+  const prixLabel = serverPrice !== null ? `${serverPrice}€` : "Sur devis";
+  const title = `${modele} — ${prixLabel} — ${zone.label}`;
+
   const calRes = await fetch("https://api.cal.com/v2/bookings", {
     method: "POST",
     headers: {
@@ -157,6 +163,8 @@ export async function POST(req: Request) {
         description: fullDescription,
         devis: "Non",
         piece: "Oui",
+        prix: prixLabel,
+        title,
         ...(notesParts.length > 0 ? { notes: notesParts.join(";") } : {}),
       },
     }),

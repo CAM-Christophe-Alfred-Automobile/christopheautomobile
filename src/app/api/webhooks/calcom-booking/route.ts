@@ -104,6 +104,7 @@ export async function POST(req: Request) {
       description: responses.description?.value || responses.besoin?.value || payload.title || undefined,
       address: responses.address?.value || responses.adresse?.value || undefined,
       amount,
+      estimatedPrice: responses.prix?.value || undefined,
     });
 
     return NextResponse.json({ success: true, alertSent: true });

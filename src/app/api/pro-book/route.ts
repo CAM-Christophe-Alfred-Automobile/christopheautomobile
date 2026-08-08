@@ -27,9 +27,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const { eventTypeId, consecutiveDays } = proEventTypes[type];
+  const { eventTypeId, consecutiveDays, lengthInMinutes, hourlyRate } = proEventTypes[type];
+  const pricePerDay = Math.round((lengthInMinutes / 60) * hourlyRate);
+  const totalPrice = pricePerDay * consecutiveDays;
+  const prixLabel =
+    consecutiveDays > 1 ? `${pricePerDay}€/jour (${totalPrice}€ total)` : `${pricePerDay}€`;
 
-  async function bookOneDay(startIso: string) {
+  async function bookOneDay(startIso: string, dayLabel: string) {
     const res = await fetch("https://api.cal.com/v2/bookings", {
       method: "POST",
       headers: {
@@ -51,6 +55,8 @@ export async function POST(req: Request) {
           entreprise,
           adresse,
           besoin,
+          prix: prixLabel,
+          title: `${entreprise} — ${prixLabel}${dayLabel}`,
         },
       }),
     });
@@ -81,7 +87,8 @@ export async function POST(req: Request) {
   for (let i = 0; i < consecutiveDays; i++) {
     const dayStart = new Date(start);
     dayStart.setDate(dayStart.getDate() + i);
-    const { ok, status, json } = await bookOneDay(dayStart.toISOString());
+    const dayLabel = consecutiveDays > 1 ? ` (jour ${i + 1}/${consecutiveDays})` : "";
+    const { ok, status, json } = await bookOneDay(dayStart.toISOString(), dayLabel);
     if (!ok) {
       for (const booking of bookings) {
         const uid = (booking as { data?: { uid?: string }; uid?: string })?.data?.uid ?? (booking as { uid?: string })?.uid;
