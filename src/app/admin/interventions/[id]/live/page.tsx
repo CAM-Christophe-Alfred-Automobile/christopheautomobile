@@ -641,6 +641,14 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         ) : (
           <>
             <p className="text-2xl font-mono text-gray-400">{formatElapsed(currentHoursSpent() * 3_600_000)}</p>
+            {data.hoursSpent ? (
+              <p className="text-xs text-gray-500 mt-1">
+                Chrono à l&apos;arrêt — temps déjà enregistré (estimation à la réservation ou sessions précédentes), pas du
+                temps en cours.
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">Chrono pas encore démarré.</p>
+            )}
             <button
               onClick={startChrono}
               className="mt-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm font-semibold cursor-pointer"
