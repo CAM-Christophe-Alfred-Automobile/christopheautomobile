@@ -29,7 +29,7 @@ const faq = [
   {
     question: "Facturez-vous à l'heure ou à la journée ?",
     answer:
-      "Deux formules : une intervention d'urgence facturée à l'heure selon disponibilité, ou un renfort planifié de 2 jours consécutifs minimum, à la journée.",
+      "Renfort planifié de 2 jours consécutifs minimum, facturé à l'heure (30 €/h de main d'œuvre).",
   },
   {
     question: "Faut-il vous superviser sur place ?",
@@ -168,15 +168,6 @@ export default function ProfessionnelsPage() {
           <section className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
             <h2 className="text-2xl font-bold text-amber-400 mb-4">Tarifs</h2>
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pb-4 border-b border-gray-700">
-                <div>
-                  <p className="font-semibold text-white">Urgence</p>
-                  <p className="text-sm text-gray-400">
-                    Sous réserve de disponibilité dans mon agenda
-                  </p>
-                </div>
-                <p className="text-xl font-bold text-blue-400">35 €/h</p>
-              </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <div>
                   <p className="font-semibold text-white">Renfort planifié</p>
@@ -184,7 +175,7 @@ export default function ProfessionnelsPage() {
                     Minimum 2 jours consécutifs, 9h00 - 17h30
                   </p>
                 </div>
-                <p className="text-xl font-bold text-blue-400">28 €/h</p>
+                <p className="text-xl font-bold text-blue-400">30 €/h</p>
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-4 italic">

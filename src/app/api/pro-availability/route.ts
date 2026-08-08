@@ -4,10 +4,10 @@ import { proEventTypes, type ProBookingType } from "@/app/data/proSchedule";
 const CALCOM_API_VERSION_SLOTS = "2024-09-04";
 
 function isProBookingType(value: string | null): value is ProBookingType {
-  return value === "urgence" || value === "journee";
+  return value === "journee";
 }
 
-// Retourne les créneaux disponibles pour un type de renfort pro (urgence ou journée complète),
+// Retourne les créneaux disponibles pour le renfort pro (2 jours consécutifs),
 // sans filtrage par secteur géographique (contrairement à la réservation grand public).
 export async function GET(req: Request) {
   const url = new URL(req.url);

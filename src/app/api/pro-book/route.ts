@@ -4,7 +4,7 @@ import { proEventTypes, type ProBookingType } from "@/app/data/proSchedule";
 const CALCOM_API_VERSION_BOOKINGS = "2024-08-13";
 
 function isProBookingType(value: unknown): value is ProBookingType {
-  return value === "urgence" || value === "journee";
+  return value === "journee";
 }
 
 export async function POST(req: Request) {

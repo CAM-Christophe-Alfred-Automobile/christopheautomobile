@@ -4,10 +4,8 @@ import type { ProBookingType } from "@/app/data/proSchedule";
 
 type Step = "slot" | "form" | "confirm";
 
-const TABS: { key: ProBookingType; label: string }[] = [
-  { key: "urgence", label: "Urgence" },
-  { key: "journee", label: "2 jours consécutifs (9h-17h30)" },
-];
+// Un seul forfait pro : renfort planifié de 2 jours consécutifs (la formule "urgence" a été retirée).
+const TYPE: ProBookingType = "journee";
 
 function formatDateLabel(dateStr: string) {
   const d = new Date(`${dateStr}T12:00:00`);
@@ -20,7 +18,6 @@ function formatTimeLabel(iso: string) {
 }
 
 export default function ProBooking() {
-  const [type, setType] = useState<ProBookingType>("urgence");
   const [step, setStep] = useState<Step>("slot");
   const [slotsData, setSlotsData] = useState<Record<string, { start: string }[]> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,7 +43,7 @@ export default function ProBooking() {
         const end = new Date();
         end.setDate(end.getDate() + 90);
         const params = new URLSearchParams({
-          type,
+          type: TYPE,
           start: start.toISOString().slice(0, 10),
           end: end.toISOString().slice(0, 10),
         });
@@ -61,7 +58,7 @@ export default function ProBooking() {
       }
     };
     fetchSlots();
-  }, [type]);
+  }, []);
 
   const handleSubmit = async () => {
     if (!selectedSlot) return;
@@ -72,7 +69,7 @@ export default function ProBooking() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type,
+          type: TYPE,
           start: selectedSlot,
           nom,
           email,
@@ -97,24 +94,9 @@ export default function ProBooking() {
     <div className="max-w-2xl mx-auto bg-gray-800/50 border border-gray-700 rounded-xl p-5 sm:p-6">
       {step === "slot" && (
         <>
-          <div className="flex justify-center gap-2 mb-5">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  setType(tab.key);
-                  setSelectedSlot(null);
-                }}
-                className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  type === tab.key
-                    ? "bg-gradient-to-r from-red-600 to-red-700 text-white"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <p className="text-center text-amber-400 font-semibold mb-5">
+            Renfort planifié — 2 jours consécutifs (9h-17h30)
+          </p>
 
           {loading && <p className="text-center text-gray-400">Recherche des créneaux...</p>}
           {error && <p className="text-center text-red-400 text-sm">{error}</p>}
@@ -224,9 +206,8 @@ export default function ProBooking() {
           <p className="text-amber-400 font-semibold text-lg mb-2">Réservation confirmée !</p>
           <p className="text-gray-300">
             Rendez-vous le {formatDateLabel(confirmedStart.slice(0, 10))} à{" "}
-            {formatTimeLabel(confirmedStart)}
-            {type === "journee" && " (et le lendemain, 2 jours consécutifs réservés)"}. Vous allez
-            recevoir un email de confirmation.
+            {formatTimeLabel(confirmedStart)} (et le lendemain, 2 jours consécutifs réservés).
+            Vous allez recevoir un email de confirmation.
           </p>
         </div>
       )}
