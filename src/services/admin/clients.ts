@@ -12,8 +12,9 @@ const clientWithRelations = {
     include: {
       maintenanceRecords: { include: { maintenanceType: true } },
       interventions: {
-        where: { status: "done", date: { gte: UNPAID_TRACKING_SINCE }, price: { not: null } },
         select: {
+          date: true,
+          status: true,
           price: true,
           depositAmount: true,
           payments: { select: { amount: true } },
@@ -31,6 +32,7 @@ type ClientWithRelations = Prisma.ClientGetPayload<{ include: typeof clientWithR
 function computeHasUnpaid(client: ClientWithRelations): boolean {
   for (const vehicle of client.vehicles) {
     for (const intervention of vehicle.interventions) {
+      if (intervention.status !== "done" || intervention.date < UNPAID_TRACKING_SINCE) continue;
       const priceNum = intervention.price != null ? Number(intervention.price) : null;
       if (priceNum == null) continue;
       const partsTotal = intervention.partsUsed
@@ -44,6 +46,18 @@ function computeHasUnpaid(client: ClientWithRelations): boolean {
     }
   }
   return false;
+}
+
+// Date de l'intervention la plus récente du client, tous véhicules confondus (n'importe quel
+// statut — sert à trier la liste clients par activité récente plutôt qu'alphabétique).
+function mostRecentInterventionDate(client: ClientWithRelations): Date | null {
+  let latest: Date | null = null;
+  for (const vehicle of client.vehicles) {
+    for (const intervention of vehicle.interventions) {
+      if (!latest || intervention.date > latest) latest = intervention.date;
+    }
+  }
+  return latest;
 }
 
 function computeClientAlertStatus(client: ClientWithRelations): AlertStatus {
@@ -85,11 +99,21 @@ export async function listClients(query?: string) {
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   });
 
-  return clients.map((client) => ({
-    ...client,
-    alertStatus: computeClientAlertStatus(client),
-    hasUnpaid: computeHasUnpaid(client),
-  }));
+  return clients
+    .map((client) => ({
+      ...client,
+      alertStatus: computeClientAlertStatus(client),
+      hasUnpaid: computeHasUnpaid(client),
+      lastInterventionDate: mostRecentInterventionDate(client),
+    }))
+    .sort((a, b) => {
+      // Intervention la plus récente en premier ; les clients sans aucune intervention (jamais
+      // vus) passent en dernier plutôt qu'en tête, faute de date sur laquelle se baser.
+      if (!a.lastInterventionDate && !b.lastInterventionDate) return 0;
+      if (!a.lastInterventionDate) return 1;
+      if (!b.lastInterventionDate) return -1;
+      return b.lastInterventionDate.getTime() - a.lastInterventionDate.getTime();
+    });
 }
 
 export async function listPersonalClients() {

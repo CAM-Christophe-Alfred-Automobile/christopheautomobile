@@ -83,26 +83,21 @@ export default function AdminClientsPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const base = q
-      ? clients.filter((client) => {
-          const haystack = [
-            client.firstName,
-            client.lastName,
-            client.phone ?? "",
-            client.email ?? "",
-            ...client.vehicles.map((v) => `${v.plate ?? ""} ${v.make ?? ""} ${v.model ?? ""}`),
-          ]
-            .join(" ")
-            .toLowerCase();
-          return haystack.includes(q);
-        })
-      : clients;
-
-    return [...base].sort(
-      (a, b) =>
-        a.lastName.localeCompare(b.lastName, "fr", { sensitivity: "base" }) ||
-        a.firstName.localeCompare(b.firstName, "fr", { sensitivity: "base" })
-    );
+    // Pas de tri ici : l'API renvoie déjà les clients triés par intervention la plus récente
+    // d'abord (voir listClients côté serveur) — filtrer préserve cet ordre.
+    if (!q) return clients;
+    return clients.filter((client) => {
+      const haystack = [
+        client.firstName,
+        client.lastName,
+        client.phone ?? "",
+        client.email ?? "",
+        ...client.vehicles.map((v) => `${v.plate ?? ""} ${v.make ?? ""} ${v.model ?? ""}`),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
   }, [clients, search]);
 
   useScrollRestoration(!loading);
