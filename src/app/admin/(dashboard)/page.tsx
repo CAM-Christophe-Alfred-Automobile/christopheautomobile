@@ -17,6 +17,7 @@ interface ClientRow {
   phone: string | null;
   email: string | null;
   alertStatus: AlertStatus;
+  hasUnpaid: boolean;
   vehicles: { plate: string | null; make: string | null; model: string | null }[];
 }
 
@@ -257,6 +258,7 @@ export default function AdminClientsPage() {
                 <th className="px-4 py-3 font-medium">Contact</th>
                 <th className="px-4 py-3 font-medium">Véhicule(s)</th>
                 <th className="px-4 py-3 font-medium">Entretien</th>
+                <th className="px-4 py-3 font-medium">Paiement</th>
               </tr>
             </thead>
             <tbody>
@@ -268,7 +270,7 @@ export default function AdminClientsPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/clients/${client.id}`}
-                      className="text-white hover:text-amber-400 font-medium"
+                      className={`font-medium ${client.hasUnpaid ? "text-red-400 hover:text-red-300" : "text-white hover:text-amber-400"}`}
                     >
                       {client.firstName} {client.lastName}
                     </Link>
@@ -308,6 +310,13 @@ export default function AdminClientsPage() {
                           </a>
                         )}
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {client.hasUnpaid && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
+                        ⚠ Impayé
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

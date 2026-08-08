@@ -2,15 +2,49 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 import { computeMaintenanceAlert, worstAlertStatus, type AlertStatus } from "./maintenanceAlerts";
 
+// Le suivi paiement/reste dû n'était pas fait de façon fiable avant juillet 2026 — remonter plus
+// loin ferait ressortir en "impayé" des interventions anciennes jamais correctement soldées dans
+// l'appli, sans rapport avec un vrai défaut de paiement du client.
+const UNPAID_TRACKING_SINCE = new Date(Date.UTC(2026, 6, 1));
+
 const clientWithRelations = {
   vehicles: {
     include: {
       maintenanceRecords: { include: { maintenanceType: true } },
+      interventions: {
+        where: { status: "done", date: { gte: UNPAID_TRACKING_SINCE }, price: { not: null } },
+        select: {
+          price: true,
+          depositAmount: true,
+          payments: { select: { amount: true } },
+          partsUsed: { select: { price: true, boughtByClient: true } },
+        },
+      },
     },
   },
 } satisfies Prisma.ClientInclude;
 
 type ClientWithRelations = Prisma.ClientGetPayload<{ include: typeof clientWithRelations }>;
+
+// Même formule que PaymentsSection côté fiche client : dû = prix + pièces (hors achetées par le
+// client) ; payé = paiements enregistrés + acompte.
+function computeHasUnpaid(client: ClientWithRelations): boolean {
+  for (const vehicle of client.vehicles) {
+    for (const intervention of vehicle.interventions) {
+      const priceNum = intervention.price != null ? Number(intervention.price) : null;
+      if (priceNum == null) continue;
+      const partsTotal = intervention.partsUsed
+        .filter((p) => !p.boughtByClient)
+        .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
+      const totalDue = priceNum + partsTotal;
+      const paymentsTotal = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const depositNum = intervention.depositAmount != null ? Number(intervention.depositAmount) : 0;
+      const totalPaid = paymentsTotal + depositNum;
+      if (totalDue - totalPaid > 0.005) return true;
+    }
+  }
+  return false;
+}
 
 function computeClientAlertStatus(client: ClientWithRelations): AlertStatus {
   const activeVehicles = client.vehicles.filter((v) => !v.sold);
@@ -54,6 +88,7 @@ export async function listClients(query?: string) {
   return clients.map((client) => ({
     ...client,
     alertStatus: computeClientAlertStatus(client),
+    hasUnpaid: computeHasUnpaid(client),
   }));
 }
 
