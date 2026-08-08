@@ -29,7 +29,8 @@ type ClientWithRelations = Prisma.ClientGetPayload<{ include: typeof clientWithR
 
 // Même formule que PaymentsSection côté fiche client : dû = prix + pièces (hors achetées par le
 // client) ; payé = paiements enregistrés + acompte.
-function computeHasUnpaid(client: ClientWithRelations): boolean {
+function computeUnpaidAmount(client: ClientWithRelations): number {
+  let total = 0;
   for (const vehicle of client.vehicles) {
     for (const intervention of vehicle.interventions) {
       if (intervention.status !== "done" || intervention.date < UNPAID_TRACKING_SINCE) continue;
@@ -42,10 +43,11 @@ function computeHasUnpaid(client: ClientWithRelations): boolean {
       const paymentsTotal = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
       const depositNum = intervention.depositAmount != null ? Number(intervention.depositAmount) : 0;
       const totalPaid = paymentsTotal + depositNum;
-      if (totalDue - totalPaid > 0.005) return true;
+      const remaining = totalDue - totalPaid;
+      if (remaining > 0.005) total += remaining;
     }
   }
-  return false;
+  return total;
 }
 
 // Date de l'intervention la plus récente du client, tous véhicules confondus (n'importe quel
@@ -100,12 +102,16 @@ export async function listClients(query?: string) {
   });
 
   return clients
-    .map((client) => ({
-      ...client,
-      alertStatus: computeClientAlertStatus(client),
-      hasUnpaid: computeHasUnpaid(client),
-      lastInterventionDate: mostRecentInterventionDate(client),
-    }))
+    .map((client) => {
+      const unpaidAmount = computeUnpaidAmount(client);
+      return {
+        ...client,
+        alertStatus: computeClientAlertStatus(client),
+        hasUnpaid: unpaidAmount > 0.005,
+        unpaidAmount,
+        lastInterventionDate: mostRecentInterventionDate(client),
+      };
+    })
     .sort((a, b) => {
       // Intervention la plus récente en premier ; les clients sans aucune intervention (jamais
       // vus) passent en dernier plutôt qu'en tête, faute de date sur laquelle se baser.

@@ -18,7 +18,12 @@ interface ClientRow {
   email: string | null;
   alertStatus: AlertStatus;
   hasUnpaid: boolean;
+  unpaidAmount: number;
   vehicles: { plate: string | null; make: string | null; model: string | null }[];
+}
+
+function formatEUR(amount: number): string {
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(amount);
 }
 
 interface InProgressIntervention {
@@ -52,6 +57,7 @@ export default function AdminClientsPage() {
   const [reviewCandidates, setReviewCandidates] = useState<ReviewCandidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [showClients, setShowClients] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/clients")
@@ -100,6 +106,11 @@ export default function AdminClientsPage() {
     });
   }, [clients, search]);
 
+  const unpaidClients = useMemo(
+    () => clients.filter((c) => c.hasUnpaid).sort((a, b) => b.unpaidAmount - a.unpaidAmount),
+    [clients]
+  );
+
   useScrollRestoration(!loading);
 
   async function resume(i: InProgressIntervention) {
@@ -122,7 +133,7 @@ export default function AdminClientsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6 gap-2 flex-wrap">
-        <h1 className="text-2xl font-semibold">Clients</h1>
+        <h1 className="text-2xl font-semibold">Accueil</h1>
         <div className="flex items-center gap-2">
           <Link
             href="/admin/start"
@@ -187,10 +198,37 @@ export default function AdminClientsPage() {
         </div>
       )}
 
+      {unpaidClients.length > 0 && (
+        <div className="mb-6 bg-red-950/20 border border-dashed border-red-700/50 rounded-lg p-3">
+          <p className="text-sm font-medium text-red-300 mb-2">
+            ⚠ Impayés ({unpaidClients.length})
+          </p>
+          <ul className="space-y-1.5">
+            {unpaidClients.map((c) => (
+              <li key={c.id} className="flex items-center justify-between gap-2 text-sm">
+                <Link
+                  href={`/admin/clients/${c.id}`}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  {c.firstName} {c.lastName !== "." ? c.lastName : ""}
+                  {c.vehicles.length > 0 && (
+                    <span className="text-gray-500">
+                      {" "}
+                      — {c.vehicles.map((v) => [v.make, v.model, v.plate].filter(Boolean).join(" ")).join(", ")}
+                    </span>
+                  )}
+                </Link>
+                <span className="text-red-400 font-medium flex-shrink-0">{formatEUR(c.unpaidAmount)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {reviewCandidates.length > 0 && (
         <div className="mb-6 bg-yellow-950/20 border border-dashed border-yellow-700/50 rounded-lg p-3">
           <p className="text-sm font-medium text-yellow-300 mb-2">
-            ⭐ Demander un avis Google ({reviewCandidates.length})
+            ⭐ Rappels — demander un avis Google ({reviewCandidates.length})
           </p>
           <ul className="space-y-1.5">
             {reviewCandidates.map((i) => {
@@ -233,19 +271,32 @@ export default function AdminClientsPage() {
         </div>
       )}
 
-      <SearchField
-        value={search}
-        onChange={setSearch}
-        showResultCount
-        resultCount={filtered.length}
-      />
+      <button
+        type="button"
+        onClick={() => setShowClients((v) => !v)}
+        className="w-full flex items-center justify-between gap-2 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 mb-3 cursor-pointer text-left"
+      >
+        <span className="text-sm font-medium text-gray-200">
+          👥 Clients {!loading && `(${clients.length})`}
+        </span>
+        <span className="text-gray-500 text-sm">{showClients ? "▲ Fermer" : "▼ Ouvrir"}</span>
+      </button>
 
-      {loading ? (
-        <p className="text-gray-400 text-sm">Chargement...</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-gray-400 text-sm">Aucun client trouvé.</p>
-      ) : (
-        <div className="overflow-x-auto border border-gray-700 rounded-xl">
+      {showClients && (
+        <>
+          <SearchField
+            value={search}
+            onChange={setSearch}
+            showResultCount
+            resultCount={filtered.length}
+          />
+
+          {loading ? (
+            <p className="text-gray-400 text-sm">Chargement...</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-gray-400 text-sm">Aucun client trouvé.</p>
+          ) : (
+            <div className="overflow-x-auto border border-gray-700 rounded-xl">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-800 text-gray-400 text-left">
@@ -317,7 +368,9 @@ export default function AdminClientsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

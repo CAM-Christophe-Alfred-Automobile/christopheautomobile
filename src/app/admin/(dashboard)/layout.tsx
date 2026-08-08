@@ -19,7 +19,7 @@ const TOP_LEVEL_PATHS = [
 const NAV_ITEMS = [
   {
     href: "/admin",
-    label: "Clients",
+    label: "Accueil",
     isActive: (path: string) =>
       path === "/admin" ||
       path.startsWith("/admin/clients") ||
