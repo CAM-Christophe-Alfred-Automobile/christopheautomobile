@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ServiceWorkerRegister from "@/components/admin/ServiceWorkerRegister";
+import BackNavigationGuard from "@/components/admin/BackNavigationGuard";
 
 export const metadata: Metadata = {
   title: { absolute: "CAMadmin" },
@@ -16,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <ServiceWorkerRegister />
+      <BackNavigationGuard />
       {children}
     </div>
   );

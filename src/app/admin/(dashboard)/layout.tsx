@@ -48,21 +48,6 @@ const NAV_ITEMS = [
   },
 ];
 
-// router.back() dépend de l'historique du navigateur : selon le chemin parcouru pour arriver
-// ici, un seul "retour" peut retomber sur un état intermédiaire (pas une vraie page utile),
-// obligeant à appuyer une deuxième fois pour arriver quelque part de concret. On calcule donc
-// une destination fixe à la place — toujours une vraie page, en un seul appui.
-function computeBackHref(pathname: string): string {
-  if (pathname.startsWith("/admin/clients/")) return "/admin";
-  if (pathname === "/admin/parts-search") return "/admin";
-  if (pathname.startsWith("/admin/finance/") || pathname.startsWith("/admin/stock/")) {
-    const parts = pathname.split("/").filter(Boolean);
-    parts.pop();
-    return "/" + parts.join("/");
-  }
-  return "/admin";
-}
-
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -75,7 +60,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
           <div className="flex items-center justify-between gap-3">
             {showBack ? (
               <button
-                onClick={() => router.push(computeBackHref(pathname))}
+                onClick={() => router.push("/admin")}
                 className="flex items-center gap-1 text-sm text-gray-300 hover:text-amber-400 transition-colors cursor-pointer flex-shrink-0"
               >
                 ← Retour
