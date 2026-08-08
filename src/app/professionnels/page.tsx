@@ -10,6 +10,7 @@
 
 import type { Metadata } from "next";
 import { Header, Footer } from "@/components";
+import { Testimonials } from "@/components/home";
 import { JsonLd } from "@/components/SEO";
 import Whatsapp from "@/components/whatsapp/Whatsapp";
 import ProBooking from "@/components/booking/ProBooking";
@@ -187,6 +188,11 @@ export default function ProfessionnelsPage() {
               point à valoriser si votre entreprise est soumise à l&apos;OETH.
             </p>
           </section>
+
+          {/* Avis clients */}
+          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
+            <Testimonials variant="card" />
+          </div>
 
           {/* Réservation directe dans l'agenda */}
           <section id="reservation" className="mb-8 scroll-mt-24">

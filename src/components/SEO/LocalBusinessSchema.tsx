@@ -15,11 +15,24 @@
 
 import JsonLd from "./JsonLd";
 import { seoConfig } from "@/seo/config";
+import { testimonials, aggregateRating } from "@/app/data/testimonials";
 
 export default function LocalBusinessSchema() {
   return (
     <JsonLd
       data={{
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: aggregateRating.ratingValue,
+          reviewCount: aggregateRating.reviewCount,
+        },
+        review: testimonials.map((t) => ({
+          "@type": "Review",
+          author: { "@type": "Person", name: t.author },
+          datePublished: t.date,
+          reviewRating: { "@type": "Rating", ratingValue: t.rating, bestRating: 5 },
+          reviewBody: t.text,
+        })),
         "@type": seoConfig.businessTypes,
         additionalType: seoConfig.additionalType,
 

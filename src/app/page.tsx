@@ -21,7 +21,8 @@ import {
   HeroSection,
   PrestationsSection,
   AtelierSection,
-  AudienceGate
+  AudienceGate,
+  Testimonials
 } from "@/components/home";
 
 export default function HomePage() {
@@ -38,6 +39,9 @@ export default function HomePage() {
 
       {/* Section 2 : Prestations */}
       <PrestationsSection />
+
+      {/* Section 2bis : Avis clients */}
+      <Testimonials />
 
       {/* Section 3 : Atelier Mobile */}
       <AtelierSection />

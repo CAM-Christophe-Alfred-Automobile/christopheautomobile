@@ -11,3 +11,4 @@ export { default as HeroSection } from "./HeroSection";
 export { default as PrestationsSection } from "./PrestationsSection";
 export { default as AtelierSection } from "./AtelierSection";
 export { default as AudienceGate } from "./AudienceGate";
+export { default as Testimonials } from "./Testimonials";
