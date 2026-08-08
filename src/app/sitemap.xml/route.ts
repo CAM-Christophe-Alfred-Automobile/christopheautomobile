@@ -43,6 +43,8 @@ export async function GET() {
     '/tarifs',
     '/booking',
     '/contact',
+    '/professionnels',
+    '/mentions-legales',
     // ajoute ici d'autres pages importantes si besoin
   ];
 
