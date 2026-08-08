@@ -2,10 +2,12 @@
  * ============================================================================
  * 📄 COMPOSANT : AudienceGate
  * ============================================================================
- * Écran d'accueil affiché au premier passage sur la page d'accueil : demande
- * si le visiteur est un particulier ou un professionnel, puis oriente vers
- * la page correspondante. Le choix est mémorisé (localStorage) pour ne plus
- * être redemandé aux visites suivantes.
+ * Écran affiché à chaque passage sur la page d'accueil : demande si le
+ * visiteur est un particulier ou un professionnel, puis oriente vers la page
+ * correspondante. Le choix est aussi mémorisé (localStorage) pour que le
+ * reste du site (Header, liens) sache quel parcours afficher pendant la
+ * session, mais l'écran est redemandé à chaque nouvelle visite de l'accueil
+ * (beaucoup de clients ne remarquaient pas le petit badge "Changer de profil").
  * ============================================================================
  */
 
@@ -21,8 +23,7 @@ export default function AudienceGate() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const choice = window.localStorage.getItem(AUDIENCE_CHOICE_KEY);
-    if (!choice) setVisible(true);
+    setVisible(true);
   }, []);
 
   const choose = (audience: "particulier" | "professionnel") => {

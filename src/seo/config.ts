@@ -79,5 +79,9 @@ export const seoConfig = {
     "diagnostic auto domicile Salon",
     "réparation moteur Salon-de-Provence",
     "intervention mécanique 40km Salon",
+    "mécanicien indépendant renfort garage",
+    "sous-traitance mécanique automobile",
+    "mécanicien intérimaire Salon-de-Provence",
+    "renfort atelier mécanique Bouches-du-Rhône",
   ],
 };

@@ -112,9 +112,12 @@ export default function Header() {
           <div className="md:hidden flex items-center gap-2 z-10">
             <button
               onClick={resetAudienceChoice}
-              className="cursor-pointer text-[10px] leading-none text-gray-500 hover:text-gray-300 transition-colors border border-gray-700 rounded-full px-1.5 py-1"
-              title="Changer de profil"
+              className="cursor-pointer flex items-center gap-1 text-xs font-semibold leading-none text-amber-400 hover:text-amber-300 transition-colors bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/50 rounded-full px-2.5 py-1.5"
+              title="Changer de profil (particulier / professionnel)"
             >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 9a9 9 0 0114-6.7M20 15a9 9 0 01-14 6.7" />
+              </svg>
               {isPro ? "Pro" : "Particulier"}
             </button>
             <button
@@ -196,9 +199,12 @@ export default function Header() {
             </Link>
             <button
               onClick={resetAudienceChoice}
-              className="cursor-pointer text-[10px] leading-none text-gray-500 hover:text-gray-300 transition-colors border border-gray-700 rounded-full px-2 py-1"
-              title="Changer de profil"
+              className="cursor-pointer flex items-center gap-1.5 text-sm font-semibold leading-none text-amber-400 hover:text-amber-300 transition-colors bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/50 rounded-full px-3.5 py-2"
+              title="Changer de profil (particulier / professionnel)"
             >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 9a9 9 0 0114-6.7M20 15a9 9 0 01-14 6.7" />
+              </svg>
               {isPro ? "Pro" : "Particulier"}
             </button>
           </nav>

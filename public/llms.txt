@@ -1,0 +1,30 @@
+# CAM - Christophe Auto-Mobile
+
+> Mécanicien automobile indépendant basé à Salon-de-Provence (Bouches-du-Rhône, France),
+> intervenant à domicile dans un rayon de 40 km. Bac Pro mécanique automobile, 10+ ans d'expérience,
+> ancien militaire.
+
+## Pour les particuliers
+
+Entretien et réparation automobile à domicile : vidange, freinage, moteur, transmission,
+suspension, direction, électricité, climatisation, diagnostic électronique. Le client achète
+lui-même ses pièces (Autodoc, Oscaro, etc.), le mécanicien facture la main d'œuvre (selon le
+gabarit du véhicule) et un forfait de déplacement. Réservation en ligne : https://christopheautomobile.fr/booking
+
+## Pour les professionnels (garages, concessions, centres auto, agences d'intérim)
+
+Renfort mécanique ponctuel en sous-traitance : pic d'activité, remplacement, dépannage.
+Intervention en autonomie complète, camion-atelier équipé (outillage complet, valise de
+diagnostic). Deux formules : urgence (facturation horaire, selon disponibilité) ou renfort
+planifié (minimum 2 jours consécutifs). Détails et réservation :
+https://christopheautomobile.fr/professionnels
+
+## Zone d'intervention
+
+Salon-de-Provence et un rayon de 40 km alentour, incluant Aix-en-Provence, Sénas,
+Plan-de-Campagne, Miramas, et Marseille.
+
+## Contact
+
+Site : https://christopheautomobile.fr
+WhatsApp et téléphone disponibles sur le site.

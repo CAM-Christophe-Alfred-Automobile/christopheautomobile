@@ -10,19 +10,81 @@
 
 import type { Metadata } from "next";
 import { Header, Footer } from "@/components";
+import { JsonLd } from "@/components/SEO";
 import Whatsapp from "@/components/whatsapp/Whatsapp";
 import ProBooking from "@/components/booking/ProBooking";
 import { siteConfig } from "@/config/site";
+import { seoConfig } from "@/seo/config";
+
+const faq = [
+  {
+    question: "Travaillez-vous avec des agences d'intérim automobile ?",
+    answer:
+      "Oui, je réponds à des missions transmises par des agences d'intérim spécialisées automobile, en plus des demandes directes de garages, concessions et centres auto.",
+  },
+  {
+    question: "Quel est votre rayon d'intervention pour du renfort ponctuel ?",
+    answer: `Je me déplace jusqu'à ${siteConfig.rayonIntervention} km autour de ${siteConfig.city}, avec mon camion-atelier entièrement équipé (outillage complet, valise de diagnostic).`,
+  },
+  {
+    question: "Facturez-vous à l'heure ou à la journée ?",
+    answer:
+      "Deux formules : une intervention d'urgence facturée à l'heure selon disponibilité, ou un renfort planifié de 2 jours consécutifs minimum, à la journée.",
+  },
+  {
+    question: "Faut-il vous superviser sur place ?",
+    answer:
+      "Non, j'interviens en totale autonomie : plus de 10 ans d'expérience, Bac Pro en mécanique automobile et rigueur acquise dans l'armée.",
+  },
+];
 
 export const metadata: Metadata = {
-  title: "Mécanicien indépendant en renfort pour garages, concessions et centres auto | CAM",
+  title: "Mécanicien indépendant en renfort pour garages, agences d'intérim et centres auto",
   description:
-    "Mécanicien indépendant, Bac Pro et 10+ ans d'expérience : renfort ponctuel pour concessions, garages, vendeurs de véhicules d'occasion et centres auto. Réservation directe ou devis rapide par WhatsApp.",
+    "Mécanicien indépendant, Bac Pro et 10+ ans d'expérience : renfort ponctuel ou missions via agences d'intérim pour concessions, garages, vendeurs de véhicules d'occasion et centres auto autour de Salon-de-Provence. Réservation directe ou devis rapide par WhatsApp.",
 };
 
 export default function ProfessionnelsPage() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
+      <JsonLd
+        data={{
+          "@type": "Service",
+          serviceType: "Renfort mécanique automobile pour professionnels",
+          name: "Renfort mécanicien indépendant pour garages, concessions et agences d'intérim",
+          description: metadata.description,
+          provider: {
+            "@type": "LocalBusiness",
+            name: seoConfig.name,
+            telephone: seoConfig.phone,
+            email: seoConfig.email,
+          },
+          areaServed: {
+            "@type": "GeoCircle",
+            geoMidpoint: {
+              "@type": "GeoCoordinates",
+              latitude: seoConfig.serviceArea.lat,
+              longitude: seoConfig.serviceArea.lon,
+            },
+            geoRadius: seoConfig.serviceArea.radiusMeters,
+          },
+          audience: {
+            "@type": "BusinessAudience",
+            audienceType:
+              "Garages, concessions automobiles, centres auto, agences d'intérim spécialisées automobile",
+          },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@type": "FAQPage",
+          mainEntity: faq.map((f) => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: { "@type": "Answer", text: f.answer },
+          })),
+        }}
+      />
       <Header />
       <main className="flex-1 p-8 text-white">
         <div className="max-w-4xl mx-auto">
@@ -33,7 +95,8 @@ export default function ProfessionnelsPage() {
             <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Mécanicien indépendant, je propose mes services en sous-traitance
               aux concessions automobiles, garages, vendeurs de véhicules
-              d&apos;occasion et centres auto qui ont besoin d&apos;un renfort
+              d&apos;occasion, centres auto et agences d&apos;intérim
+              spécialisées automobile qui ont besoin d&apos;un renfort
               ponctuel : pic d&apos;activité, remplacement, dépannage.
             </p>
           </div>
@@ -118,7 +181,7 @@ export default function ProfessionnelsPage() {
                 <div>
                   <p className="font-semibold text-white">Renfort planifié</p>
                   <p className="text-sm text-gray-400">
-                    Minimum 1 journée complète, 9h00 - 17h30
+                    Minimum 2 jours consécutifs, 9h00 - 17h30
                   </p>
                 </div>
                 <p className="text-xl font-bold text-blue-400">28 €/h</p>
@@ -140,6 +203,19 @@ export default function ProfessionnelsPage() {
               Voir mes disponibilités et réserver
             </h2>
             <ProBooking />
+          </section>
+
+          {/* FAQ */}
+          <section className="bg-gray-800 rounded-xl border border-gray-700 p-6 mb-8">
+            <h2 className="text-2xl font-bold text-amber-400 mb-4">Questions fréquentes</h2>
+            <div className="space-y-4">
+              {faq.map((f) => (
+                <div key={f.question}>
+                  <h3 className="font-semibold text-white mb-1">{f.question}</h3>
+                  <p className="text-sm text-gray-300 leading-relaxed">{f.answer}</p>
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* Contact */}
