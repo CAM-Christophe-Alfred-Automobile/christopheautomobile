@@ -12,6 +12,7 @@ export interface InterventionInput {
   toolLink?: string | null;
   mileage?: number | null;
   hoursSpent?: number | null;
+  estimatedHours?: number | null;
   vehicleCondition?: string | null;
   status?: "draft" | "done" | "reserved";
   chronoStartedAt?: Date | null;

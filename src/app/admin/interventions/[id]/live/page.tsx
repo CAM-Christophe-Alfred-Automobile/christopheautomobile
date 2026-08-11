@@ -31,6 +31,7 @@ interface InterventionData {
   status: string;
   chronoStartedAt: string | null;
   hoursSpent: string | number | null;
+  estimatedHours: string | number | null;
   photosBefore: string[];
   photosAfter: string[];
   photos: string[];
@@ -643,11 +644,14 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
             <p className="text-2xl font-mono text-gray-400">{formatElapsed(currentHoursSpent() * 3_600_000)}</p>
             {data.hoursSpent ? (
               <p className="text-xs text-gray-500 mt-1">
-                Chrono à l&apos;arrêt — temps déjà enregistré (estimation à la réservation ou sessions précédentes), pas du
-                temps en cours.
+                Chrono à l&apos;arrêt — temps réellement travaillé lors d&apos;une session précédente, pas du temps en
+                cours.
               </p>
             ) : (
-              <p className="text-xs text-gray-500 mt-1">Chrono pas encore démarré.</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Chrono pas encore démarré — repart de 0, jamais additionné à une estimation.
+                {data.estimatedHours != null && ` (estimé à la réservation : ≈${data.estimatedHours}h, purement indicatif)`}
+              </p>
             )}
             <button
               onClick={startChrono}

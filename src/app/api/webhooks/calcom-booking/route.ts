@@ -194,7 +194,7 @@ export async function POST(req: Request) {
         calcomBookingUid: uid,
         normalPrice,
         dossierFee,
-        hoursSpent: hours,
+        estimatedHours: hours,
       },
     });
 
@@ -262,7 +262,7 @@ export async function POST(req: Request) {
       dossierFee,
       distanceKm,
       travelFee,
-      hoursSpent: hours,
+      estimatedHours: hours,
     },
   });
 

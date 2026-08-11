@@ -67,6 +67,7 @@ interface Intervention {
   vehicleCondition: string | null;
   mileage: number | null;
   hoursSpent: string | number | null;
+  estimatedHours: string | number | null;
   partsUsed: PartUsed[];
   payments: Payment[];
   maintenanceTypeId: string | null;
@@ -1260,12 +1261,17 @@ function InterventionHistory({
           status: entryStatus,
           price: price ? Number(price) : null,
           mileage: mileage ? Number(mileage) : null,
-          hoursSpent: hoursSpent ? Number(hoursSpent) : null,
+          // "reserved" : la durée saisie n'est qu'une estimation, jamais du temps réellement
+          // travaillé — elle va dans estimatedHours, pas hoursSpent, pour que démarrer le chrono
+          // plus tard reparte de zéro au lieu de s'additionner à cette estimation (voir
+          // l'incident Golf5/christian laffitte : 6h d'estimation + chrono réel = 11h facturées).
+          hoursSpent: entryStatus === "reserved" ? null : hoursSpent ? Number(hoursSpent) : null,
           maintenanceTypeIds,
           notes: notes || null,
           vehicleCondition: vehicleCondition || null,
           ...(entryStatus === "reserved"
             ? {
+                estimatedHours: hoursSpent ? Number(hoursSpent) : null,
                 bookedOnline,
                 depositAmount: depositAmount ? Number(depositAmount) : null,
                 depositDate: depositDate || null,
@@ -1895,6 +1901,7 @@ function InterventionHistory({
                 )}
                 {!isPersonal && (
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500">
+                    {i.estimatedHours != null && <span>≈ {i.estimatedHours}h estimées</span>}
                     {i.price != null && <span>Main d&apos;œuvre estimée : {i.price}€</span>}
                     {i.deliveryPrice != null && <span>Livraison : {i.deliveryPrice}€</span>}
                     {i.dossierFee != null && <span>Frais de dossier : {i.dossierFee}€</span>}

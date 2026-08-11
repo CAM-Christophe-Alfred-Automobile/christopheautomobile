@@ -101,7 +101,8 @@ model Intervention {
   vehicleCondition String? // annexe : état constaté (ex: plaquettes ~50%, pneu AV usé)
 
   mileage    Int? // kilométrage au moment de l'intervention
-  hoursSpent Decimal? @db.Decimal(5, 2) // temps passé, en heures
+  hoursSpent Decimal? @db.Decimal(5, 2) // temps RÉELLEMENT travaillé (accumulé par le chrono, ou saisi à la main pour une entrée déjà terminée) — jamais une estimation, pour ne pas fausser le prix facturé au client
+  estimatedHours Decimal? @db.Decimal(5, 2) // durée estimée à la réservation, purement indicative — distinct de hoursSpent pour que démarrer le chrono reparte de zéro plutôt que de s'additionner à une estimation
 
   status          String    @default("done") // draft (en cours sur place) | done (terminée) | reserved (réservation prévue, pas encore commencée)
   reviewReminderSent Boolean @default(false) // relance avis Google déjà envoyée pour cette intervention
