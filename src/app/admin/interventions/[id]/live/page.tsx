@@ -81,6 +81,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [finalDescription, setFinalDescription] = useState("");
   const [finalMaintenanceTypeIds, setFinalMaintenanceTypeIds] = useState<string[]>([]);
   const [finalPrice, setFinalPrice] = useState("");
+  const [finalMileage, setFinalMileage] = useState("");
   const [clientLastName, setClientLastName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientEmail, setClientEmail] = useState("");
@@ -390,12 +391,17 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
     setClientEmail(data.vehicle.client.email || "");
     setClientAddress(data.vehicle.client.address || "");
     setWearChecks({ plaquettes: "", pneus: "", disquesAvant: "", disquesArriere: "" });
+    setFinalMileage(data.vehicle.mileage != null ? String(data.vehicle.mileage) : "");
     setShowFinalize(true);
   }
 
   async function handleFinalize(e: React.FormEvent) {
     e.preventDefault();
     if (!data) return;
+    if (!finalMileage.trim()) {
+      alert("⚠️ Le kilométrage est requis pour terminer l'intervention.");
+      return;
+    }
     if (!confirm("Es-tu sûr de vouloir terminer l'intervention ? Si ce n'est pas fini, utilise plutôt \"pas terminé — mettre en pause\".")) {
       return;
     }
@@ -431,6 +437,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         maintenanceTypeIds: finalMaintenanceTypeIds,
         price: !data.vehicle.client.isPersonal && finalPrice ? Number(finalPrice) : null,
         hoursSpent: totalHours,
+        mileage: Number(finalMileage),
         vehicleCondition: vehicleConditionUpdate,
         status: "done",
         completedAt: new Date().toISOString(),
@@ -934,6 +941,19 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
       ) : (
         <form onSubmit={handleFinalize} className="space-y-3 border-t border-gray-700 pt-4">
           <h2 className="text-sm font-medium text-gray-300">Finaliser l&apos;intervention</h2>
+          <div>
+            <label className="block text-[11px] text-gray-500 mb-0.5">
+              Kilométrage au moment de l&apos;intervention
+            </label>
+            <input
+              type="number"
+              required
+              min="0"
+              className={inputClass}
+              value={finalMileage}
+              onChange={(e) => setFinalMileage(e.target.value)}
+            />
+          </div>
           <div>
             <label className="block text-[11px] text-gray-500 mb-0.5">Ce qui a été fait</label>
             <input

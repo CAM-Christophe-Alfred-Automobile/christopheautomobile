@@ -162,6 +162,19 @@ export async function updateIntervention(id: string, data: Partial<InterventionI
     }
   }
 
+  // Le kilométrage saisi en finalisant une intervention (voir la page en direct) passe par ici,
+  // pas par addIntervention — même règle qu'à la création : ne recule jamais le compteur du
+  // véhicule (relevé antérieur oublié, saisie inversée...).
+  if (data.mileage != null) {
+    const vehicle = await prisma.vehicle.findUniqueOrThrow({ where: { id: intervention.vehicleId } });
+    if (vehicle.mileage == null || data.mileage > vehicle.mileage) {
+      await prisma.vehicle.update({
+        where: { id: intervention.vehicleId },
+        data: { mileage: data.mileage, mileageUpdatedAt: intervention.date },
+      });
+    }
+  }
+
   return intervention;
 }
 
