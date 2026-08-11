@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDailyIncomeForMonth } from "@/services/finance/transactions";
+import { getIncomeAgenda } from "@/services/finance/agenda";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,14 @@ export default async function FinanceAgendaPage({
   const month = params.month ? Number(params.month) : now.getUTCMonth() + 1;
 
   const { days, total } = await getDailyIncomeForMonth(year, month, "PRO");
+
+  // Rentrées futures connues sur le mois affiché : revenus récurrents actifs +
+  // interventions réservées/en cours (prix facturé ou estimé), à partir d'aujourd'hui.
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
+  const monthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59));
+  const todayStr = now.toISOString().slice(0, 10);
+  const upcoming = (await getIncomeAgenda(monthStart, monthEnd)).filter((e) => e.date >= todayStr);
+  const upcomingTotal = upcoming.reduce((sum, e) => sum + e.amount, 0);
 
   const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1));
   // getUTCDay() : 0 = dimanche → décale pour que la semaine commence lundi (0 = lundi).
@@ -91,6 +100,38 @@ export default async function FinanceAgendaPage({
           )
         )}
       </div>
+
+      {upcoming.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-400">Rentrées prévues restant ce mois-ci</p>
+            <p className="text-lg font-semibold text-emerald-400">{formatEUR(upcomingTotal)}</p>
+          </div>
+          <div className="divide-y divide-gray-800 text-sm">
+            {upcoming.map((e, i) => {
+              const label = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(
+                new Date(`${e.date}T12:00:00Z`)
+              );
+              const row = (
+                <div className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-gray-300 truncate">
+                    {label} — {e.label}
+                    {e.isEstimate && <span className="text-gray-500"> (estimation)</span>}
+                  </span>
+                  <span className="text-emerald-400 font-medium flex-shrink-0">{formatEUR(e.amount)}</span>
+                </div>
+              );
+              return e.href ? (
+                <Link key={i} href={e.href} className="block hover:bg-gray-800/50 -mx-1 px-1 rounded">
+                  {row}
+                </Link>
+              ) : (
+                <div key={i}>{row}</div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
