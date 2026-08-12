@@ -133,6 +133,11 @@ model Payment {
   date   DateTime @default(now()) // date à laquelle le paiement a été reçu (utilisé pour la synchro espèces vers Finance Copilot)
   note   String? // ex: "Acompte avant intervention"
 
+  // Paiements "card" (Stripe / terminal carte) uniquement : l'argent met ~10 jours à
+  // arriver réellement en banque, donc il n'est affiché comme reçu dans l'agenda finance
+  // qu'une fois ce champ renseigné (bouton "Confirmer reçu"), plutôt que le jour même.
+  receivedConfirmedAt DateTime?
+
   createdAt DateTime @default(now())
 
   @@index([interventionId])

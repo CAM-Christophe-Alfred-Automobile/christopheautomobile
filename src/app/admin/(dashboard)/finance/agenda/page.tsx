@@ -1,11 +1,23 @@
 import Link from "next/link";
 import { getDailyIncomeForMonth } from "@/services/finance/transactions";
 import { getIncomeAgenda } from "@/services/finance/agenda";
+import { ConfirmCardPaymentButton } from "@/components/admin/ConfirmCardPaymentButton";
 
 export const dynamic = "force-dynamic";
 
 function formatEUR(amount: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(amount);
+}
+
+// Version compacte pour les cases du calendrier (peu de place) : pas de décimales
+// quand le montant est rond, pour rester lisible sans zoomer sur téléphone.
+function formatEURCompact(amount: number) {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 }
 
 const WEEKDAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
@@ -27,7 +39,12 @@ export default async function FinanceAgendaPage({
   const monthStart = new Date(Date.UTC(year, month - 1, 1));
   const monthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59));
   const todayStr = now.toISOString().slice(0, 10);
-  const upcoming = (await getIncomeAgenda(monthStart, monthEnd)).filter((e) => e.date >= todayStr);
+  // Les paiements carte en attente de confirmation restent affichés même une fois leur date
+  // d'arrivée attendue dépassée (c'est justement le cas à vérifier en priorité), contrairement
+  // aux autres rentrées prévues qui ne montrent que ce qui reste à venir.
+  const upcoming = (await getIncomeAgenda(monthStart, monthEnd)).filter(
+    (e) => e.kind === "card-payment-pending" || e.date >= todayStr
+  );
   const upcomingTotal = upcoming.reduce((sum, e) => sum + e.amount, 0);
 
   const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1));
@@ -88,10 +105,10 @@ export default async function FinanceAgendaPage({
                 cell.amount > 0 ? "border-emerald-700/40 bg-emerald-950/20" : "border-gray-800 bg-gray-900/50"
               }`}
             >
-              <span className="text-[11px] text-gray-500">{cell.day}</span>
+              <span className="text-xs text-gray-400">{cell.day}</span>
               {cell.amount > 0 && (
-                <span className="mt-auto text-xs sm:text-sm font-medium text-emerald-400 truncate">
-                  {formatEUR(cell.amount)}
+                <span className="mt-auto text-[13px] sm:text-sm font-semibold text-emerald-400 truncate">
+                  {formatEURCompact(cell.amount)}
                 </span>
               )}
             </div>
@@ -112,6 +129,27 @@ export default async function FinanceAgendaPage({
               const label = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(
                 new Date(`${e.date}T12:00:00Z`)
               );
+              const isPendingCard = e.kind === "card-payment-pending";
+              const isOverdue = isPendingCard && e.date < todayStr;
+
+              if (isPendingCard) {
+                return (
+                  <div key={i} className="flex items-center justify-between gap-3 py-2">
+                    <span className={`truncate ${isOverdue ? "text-amber-400" : "text-gray-300"}`}>
+                      {label} — {e.label}
+                      <span className="text-amber-500">
+                        {" "}
+                        {isOverdue ? "(en retard, à vérifier)" : "(carte, en attente d'arrivée)"}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-amber-400 font-medium">{formatEUR(e.amount)}</span>
+                      {e.paymentId && <ConfirmCardPaymentButton paymentId={e.paymentId} />}
+                    </span>
+                  </div>
+                );
+              }
+
               const row = (
                 <div className="flex items-center justify-between gap-3 py-2">
                   <span className="text-gray-300 truncate">

@@ -263,3 +263,10 @@ export async function addPayment(interventionId: string, data: PaymentInput) {
 export async function removePayment(id: string) {
   return prisma.payment.delete({ where: { id } });
 }
+
+// Paiement "card" (Stripe / terminal carte) confirmé comme réellement arrivé en banque —
+// voir le champ Payment.receivedConfirmedAt. Fait disparaître l'entrée "en attente" de
+// l'agenda finance ; ne crée pas de transaction (la synchro bancaire s'en charge déjà).
+export async function confirmPaymentReceived(id: string) {
+  return prisma.payment.update({ where: { id }, data: { receivedConfirmedAt: new Date() } });
+}
