@@ -370,7 +370,7 @@ export default function ZoneBooking({
             />
             <input
               type="tel"
-              placeholder="Téléphone"
+              placeholder="Téléphone (ex: 06 12 34 56 78)"
               value={telephone}
               onChange={(e) => setTelephone(e.target.value)}
               className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500"

@@ -4,6 +4,7 @@ import { getSlotDef } from "@/app/data/particulierSlots";
 import { getVehicleTierMultiplier } from "@/app/data/vehicleTiers";
 import servicesData from "@/app/data/services.json";
 import { prisma } from "@/lib/prisma";
+import { toE164French } from "@/lib/phoneNumber";
 
 const CALCOM_API_VERSION_BOOKINGS = "2024-08-13";
 
@@ -152,7 +153,7 @@ export async function POST(req: Request) {
       attendee: {
         name: nom,
         email,
-        phoneNumber: telephone || undefined,
+        phoneNumber: toE164French(telephone),
         timeZone: "Europe/Paris",
         language: "fr",
       },

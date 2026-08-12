@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { proEventTypes, type ProBookingType } from "@/app/data/proSchedule";
+import { toE164French } from "@/lib/phoneNumber";
 
 const CALCOM_API_VERSION_BOOKINGS = "2024-08-13";
 
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
         attendee: {
           name: nom,
           email,
-          phoneNumber: telephone,
+          phoneNumber: toE164French(telephone),
           timeZone: "Europe/Paris",
           language: "fr",
         },
