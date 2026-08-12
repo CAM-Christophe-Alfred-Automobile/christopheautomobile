@@ -132,3 +132,39 @@ body {
 html {
   overflow: auto !important;
 }
+
+/* --- CAMadmin : retour visuel au clic/appui --------------------------------
+   Sur PC comme sur téléphone, on veut voir immédiatement sur quoi on vient
+   d'appuyer (bouton, lien, case à cocher...). Un léger rétrécissement +
+   assombrissement au moment de l'appui suffit, sans avoir à retoucher
+   chaque bouton individuellement. */
+.camadmin button:not(:disabled):active,
+.camadmin a:active,
+.camadmin [role="button"]:active {
+  transform: scale(0.96);
+  filter: brightness(0.85);
+}
+
+.camadmin button:focus-visible,
+.camadmin a:focus-visible,
+.camadmin input:focus-visible,
+.camadmin select:focus-visible,
+.camadmin textarea:focus-visible,
+.camadmin [role="button"]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* --- CAMadmin : taille de texte minimum sur téléphone ----------------------
+   Plusieurs libellés/infos secondaires sont en 9-11px, illisibles sans zoomer
+   sur un écran de téléphone. On relève un plancher de lisibilité sur mobile
+   uniquement, sans toucher à l'affichage PC (plus large, déjà lisible). */
+@media (max-width: 768px) {
+  .camadmin [class*="text-[9px]"],
+  .camadmin [class*="text-[10px]"] {
+    font-size: 12px !important;
+  }
+  .camadmin [class*="text-[11px]"] {
+    font-size: 13px !important;
+  }
+}
