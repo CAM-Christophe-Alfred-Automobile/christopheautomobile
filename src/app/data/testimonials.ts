@@ -1,11 +1,10 @@
 // Avis clients réels, repris de la fiche Google Business de Christophe (avis vérifiés Google).
 // Ne pas inventer/modifier un avis : uniquement des textes réels, avec attribution.
-// TODO: demander à Christophe la note globale + nombre total d'avis affichés en haut de sa
-// fiche Google pour renseigner reviewCount ci-dessous (actuellement omis, pas de valeur confirmée).
+// reviewCount confirmé le 2026-08-19 via la fiche Google Business (5/5 · 16 avis).
 
 export const aggregateRating = {
   ratingValue: 5,
-  reviewCount: undefined as number | undefined,
+  reviewCount: 16 as number | undefined,
   sourceLabel: "Avis Google",
   sourceUrl: "https://www.google.com/search?q=Christophe+AutoMobile+(CAM)&kgmid=/g/11mrhqnz4m",
 };
