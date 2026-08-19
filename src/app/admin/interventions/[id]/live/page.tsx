@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { buildWhatsAppLink, buildStartWorkMessage, buildFinishWorkMessage, buildDelayMessage } from "@/lib/whatsapp";
 import { VEHICLE_TIERS, getVehicleTierMultiplier, type VehicleTier } from "@/app/data/vehicleTiers";
+import PrestationAutocomplete from "@/components/admin/PrestationAutocomplete";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -956,12 +957,11 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
           </div>
           <div>
             <label className="block text-[11px] text-gray-500 mb-0.5">Ce qui a été fait</label>
-            <input
-              type="text"
+            <PrestationAutocomplete
               required
               className={inputClass}
               value={finalDescription}
-              onChange={(e) => setFinalDescription(e.target.value)}
+              onChange={setFinalDescription}
             />
           </div>
           <div>

@@ -9,6 +9,7 @@ import { computeMaintenanceAlert } from "@/services/admin/maintenanceAlerts";
 import { buildWhatsAppLink, buildRelanceMessage, buildQuoteMessage, buildPartsOrderMessage } from "@/lib/whatsapp";
 import { MAINTENANCE_PART_HINTS, buildSupplierSearchUrl } from "@/lib/maintenancePartHints";
 import { getVehicleTierMultiplier, type VehicleTier } from "@/app/data/vehicleTiers";
+import PrestationAutocomplete from "@/components/admin/PrestationAutocomplete";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -1523,13 +1524,12 @@ function InterventionHistory({
             <label className="block text-[11px] text-gray-500 mb-0.5">
               {entryStatus === "reserved" ? "Ce qui est prévu" : "Ce qui a été fait"}
             </label>
-            <input
-              type="text"
+            <PrestationAutocomplete
               placeholder={entryStatus === "reserved" ? "Description de l'intervention prévue" : "Description de l'intervention"}
               required
               className={inputClass}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
             />
           </div>
 
