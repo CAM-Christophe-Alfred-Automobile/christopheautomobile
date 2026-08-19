@@ -1270,6 +1270,10 @@ function InterventionHistory({
           // plus tard reparte de zéro au lieu de s'additionner à cette estimation (voir
           // l'incident Golf5/christian laffitte : 6h d'estimation + chrono réel = 11h facturées).
           hoursSpent: entryStatus === "reserved" ? null : hoursSpent ? Number(hoursSpent) : null,
+          // Sans ça, une intervention créée directement en "terminée" (sans passer par le
+          // chrono en direct) n'a jamais de date de finalisation, ce qui bloque silencieusement
+          // la réouverture sous 7 jours (voir assertReopenAllowed dans interventions.ts).
+          completedAt: entryStatus === "done" ? new Date().toISOString() : null,
           maintenanceTypeIds,
           notes: notes || null,
           vehicleCondition: vehicleCondition || null,
@@ -2790,7 +2794,8 @@ function FinalCalcBreakdown({
   const partsTotal = intervention.partsUsed
     .filter((p) => !p.boughtByClient)
     .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-  const total = priceNum + travelFeeNum + partsTotal;
+  const deliveryPriceNum = intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0;
+  const total = priceNum + travelFeeNum + deliveryPriceNum + partsTotal;
   const urssafDue = total * (urssafRate / 100);
   const net = total - urssafDue;
   // Les pièces sont refacturées au client sans marge : cet argent ne fait que transiter (il a
@@ -2821,6 +2826,12 @@ function FinalCalcBreakdown({
         <div className="flex justify-between text-gray-400">
           <span>+ Trajet</span>
           <span>{travelFeeNum.toFixed(2)}€</span>
+        </div>
+      )}
+      {deliveryPriceNum > 0 && (
+        <div className="flex justify-between text-gray-400">
+          <span>+ Livraison</span>
+          <span>{deliveryPriceNum.toFixed(2)}€</span>
         </div>
       )}
       {partsTotal > 0 && (
@@ -2879,7 +2890,9 @@ function PaymentsSection({
   const partsTotal = intervention.partsUsed
     .filter((p) => !p.boughtByClient)
     .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-  const totalDue = priceNum != null ? priceNum + partsTotal : null;
+  const travelFeeNum = intervention.travelFee != null ? Number(intervention.travelFee) : 0;
+  const deliveryPriceNum = intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0;
+  const totalDue = priceNum != null ? priceNum + partsTotal + travelFeeNum + deliveryPriceNum : null;
   const remaining = totalDue != null ? totalDue - totalPaid : null;
   const urssafDue = totalPaid * (urssafRate / 100);
   const daysSince = Math.floor((Date.now() - new Date(intervention.date).getTime()) / 86_400_000);

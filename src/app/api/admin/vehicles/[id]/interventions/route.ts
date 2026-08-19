@@ -22,6 +22,7 @@ export async function POST(req: Request, { params }: Context) {
       date: new Date(body.date),
       endDate: body.endDate ? new Date(body.endDate) : null,
       depositDate: body.depositDate ? new Date(body.depositDate) : null,
+      completedAt: body.completedAt ? new Date(body.completedAt) : null,
     });
     return NextResponse.json({ success: true, intervention });
   } catch (error) {

@@ -17,6 +17,8 @@ const clientWithRelations = {
           status: true,
           price: true,
           depositAmount: true,
+          travelFee: true,
+          deliveryPrice: true,
           payments: { select: { amount: true } },
           partsUsed: { select: { price: true, boughtByClient: true } },
         },
@@ -39,7 +41,9 @@ function computeUnpaidAmount(client: ClientWithRelations): number {
       const partsTotal = intervention.partsUsed
         .filter((p) => !p.boughtByClient)
         .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-      const totalDue = priceNum + partsTotal;
+      const travelFeeNum = intervention.travelFee != null ? Number(intervention.travelFee) : 0;
+      const deliveryPriceNum = intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0;
+      const totalDue = priceNum + partsTotal + travelFeeNum + deliveryPriceNum;
       const paymentsTotal = intervention.payments.reduce((sum, p) => sum + Number(p.amount), 0);
       const depositNum = intervention.depositAmount != null ? Number(intervention.depositAmount) : 0;
       const totalPaid = paymentsTotal + depositNum;
