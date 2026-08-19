@@ -345,9 +345,23 @@
   {
     "categorie": "Moteur",
     "service": "EGR / FAP",
-    "description": "Nettoyage ou remplacement",
+    "description": "Nettoyage",
     "duree": 100,
     "prix": "à partir de 60€"
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Vanne EGR",
+    "description": "Remplacement",
+    "duree": 100,
+    "prix": "à partir de 60€"
+  },
+  {
+    "categorie": "Moteur",
+    "service": "Filtre à particules (FAP)",
+    "description": "Remplacement",
+    "duree": 300,
+    "prix": "à partir de 300€"
   },
   {
     "categorie": "Moteur",
