@@ -21,6 +21,8 @@ export default function CalculPrixPage() {
   const [minutes, setMinutes] = useState("0");
   const [saving, setSaving] = useState(false);
   const [tier, setTier] = useState<VehicleTier>("standard");
+  const [travelRate, setTravelRate] = useState(0.35);
+  const [distanceKm, setDistanceKm] = useState("0");
 
   useEffect(() => {
     fetch("/api/admin/shop-settings")
@@ -30,6 +32,7 @@ export default function CalculPrixPage() {
           const r = Number(d.settings.hourlyRate);
           setDefaultRate(r);
           setRate(String(r));
+          setTravelRate(Number(d.settings.travelRatePerKm));
         }
       });
   }, []);
@@ -37,7 +40,11 @@ export default function CalculPrixPage() {
   const totalHours = (Number(hours) || 0) + (Number(minutes) || 0) / 60;
   const basePrice = totalHours * (Number(rate) || 0);
   const multiplier = getVehicleTierMultiplier(tier);
-  const price = basePrice * multiplier;
+  const laborPrice = basePrice * multiplier;
+  // Tarif au km facturé pour le trajet aller simple depuis Salon-de-Provence, même logique
+  // que sur le site public (christopheautomobile.fr) au moment de la réservation en ligne.
+  const travelFee = (Number(distanceKm) || 0) * travelRate;
+  const price = laborPrice + travelFee;
   const rateChanged = defaultRate != null && Number(rate) !== defaultRate && !Number.isNaN(Number(rate));
 
   function applyPreset(h: number, m: number) {
@@ -147,17 +154,33 @@ export default function CalculPrixPage() {
           </p>
         </div>
 
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">
+            Trajet (km depuis Salon-de-Provence, aller simple)
+          </label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            value={distanceKm}
+            onChange={(e) => setDistanceKm(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+          />
+          <span className="text-[11px] text-gray-500">{travelRate}€/km, comme sur le site</span>
+        </div>
+
         <div className="rounded-xl bg-gray-900 border border-gray-700 p-5 text-center">
           <p className="text-xs text-gray-500 mb-1">
             {totalHours.toFixed(2)}h × {rate || 0}€/h
             {multiplier !== 1 && ` × ${multiplier.toFixed(2)} (gabarit)`}
+            {travelFee > 0 && ` + ${travelFee.toFixed(2)}€ trajet`}
           </p>
           <p className="text-4xl font-bold text-amber-400">
             {price.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
           </p>
           {multiplier !== 1 && (
             <p className="text-[11px] text-gray-500 mt-1">
-              Prix standard (berline) : {basePrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+              Prix standard (berline), hors trajet : {basePrice.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
             </p>
           )}
         </div>

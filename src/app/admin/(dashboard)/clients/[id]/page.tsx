@@ -8,6 +8,7 @@ import LongPressButton from "@/components/admin/LongPressButton";
 import { computeMaintenanceAlert } from "@/services/admin/maintenanceAlerts";
 import { buildWhatsAppLink, buildRelanceMessage, buildQuoteMessage, buildPartsOrderMessage } from "@/lib/whatsapp";
 import { MAINTENANCE_PART_HINTS, buildSupplierSearchUrl } from "@/lib/maintenancePartHints";
+import { getVehicleTierMultiplier, type VehicleTier } from "@/app/data/vehicleTiers";
 
 const inputClass =
   "w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white " +
@@ -80,6 +81,7 @@ interface Intervention {
   depositDate: string | null;
   deliveryPrice: string | number | null;
   dossierFee: string | number | null;
+  travelFee: string | number | null;
 }
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -125,6 +127,7 @@ interface Vehicle {
   sold: boolean;
   soldAt: string | null;
   previousOwnerName: string | null;
+  tier: string | null;
   interventions: Intervention[];
   plannedRepairs: PlannedRepair[];
   maintenanceRecords: MaintenanceRecord[];
@@ -1930,7 +1933,14 @@ function InterventionHistory({
                     Reprendre
                   </a>
                 </div>
-                {!isPersonal && <FinalCalcBreakdown intervention={i} urssafRate={urssafRate} />}
+                {!isPersonal && (
+                  <FinalCalcBreakdown
+                    intervention={i}
+                    urssafRate={urssafRate}
+                    hourlyRate={hourlyRate}
+                    vehicleTier={vehicle.tier}
+                  />
+                )}
                 {!isPersonal && <PaymentsSection intervention={i} urssafRate={urssafRate} onChanged={onChanged} />}
               </li>
             ) : (
@@ -1941,7 +1951,9 @@ function InterventionHistory({
                 clientFirstName={clientFirstName}
                 clientPhone={clientPhone}
                 vehicleLabel={[vehicle.make, vehicle.model, vehicle.plate].filter(Boolean).join(" ") || "votre véhicule"}
+                vehicleTier={vehicle.tier}
                 urssafRate={urssafRate}
+                hourlyRate={hourlyRate}
                 onChanged={onChanged}
               />
             )
@@ -1958,7 +1970,9 @@ function InterventionRow({
   clientFirstName,
   clientPhone,
   vehicleLabel,
+  vehicleTier,
   urssafRate,
+  hourlyRate,
   onChanged,
 }: {
   intervention: Intervention;
@@ -1966,7 +1980,9 @@ function InterventionRow({
   clientFirstName: string;
   clientPhone: string | null;
   vehicleLabel: string;
+  vehicleTier: string | null;
   urssafRate: number;
+  hourlyRate: number;
   onChanged: () => void;
 }) {
   const [uploadingCategory, setUploadingCategory] = useState<"before" | "after" | "damage" | null>(null);
@@ -2291,7 +2307,14 @@ function InterventionRow({
         <div className="text-xs text-gray-500 mt-1 whitespace-pre-wrap">📋 {intervention.vehicleCondition}</div>
       )}
 
-      {!isPersonal && <FinalCalcBreakdown intervention={intervention} urssafRate={urssafRate} />}
+      {!isPersonal && (
+        <FinalCalcBreakdown
+          intervention={intervention}
+          urssafRate={urssafRate}
+          hourlyRate={hourlyRate}
+          vehicleTier={vehicleTier}
+        />
+      )}
 
       {!isPersonal && <PaymentsSection intervention={intervention} urssafRate={urssafRate} onChanged={onChanged} />}
 
@@ -2744,23 +2767,62 @@ function PaymentForm({
   );
 }
 
-function FinalCalcBreakdown({ intervention, urssafRate }: { intervention: Intervention; urssafRate: number }) {
+function FinalCalcBreakdown({
+  intervention,
+  urssafRate,
+  hourlyRate,
+  vehicleTier,
+}: {
+  intervention: Intervention;
+  urssafRate: number;
+  hourlyRate: number;
+  vehicleTier: string | null;
+}) {
   const priceNum = intervention.price != null ? Number(intervention.price) : null;
   if (priceNum == null) return null;
+
+  const normalPriceNum = intervention.normalPrice != null ? Number(intervention.normalPrice) : null;
+  const hoursSpentNum = intervention.hoursSpent != null ? Number(intervention.hoursSpent) : null;
+  const tierMultiplier = getVehicleTierMultiplier((vehicleTier as VehicleTier) || "standard");
+  const chronoPrice = hoursSpentNum ? hoursSpentNum * hourlyRate * tierMultiplier : null;
+  const travelFeeNum = intervention.travelFee != null ? Number(intervention.travelFee) : 0;
 
   const partsTotal = intervention.partsUsed
     .filter((p) => !p.boughtByClient)
     .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-  const total = priceNum + partsTotal;
+  const total = priceNum + travelFeeNum + partsTotal;
   const urssafDue = total * (urssafRate / 100);
   const net = total - urssafDue;
+  // Les pièces sont refacturées au client sans marge : cet argent ne fait que transiter (il a
+  // déjà été avancé à l'achat), donc on le retire du net pour avoir le vrai gain disponible.
+  const realProfit = net - partsTotal;
 
   return (
     <div className="mt-2 text-xs bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-2 space-y-0.5">
+      {normalPriceNum != null && normalPriceNum !== priceNum && (
+        <div className="flex justify-between text-gray-500">
+          <span>Prix donné au client au rendez-vous</span>
+          <span>{normalPriceNum.toFixed(2)}€</span>
+        </div>
+      )}
+      {chronoPrice != null && (
+        <div className="flex justify-between text-gray-500">
+          <span>
+            Prix chrono ({hoursSpentNum}h × {hourlyRate}€{tierMultiplier !== 1 ? " × gabarit" : ""})
+          </span>
+          <span>{chronoPrice.toFixed(2)}€</span>
+        </div>
+      )}
       <div className="flex justify-between text-gray-400">
-        <span>Main d&apos;œuvre</span>
+        <span>Prix final (main d&apos;œuvre)</span>
         <span>{priceNum.toFixed(2)}€</span>
       </div>
+      {travelFeeNum > 0 && (
+        <div className="flex justify-between text-gray-400">
+          <span>+ Trajet</span>
+          <span>{travelFeeNum.toFixed(2)}€</span>
+        </div>
+      )}
       {partsTotal > 0 && (
         <div className="flex justify-between text-gray-400">
           <span>+ Pièces (hors achetées par le client)</span>
@@ -2776,9 +2838,21 @@ function FinalCalcBreakdown({ intervention, urssafRate }: { intervention: Interv
         <span>{urssafDue.toFixed(2)}€</span>
       </div>
       <div className="flex justify-between text-green-400 font-medium">
-        <span>= Net pour toi</span>
+        <span>= Net pour toi (en banque)</span>
         <span>{net.toFixed(2)}€</span>
       </div>
+      {partsTotal > 0 && (
+        <>
+          <div className="flex justify-between text-gray-500">
+            <span>− Pièces (déjà avancées à l&apos;achat)</span>
+            <span>{partsTotal.toFixed(2)}€</span>
+          </div>
+          <div className="flex justify-between text-amber-400 font-semibold border-t border-gray-700 pt-0.5">
+            <span>= Argent réel dans ta poche</span>
+            <span>{realProfit.toFixed(2)}€</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
