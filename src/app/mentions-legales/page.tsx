@@ -283,8 +283,9 @@ export default function MentionsLegalesPage() {
                 Dans le cadre de son activité de réparation et de vente de véhicules automobiles, {siteConfig.name}
                 est couvert par une assurance Responsabilité Civile Professionnelle et Responsabilité Civile Automobile.
               </p>
-              <p><strong>Assureur :</strong> Groupama Assurances (contrat GARASSUR)</p>
+              <p><strong>Assureur :</strong> Groupama Assurances (contrat n° 43574875N0001)</p>
               <p><strong>Courtier :</strong> ETIK Assurance</p>
+              <p><strong>Période de garantie :</strong> du 01/07/2026 au 30/06/2027</p>
               <p className="text-sm text-gray-400 mt-2">
                 ℹ️ Attestation d&apos;assurance disponible sur demande auprès de {siteConfig.name}.
               </p>
