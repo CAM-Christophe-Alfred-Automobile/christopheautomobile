@@ -69,6 +69,8 @@ export default function AdminClientsPage() {
   const [inProgress, setInProgress] = useState<InProgressIntervention[]>([]);
   const [reviewCandidates, setReviewCandidates] = useState<ReviewCandidate[]>([]);
   const [uninvoiced, setUninvoiced] = useState<UninvoicedIntervention[]>([]);
+  const [freeReasonOpenId, setFreeReasonOpenId] = useState<string | null>(null);
+  const [freeReasonDraft, setFreeReasonDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showClients, setShowClients] = useState(false);
@@ -123,19 +125,18 @@ export default function AdminClientsPage() {
 
   // Finalement pas facturée — échange de bon procédé, cadeau, client qui en a ramené d'autres...
   // Repasse le prix à 0 (rien à facturer) et garde le motif pour ne pas confondre avec un prix
-  // simplement oublié (voir le badge 🎁 sur la fiche client).
+  // simplement oublié (voir le badge 🎁 sur la fiche client). Champ de saisie intégré plutôt que
+  // window.prompt(), qui ne s'affiche pas de façon fiable en PWA installée sur téléphone.
   async function markFree(item: UninvoicedIntervention) {
-    const reason = window.prompt(
-      "Motif (ex: échange de bon procédé, cadeau, client qui en a ramené d'autres...)",
-      "Offert — échange de bon procédé"
-    );
-    if (reason == null) return;
+    const reason = freeReasonDraft.trim() || "Offert";
+    setFreeReasonOpenId(null);
+    setFreeReasonDraft("");
     setUninvoiced((prev) => prev.filter((i) => i.id !== item.id));
     try {
       const res = await fetch(`/api/admin/interventions/${item.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ price: 0, freeReason: reason || "Offert" }),
+        body: JSON.stringify({ price: 0, freeReason: reason }),
       });
       if (!res.ok) throw new Error();
     } catch {
@@ -357,14 +358,50 @@ export default function AdminClientsPage() {
                       </span>
                     </Link>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => markFree(i)}
-                    title="Finalement pas facturée : échange de bon procédé, cadeau, client qui en a ramené d'autres..."
-                    className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-amber-500 hover:text-amber-400 cursor-pointer"
-                  >
-                    🎁 Offert
-                  </button>
+                  {freeReasonOpenId === i.id ? (
+                    <span className="flex items-center gap-1 flex-shrink-0">
+                      <input
+                        type="text"
+                        autoFocus
+                        placeholder="Motif (ex: échange de bon procédé)"
+                        value={freeReasonDraft}
+                        onChange={(e) => setFreeReasonDraft(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && markFree(i)}
+                        className="w-40 px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => markFree(i)}
+                        className="text-green-400 hover:text-green-300 cursor-pointer text-xs"
+                        title="Confirmer"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFreeReasonOpenId(null);
+                          setFreeReasonDraft("");
+                        }}
+                        className="text-gray-500 hover:text-gray-300 cursor-pointer text-xs"
+                        title="Annuler"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFreeReasonOpenId(i.id);
+                        setFreeReasonDraft("Offert — échange de bon procédé");
+                      }}
+                      title="Finalement pas facturée : échange de bon procédé, cadeau, client qui en a ramené d'autres..."
+                      className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-amber-500 hover:text-amber-400 cursor-pointer"
+                    >
+                      🎁 Offert
+                    </button>
+                  )}
                   <span className="text-purple-300 font-medium flex-shrink-0">{formatEUR(i.total)}</span>
                 </li>
               );
