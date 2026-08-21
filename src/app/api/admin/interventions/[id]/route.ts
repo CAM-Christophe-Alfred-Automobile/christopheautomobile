@@ -38,6 +38,9 @@ export async function PATCH(req: Request, { params }: Context) {
       ...(body.completedAt !== undefined
         ? { completedAt: body.completedAt ? new Date(body.completedAt) : null }
         : {}),
+      ...(body.invoicedAt !== undefined
+        ? { invoicedAt: body.invoicedAt ? new Date(body.invoicedAt) : null }
+        : {}),
     });
     return NextResponse.json({ success: true, intervention });
   } catch (error) {

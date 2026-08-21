@@ -39,6 +39,19 @@ interface InProgressIntervention {
   };
 }
 
+interface UninvoicedIntervention {
+  id: string;
+  date: string;
+  description: string;
+  total: number;
+  vehicle: {
+    make: string | null;
+    model: string | null;
+    plate: string | null;
+    client: { id: string; firstName: string; lastName: string };
+  };
+}
+
 interface ReviewCandidate {
   id: string;
   date: string;
@@ -55,6 +68,7 @@ export default function AdminClientsPage() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [inProgress, setInProgress] = useState<InProgressIntervention[]>([]);
   const [reviewCandidates, setReviewCandidates] = useState<ReviewCandidate[]>([]);
+  const [uninvoiced, setUninvoiced] = useState<UninvoicedIntervention[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showClients, setShowClients] = useState(false);
@@ -76,6 +90,11 @@ export default function AdminClientsPage() {
       .then((data) => {
         if (data.success) setReviewCandidates(data.interventions);
       });
+    fetch("/api/admin/interventions/uninvoiced")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setUninvoiced(data.interventions);
+      });
   }, []);
 
   async function markReviewReminderSent(id: string) {
@@ -85,6 +104,21 @@ export default function AdminClientsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reviewReminderSent: true }),
     });
+  }
+
+  async function markInvoiced(item: UninvoicedIntervention) {
+    setUninvoiced((prev) => prev.filter((i) => i.id !== item.id));
+    try {
+      const res = await fetch(`/api/admin/interventions/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoicedAt: new Date().toISOString() }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      alert("⚠️ Impossible d'enregistrer — connexion internet ? Réessaie.");
+      setUninvoiced((prev) => [...prev, item].sort((a, b) => a.date.localeCompare(b.date)));
+    }
   }
 
   const filtered = useMemo(() => {
@@ -264,6 +298,42 @@ export default function AdminClientsPage() {
                       Ignorer
                     </button>
                   </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {uninvoiced.length > 0 && (
+        <div className="mb-6 bg-purple-950/20 border border-dashed border-purple-700/50 rounded-lg p-3">
+          <p className="text-sm font-medium text-purple-300 mb-2">
+            🧾 Factures à faire ({uninvoiced.length})
+          </p>
+          <ul className="space-y-1.5">
+            {uninvoiced.map((i) => {
+              const vehicleLabel =
+                [i.vehicle.make, i.vehicle.model, i.vehicle.plate].filter(Boolean).join(" ") || "véhicule";
+              return (
+                <li key={i.id} className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      onChange={() => markInvoiced(i)}
+                      className="flex-shrink-0 w-4 h-4 accent-purple-500 cursor-pointer"
+                    />
+                    <Link
+                      href={`/admin/clients/${i.vehicle.client.id}`}
+                      className="text-gray-300 hover:text-purple-300 truncate"
+                    >
+                      {i.vehicle.client.firstName} {i.vehicle.client.lastName !== "." ? i.vehicle.client.lastName : ""}
+                      <span className="text-gray-500">
+                        {" "}
+                        — {vehicleLabel} · {new Date(i.date).toLocaleDateString("fr-FR")}
+                      </span>
+                    </Link>
+                  </label>
+                  <span className="text-purple-300 font-medium flex-shrink-0">{formatEUR(i.total)}</span>
                 </li>
               );
             })}

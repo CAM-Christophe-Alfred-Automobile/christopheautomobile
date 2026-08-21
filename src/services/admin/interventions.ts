@@ -17,6 +17,7 @@ export interface InterventionInput {
   status?: "draft" | "done" | "reserved";
   chronoStartedAt?: Date | null;
   completedAt?: Date | null;
+  invoicedAt?: Date | null;
   bookedOnline?: boolean;
   depositAmount?: number | null;
   depositDate?: Date | null;
@@ -74,6 +75,35 @@ export async function listReviewReminderCandidates() {
     },
     include: { vehicle: { include: { client: true } } },
     orderBy: { date: "desc" },
+  });
+}
+
+// Interventions terminées, facturables (client réel, pas un véhicule perso), pas encore
+// pointées comme facturées — sert à la liste "Factures à faire" de l'accueil admin, pour la
+// facturation par lot différée (le client coche au fur et à mesure qu'il facture).
+export async function listUninvoicedInterventions() {
+  const interventions = await prisma.intervention.findMany({
+    where: {
+      status: "done",
+      invoicedAt: null,
+      vehicle: { client: { isPersonal: false } },
+    },
+    include: { vehicle: { include: { client: true } }, partsUsed: true },
+    orderBy: { date: "asc" },
+  });
+
+  // Même formule que FinalCalcBreakdown côté fiche client — le montant affiché doit
+  // correspondre à ce qu'il faudra effectivement facturer, pas juste la main d'œuvre.
+  return interventions.map(({ partsUsed, ...intervention }) => {
+    const partsTotal = partsUsed
+      .filter((p) => !p.boughtByClient)
+      .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
+    const total =
+      (intervention.price != null ? Number(intervention.price) : 0) +
+      partsTotal +
+      (intervention.travelFee != null ? Number(intervention.travelFee) : 0) +
+      (intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0);
+    return { ...intervention, total };
   });
 }
 

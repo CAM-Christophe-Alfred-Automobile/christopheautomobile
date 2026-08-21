@@ -77,6 +77,7 @@ interface Intervention {
   maintenanceType: MaintenanceType | null;
   status: string;
   completedAt: string | null;
+  invoicedAt: string | null;
   bookedOnline: boolean;
   depositAmount: string | number | null;
   depositDate: string | null;
@@ -2936,6 +2937,12 @@ function PaymentsSection({
             )}
           </span>
         </div>
+      )}
+      {intervention.invoicedAt && (
+        <p className="text-gray-500 mb-1">
+          🧾 <span className="text-green-400">Facture effectuée</span> le{" "}
+          {new Date(intervention.invoicedAt).toLocaleDateString("fr-FR")}
+        </p>
       )}
 
       <PaymentForm interventionId={intervention.id} urssafRate={urssafRate} remaining={remaining} onAdded={onChanged} />
