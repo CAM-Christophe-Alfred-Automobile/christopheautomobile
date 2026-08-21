@@ -121,6 +121,29 @@ export default function AdminClientsPage() {
     }
   }
 
+  // Finalement pas facturée — échange de bon procédé, cadeau, client qui en a ramené d'autres...
+  // Repasse le prix à 0 (rien à facturer) et garde le motif pour ne pas confondre avec un prix
+  // simplement oublié (voir le badge 🎁 sur la fiche client).
+  async function markFree(item: UninvoicedIntervention) {
+    const reason = window.prompt(
+      "Motif (ex: échange de bon procédé, cadeau, client qui en a ramené d'autres...)",
+      "Offert — échange de bon procédé"
+    );
+    if (reason == null) return;
+    setUninvoiced((prev) => prev.filter((i) => i.id !== item.id));
+    try {
+      const res = await fetch(`/api/admin/interventions/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: 0, freeReason: reason || "Offert" }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      alert("⚠️ Impossible d'enregistrer — connexion internet ? Réessaie.");
+      setUninvoiced((prev) => [...prev, item].sort((a, b) => a.date.localeCompare(b.date)));
+    }
+  }
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     // Pas de tri ici : l'API renvoie déjà les clients triés par intervention la plus récente
@@ -320,6 +343,7 @@ export default function AdminClientsPage() {
                     <input
                       type="checkbox"
                       onChange={() => markInvoiced(i)}
+                      title="Cocher : facture faite"
                       className="flex-shrink-0 w-4 h-4 accent-purple-500 cursor-pointer"
                     />
                     <Link
@@ -333,6 +357,14 @@ export default function AdminClientsPage() {
                       </span>
                     </Link>
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => markFree(i)}
+                    title="Finalement pas facturée : échange de bon procédé, cadeau, client qui en a ramené d'autres..."
+                    className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-amber-500 hover:text-amber-400 cursor-pointer"
+                  >
+                    🎁 Offert
+                  </button>
                   <span className="text-purple-300 font-medium flex-shrink-0">{formatEUR(i.total)}</span>
                 </li>
               );
