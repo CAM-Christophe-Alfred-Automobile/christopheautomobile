@@ -18,6 +18,7 @@ export interface InterventionInput {
   chronoStartedAt?: Date | null;
   completedAt?: Date | null;
   invoicedAt?: Date | null;
+  freeReason?: string | null;
   bookedOnline?: boolean;
   depositAmount?: number | null;
   depositDate?: Date | null;
@@ -94,17 +95,21 @@ export async function listUninvoicedInterventions() {
 
   // Même formule que FinalCalcBreakdown côté fiche client — le montant affiché doit
   // correspondre à ce qu'il faudra effectivement facturer, pas juste la main d'œuvre.
-  return interventions.map(({ partsUsed, ...intervention }) => {
-    const partsTotal = partsUsed
-      .filter((p) => !p.boughtByClient)
-      .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
-    const total =
-      (intervention.price != null ? Number(intervention.price) : 0) +
-      partsTotal +
-      (intervention.travelFee != null ? Number(intervention.travelFee) : 0) +
-      (intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0);
-    return { ...intervention, total };
-  });
+  return interventions
+    .map(({ partsUsed, ...intervention }) => {
+      const partsTotal = partsUsed
+        .filter((p) => !p.boughtByClient)
+        .reduce((sum, p) => sum + (p.price != null ? Number(p.price) : 0), 0);
+      const total =
+        (intervention.price != null ? Number(intervention.price) : 0) +
+        partsTotal +
+        (intervention.travelFee != null ? Number(intervention.travelFee) : 0) +
+        (intervention.deliveryPrice != null ? Number(intervention.deliveryPrice) : 0);
+      return { ...intervention, total };
+    })
+    // Rien à facturer sur une intervention à 0€ (offerte, échange de bon procédé...) —
+    // inutile de la faire apparaître dans la liste des factures à faire.
+    .filter((i) => i.total > 0);
 }
 
 async function syncMaintenanceRecord(vehicleId: string, maintenanceTypeId: string, date: Date) {

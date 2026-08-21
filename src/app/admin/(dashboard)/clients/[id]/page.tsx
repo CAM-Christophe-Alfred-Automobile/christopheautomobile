@@ -78,6 +78,7 @@ interface Intervention {
   status: string;
   completedAt: string | null;
   invoicedAt: string | null;
+  freeReason: string | null;
   bookedOnline: boolean;
   depositAmount: string | number | null;
   depositDate: string | null;
@@ -1140,6 +1141,7 @@ function InterventionHistory({
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [freeReason, setFreeReason] = useState("");
   const [mileage, setMileage] = useState("");
   const [hoursSpent, setHoursSpent] = useState("");
   const [maintenanceTypeIds, setMaintenanceTypeIds] = useState<string[]>([]);
@@ -1265,6 +1267,7 @@ function InterventionHistory({
           description,
           status: entryStatus,
           price: price ? Number(price) : null,
+          freeReason: freeReason || null,
           mileage: mileage ? Number(mileage) : null,
           // "reserved" : la durée saisie n'est qu'une estimation, jamais du temps réellement
           // travaillé — elle va dans estimatedHours, pas hoursSpent, pour que démarrer le chrono
@@ -1727,6 +1730,21 @@ function InterventionHistory({
             )}
           </div>
 
+          {!isPersonal && (
+            <div>
+              <label className="block text-[11px] text-gray-500 mb-0.5">
+                Motif si offert / prix réduit (optionnel)
+              </label>
+              <input
+                type="text"
+                placeholder="ex: échange de bon procédé — m'a donné des clients"
+                className={inputClass}
+                value={freeReason}
+                onChange={(e) => setFreeReason(e.target.value)}
+              />
+            </div>
+          )}
+
           {!isPersonal && (Number(price) > 0 || queuedPartsTotal > 0) && (
             <div className="text-xs bg-gray-800/30 border border-gray-700 rounded-lg px-2.5 py-2 space-y-0.5">
               <div className="flex justify-between text-gray-400">
@@ -2002,6 +2020,7 @@ function InterventionRow({
   const [normalPriceDraft, setNormalPriceDraft] = useState(
     intervention.normalPrice != null ? String(intervention.normalPrice) : ""
   );
+  const [freeReasonDraft, setFreeReasonDraft] = useState(intervention.freeReason ?? "");
   const [showPartForm, setShowPartForm] = useState(false);
   const [part, setPart] = useState({
     designation: "",
@@ -2112,6 +2131,7 @@ function InterventionRow({
       body: JSON.stringify({
         price: priceDraft ? Number(priceDraft) : null,
         normalPrice: normalPriceDraft ? Number(normalPriceDraft) : null,
+        freeReason: freeReasonDraft || null,
       }),
     });
     setEditingPrice(false);
@@ -2235,6 +2255,14 @@ function InterventionRow({
                     onKeyDown={(e) => e.key === "Enter" && savePrice()}
                   />
                 </span>
+                <input
+                  type="text"
+                  placeholder="Motif si offert/réduit"
+                  className="w-40 px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-500"
+                  value={freeReasonDraft}
+                  onChange={(e) => setFreeReasonDraft(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && savePrice()}
+                />
                 <button onClick={savePrice} className="text-green-400 hover:text-green-300 cursor-pointer text-xs" title="Enregistrer">
                   ✓
                 </button>
@@ -2242,6 +2270,7 @@ function InterventionRow({
                   onClick={() => {
                     setPriceDraft(intervention.price != null ? String(intervention.price) : "");
                     setNormalPriceDraft(intervention.normalPrice != null ? String(intervention.normalPrice) : "");
+                    setFreeReasonDraft(intervention.freeReason ?? "");
                     setEditingPrice(false);
                   }}
                   className="text-gray-500 hover:text-gray-300 cursor-pointer text-xs"
@@ -2271,14 +2300,29 @@ function InterventionRow({
                         {remaining != null && remaining > 0.005 ? "🔶" : "✅"}
                       </span>
                     )}
+                    {intervention.freeReason && (
+                      <span className="ml-1" title={intervention.freeReason}>
+                        🎁
+                      </span>
+                    )}
                     {discountPct != null && (
                       <span className="text-gray-500 text-[10px] ml-1 block leading-tight">
                         normal {normalPriceNum}€ · -{discountPct}%
                       </span>
                     )}
+                    {intervention.freeReason && (
+                      <span className="text-gray-500 text-[10px] block leading-tight">{intervention.freeReason}</span>
+                    )}
                   </span>
                 ) : (
-                  <span className="text-amber-400">+ prix</span>
+                  <span className="text-amber-400">
+                    + prix
+                    {intervention.freeReason && (
+                      <span className="ml-1" title={intervention.freeReason}>
+                        🎁
+                      </span>
+                    )}
+                  </span>
                 )}
               </button>
             ))}

@@ -109,6 +109,7 @@ model Intervention {
   chronoStartedAt DateTime? // si non nul, le chrono tourne actuellement pour cette intervention
   completedAt     DateTime? // date/heure de passage à "done" — point de départ du délai de réouverture (voir REOPEN_WINDOW_DAYS côté service)
   invoicedAt      DateTime? // coché manuellement une fois la facture faite (facturation par lot, différée) — null tant que non fait, alimente la liste "Factures à faire" de l'accueil
+  freeReason      String? // justificatif quand l'intervention est offerte/à prix réduit volontairement (échange de bon procédé, petit cadeau...) — distingue une gratuité assumée d'un prix simplement oublié à la saisie
 
   abbyInvoiceNumber String? @unique
 

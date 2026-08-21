@@ -82,6 +82,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
   const [finalDescription, setFinalDescription] = useState("");
   const [finalMaintenanceTypeIds, setFinalMaintenanceTypeIds] = useState<string[]>([]);
   const [finalPrice, setFinalPrice] = useState("");
+  const [finalFreeReason, setFinalFreeReason] = useState("");
   const [finalMileage, setFinalMileage] = useState("");
   const [clientLastName, setClientLastName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
@@ -437,6 +438,7 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
         description: finalDescription,
         maintenanceTypeIds: finalMaintenanceTypeIds,
         price: !data.vehicle.client.isPersonal && finalPrice ? Number(finalPrice) : null,
+        freeReason: !data.vehicle.client.isPersonal && finalFreeReason ? finalFreeReason : null,
         hoursSpent: totalHours,
         mileage: Number(finalMileage),
         vehicleCondition: vehicleConditionUpdate,
@@ -1022,6 +1024,20 @@ export default function LiveInterventionPage({ params }: { params: Promise<{ id:
                   Les pièces se gèrent dans la section « Pièces / dépenses » ci-dessus, ou ensuite sur la fiche du véhicule.
                 </p>
               )}
+            </div>
+          )}
+          {!data.vehicle.client.isPersonal && (
+            <div>
+              <label className="block text-[11px] text-gray-500 mb-0.5">
+                Motif si offert / prix réduit (optionnel)
+              </label>
+              <input
+                type="text"
+                placeholder="ex: échange de bon procédé — m'a donné des clients"
+                className={inputClass}
+                value={finalFreeReason}
+                onChange={(e) => setFinalFreeReason(e.target.value)}
+              />
             </div>
           )}
 
