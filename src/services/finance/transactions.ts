@@ -202,3 +202,60 @@ export async function createTransfer(data: {
     }),
   ]);
 }
+
+// Une grosse entrée d'argent synchronisée sur un compte bancaire est souvent un virement
+// espèces->banque que Christophe a fait lui-même, pas un vrai revenu — sans confirmation,
+// le compte espèces ne serait jamais mis à jour en retour. Seuil ajustable si besoin.
+export const LARGE_DEPOSIT_THRESHOLD = 100;
+
+/**
+ * Grosses entrées récentes (synchronisées, positives, sur un compte non-espèces) pas encore
+ * passées en revue — candidates à "est-ce un virement depuis mes espèces ?".
+ */
+export function listPendingTransferReviews() {
+  return prisma.transaction.findMany({
+    where: {
+      type: "synced",
+      isTransfer: false,
+      transferReviewed: false,
+      amount: { gte: LARGE_DEPOSIT_THRESHOLD },
+      account: { type: { not: "cash" } },
+    },
+    include: { account: true },
+    orderBy: { date: "desc" },
+  });
+}
+
+/**
+ * Confirme qu'une entrée déjà synchronisée est en fait un virement depuis les espèces :
+ * la marque comme transfert (exclue des stats de revenus) et crée la sortie correspondante
+ * sur le compte espèces, plutôt que de dupliquer l'entrée déjà présente.
+ */
+export async function confirmCashTransfer(transactionId: string) {
+  const original = await prisma.transaction.findUniqueOrThrow({ where: { id: transactionId } });
+  const cashAccount = await prisma.account.findFirstOrThrow({ where: { type: "cash" } });
+  const linkedTransferId = randomUUID();
+
+  return prisma.$transaction([
+    prisma.transaction.update({
+      where: { id: transactionId },
+      data: { isTransfer: true, transferReviewed: true, linkedTransferId: `${linkedTransferId}-in` },
+    }),
+    prisma.transaction.create({
+      data: {
+        accountId: cashAccount.id,
+        date: original.date,
+        description: `Virement vers ${(await prisma.account.findUniqueOrThrow({ where: { id: original.accountId } })).name}`,
+        amount: -Math.abs(Number(original.amount)),
+        scope: cashAccount.scope,
+        isTransfer: true,
+        linkedTransferId: `${linkedTransferId}-out`,
+      },
+    }),
+  ]);
+}
+
+/** L'entrée était un vrai revenu, pas un virement — ne plus la proposer à la revue. */
+export function dismissTransferReview(transactionId: string) {
+  return prisma.transaction.update({ where: { id: transactionId }, data: { transferReviewed: true } });
+}

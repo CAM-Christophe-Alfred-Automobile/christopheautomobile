@@ -10,6 +10,8 @@ import {
   createTransfer,
   deleteTransaction,
   updateTransaction,
+  confirmCashTransfer,
+  dismissTransferReview,
 } from "@/services/finance/transactions";
 import { getOrCreateCategory } from "@/services/finance/categories";
 import { prisma } from "@/lib/prisma";
@@ -116,6 +118,20 @@ export async function quickCashExpenseAction(formData: FormData) {
   });
 
   revalidatePath("/admin/finance/transactions");
+  revalidatePath("/admin/finance");
+}
+
+/** Confirme qu'une grosse entrée déjà synchronisée est un virement depuis les espèces —
+ * voir listPendingTransferReviews(). Met aussi à jour le compte espèces en conséquence. */
+export async function confirmCashTransferAction(transactionId: string) {
+  await confirmCashTransfer(transactionId);
+  revalidatePath("/admin/finance/transactions");
+  revalidatePath("/admin/finance");
+}
+
+/** L'entrée était un vrai revenu, pas un virement espèces — ne plus la proposer. */
+export async function dismissTransferReviewAction(transactionId: string) {
+  await dismissTransferReview(transactionId);
   revalidatePath("/admin/finance");
 }
 

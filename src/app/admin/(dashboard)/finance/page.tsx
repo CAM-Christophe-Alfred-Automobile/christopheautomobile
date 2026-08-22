@@ -1,12 +1,23 @@
 import Link from "next/link";
 import { listAccounts, getAllCurrentBalances, getNetWorthHistory } from "@/services/finance/accounts";
-import { listTransactions, getMonthlyFlows, listRecentCrmCashPayments } from "@/services/finance/transactions";
+import {
+  listTransactions,
+  getMonthlyFlows,
+  listRecentCrmCashPayments,
+  listPendingTransferReviews,
+  LARGE_DEPOSIT_THRESHOLD,
+} from "@/services/finance/transactions";
 import { recomputeAdvice, listAdvice } from "@/services/finance/advice";
 import { getSettings } from "@/services/finance/settings";
 import { getSimpleSummary, getBestTransferDay, getRevenueTarget } from "@/services/finance/coach";
 import MonthlyFlowChart from "@/components/admin/finance/MonthlyFlowChart";
 import NetWorthChart from "@/components/admin/finance/NetWorthChart";
-import { quickCashExpenseAction, quickTransferAction } from "./transactions/actions";
+import {
+  quickCashExpenseAction,
+  quickTransferAction,
+  confirmCashTransferAction,
+  dismissTransferReviewAction,
+} from "./transactions/actions";
 
 const QUICK_CASH_CATEGORIES = ["Courses", "Carburant", "Péage", "Santé", "Autre"];
 
@@ -24,19 +35,31 @@ const SEVERITY_STYLES: Record<string, string> = {
 
 export default async function FinanceDashboardPage() {
   await recomputeAdvice();
-  const [recentTransactions, advice, monthlyFlows, accounts, recentCashPayments, netWorthHistory, settings, simpleSummary, bestTransferDay, revenueTarget] =
-    await Promise.all([
-      listTransactions({ take: 8 }),
-      listAdvice().then((items) => items.slice(0, 3)),
-      getMonthlyFlows(6),
-      listAccounts(),
-      listRecentCrmCashPayments(5),
-      getNetWorthHistory(6),
-      getSettings(),
-      getSimpleSummary(),
-      getBestTransferDay(),
-      getRevenueTarget(),
-    ]);
+  const [
+    recentTransactions,
+    advice,
+    monthlyFlows,
+    accounts,
+    recentCashPayments,
+    netWorthHistory,
+    settings,
+    simpleSummary,
+    bestTransferDay,
+    revenueTarget,
+    pendingTransferReviews,
+  ] = await Promise.all([
+    listTransactions({ take: 8 }),
+    listAdvice().then((items) => items.slice(0, 3)),
+    getMonthlyFlows(6),
+    listAccounts(),
+    listRecentCrmCashPayments(5),
+    getNetWorthHistory(6),
+    getSettings(),
+    getSimpleSummary(),
+    getBestTransferDay(),
+    getRevenueTarget(),
+    listPendingTransferReviews(),
+  ]);
   const balanceByAccountId = await getAllCurrentBalances(accounts);
   const accountBalances = accounts.map((a) => balanceByAccountId.get(a.id) ?? 0);
   const balances = accounts.reduce(
@@ -201,6 +224,51 @@ export default async function FinanceDashboardPage() {
               Virer
             </button>
           </form>
+        </div>
+      )}
+
+      {pendingTransferReviews.length > 0 && (
+        <div className="bg-amber-950/20 border border-dashed border-amber-700/50 rounded-xl p-5 space-y-3">
+          <h2 className="text-sm font-medium text-amber-300">
+            💰 Grosses entrées à vérifier ({pendingTransferReviews.length})
+          </h2>
+          <p className="text-xs text-gray-500">
+            Une entrée de plus de {formatEUR(LARGE_DEPOSIT_THRESHOLD)} vient d&apos;arriver sur un compte —
+            est-ce un virement que tu as fait depuis tes espèces, ou un vrai encaissement ?
+          </p>
+          <ul className="space-y-2">
+            {pendingTransferReviews.map((t) => (
+              <li
+                key={t.id}
+                className="flex flex-wrap items-center justify-between gap-2 bg-gray-950/50 rounded-lg px-3 py-2 text-sm"
+              >
+                <span className="text-gray-300">
+                  {new Date(t.date).toLocaleDateString("fr-FR")} — {t.account.name} — {t.description}
+                </span>
+                <span className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-amber-300 font-medium">{formatEUR(Number(t.amount))}</span>
+                  <form action={confirmCashTransferAction.bind(null, t.id)}>
+                    <button
+                      type="submit"
+                      className="text-xs px-2 py-1 rounded-md border border-emerald-700 text-emerald-400 hover:bg-emerald-950/40 cursor-pointer"
+                      title="Oui, c'est un virement depuis mes espèces — met aussi à jour le compte espèces"
+                    >
+                      💵 Depuis mes espèces
+                    </button>
+                  </form>
+                  <form action={dismissTransferReviewAction.bind(null, t.id)}>
+                    <button
+                      type="submit"
+                      className="text-xs px-2 py-1 rounded-md border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300 cursor-pointer"
+                      title="Non, c'est un vrai encaissement"
+                    >
+                      Non, revenu réel
+                    </button>
+                  </form>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

@@ -325,6 +325,7 @@ model Transaction {
 
   isTransfer       Boolean @default(false)
   linkedTransferId String? @unique
+  transferReviewed Boolean @default(false) // pour les grosses entrées synchronisées sur un compte bancaire : a-t-on déjà demandé si c'était un virement espèces->banque ? évite de reposer la question à chaque fois
 
   notes          String?
   attachmentPath String? // URL Vercel Blob du justificatif (photo de ticket)
