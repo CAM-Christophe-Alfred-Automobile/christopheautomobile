@@ -23,9 +23,14 @@ export function createAccount(data: {
 }
 
 export function reconcileBalance(id: string, balance: number) {
+  // L'ancre part du lendemain plutôt qu'aujourd'hui : le solde réel saisi tient déjà compte de
+  // toutes les transactions du jour (notamment celles déjà synchronisées depuis la banque avant
+  // la réconciliation) — les compter une seconde fois via getCurrentBalance() gonflait le solde.
+  const anchor = startOfDay(new Date());
+  anchor.setUTCDate(anchor.getUTCDate() + 1);
   return prisma.account.update({
     where: { id },
-    data: { currentBalance: balance, balanceAsOf: startOfDay(new Date()) },
+    data: { currentBalance: balance, balanceAsOf: anchor },
   });
 }
 
